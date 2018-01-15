@@ -4,11 +4,11 @@ import org.globsframework.streams.accessors.StringAccessor;
 
 public class StringSqlAccessor extends SqlAccessor implements StringAccessor {
 
-  public String getString() {
-    return getSqlMoStream().getString(getIndex());
-  }
+    public String getString() {
+        return getSqlMoStream().getString(getIndex());
+    }
 
-  public Object getObjectValue() {
-    return getString();
-  }
+    public Object getObjectValue() {
+        return getString();
+    }
 }

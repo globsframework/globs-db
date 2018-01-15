@@ -6,12 +6,24 @@ import org.globsframework.streams.GlobStream;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.TooManyItems;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 public interface SelectQuery {
-  GlobStream execute();
+    Stream<?> executeAsStream();
 
-  GlobList executeAsGlobs();
+    GlobStream execute();
 
-  Glob executeUnique() throws ItemNotFound, TooManyItems;
+    GlobList executeAsGlobs();
 
-  void close();
+    Glob executeUnique() throws ItemNotFound, TooManyItems;
+
+//    <T> CompletableFuture<T> executeAsFutureStream(Consumer<?> consumer, Consumer<?> onComplete);
+//
+//    <T> CompletableFuture<T> executeAsFutureGlobStream(Consumer<?> consumer, Consumer<?> onComplete);
+//
+//    <T> CompletableFuture<T> executeAsFutureGlobs(Consumer<?> consumer, Consumer<?> onComplete);
+
+    void close();
 }

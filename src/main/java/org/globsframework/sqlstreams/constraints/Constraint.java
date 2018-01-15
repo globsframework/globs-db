@@ -1,5 +1,5 @@
 package org.globsframework.sqlstreams.constraints;
 
 public interface Constraint {
-  void visit(ConstraintVisitor constraintVisitor);
+    void visit(ConstraintVisitor constraintVisitor);
 }

@@ -4,7 +4,6 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.model.impl.DefaultGlob;
 import org.globsframework.streams.GlobStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.collections.MultiMap;
@@ -12,30 +11,38 @@ import org.globsframework.utils.collections.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class AccessorGlobBuilder {
-  private MultiMap<GlobType, Pair<Field, Accessor>> accessors = new MultiMap<GlobType, Pair<Field, Accessor>>();
+    private final GlobType type;
+    private List<Pair<Field, Accessor>> accessors = new ArrayList<>();
 
-  public AccessorGlobBuilder(GlobStream globStream) {
-    for (Field field : globStream.getFields()) {
-      accessors.put(field.getGlobType(), new Pair<Field, Accessor>(field, globStream.getAccessor(field)));
+    public AccessorGlobBuilder(GlobStream globStream) {
+        GlobType globType = null;
+        for (Field field : globStream.getFields()) {
+            if (globType == null) {
+                globType = field.getGlobType();
+            } else if (globType != field.getGlobType()) {
+                throw new RuntimeException("Multiple type " + globType.getName() + " and " + field.getGlobType().getName());
+            }
+            accessors.add(new Pair<>(field, getAccessor(globStream, field)));
+        }
+        type = globType;
     }
-  }
 
-  public static AccessorGlobBuilder init(GlobStream globStream) {
-    return new AccessorGlobBuilder(globStream);
-  }
-
-  public List<Glob> getGlobs() {
-    List globs = new ArrayList();
-    for (Map.Entry<GlobType, List<Pair<Field, Accessor>>> entry : accessors.entries()) {
-      MutableGlob defaultGlob = entry.getKey().instantiate();
-      for (Pair<Field, Accessor> pair : entry.getValue()) {
-        defaultGlob.setValue(pair.getFirst(), pair.getSecond().getObjectValue());
-      }
-      globs.add(defaultGlob);
+    public Accessor getAccessor(GlobStream globStream, Field field) {
+        return globStream.getAccessor(field);
     }
-    return globs;
-  }
+
+    public static AccessorGlobBuilder init(GlobStream globStream) {
+        return new AccessorGlobBuilder(globStream);
+    }
+
+    public Glob getGlob() {
+        MutableGlob defaultGlob = type.instantiate();
+        for (Pair<Field, Accessor> pair : accessors) {
+            defaultGlob.setValue(pair.getFirst(), pair.getSecond().getObjectValue());
+
+        }
+        return defaultGlob;
+    }
 }

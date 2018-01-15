@@ -5,7 +5,6 @@ import org.globsframework.streams.accessors.StringAccessor;
 import org.globsframework.utils.Ref;
 
 public class StringMongoAccessor implements StringAccessor {
-
     private final String columnName;
     private final Ref<Document> currentDoc;
 

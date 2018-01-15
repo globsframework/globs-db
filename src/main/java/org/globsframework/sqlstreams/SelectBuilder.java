@@ -5,41 +5,52 @@ import org.globsframework.metamodel.fields.*;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.Ref;
 
+import java.util.Collection;
+
 // attention sur le distinct : les valeurs de la clef sont automatiquement ajoutees  ==> faire un distinct a part
 
 public interface SelectBuilder {
 
-   SelectQuery getQuery();
+    SelectQuery getQuery();
 
-   SelectQuery getNotAutoCloseQuery();
+    SelectQuery getNotAutoCloseQuery();
 
-   SelectBuilder select(Field field);
+    SelectBuilder select(Field field);
 
-   SelectBuilder selectAll();
+    SelectBuilder selectAll();
 
-   SelectBuilder select(IntegerField field, Ref<IntegerAccessor> accessor);
+    SelectBuilder select(IntegerField field, Ref<IntegerAccessor> accessor);
 
-   SelectBuilder select(LongField field, Ref<LongAccessor> accessor);
+    SelectBuilder select(LongField field, Ref<LongAccessor> accessor);
 
-   SelectBuilder select(BooleanField field, Ref<BooleanAccessor> accessor);
+    SelectBuilder select(BooleanField field, Ref<BooleanAccessor> accessor);
 
-   SelectBuilder select(StringField field, Ref<StringAccessor> accessor);
+    SelectBuilder select(StringField field, Ref<StringAccessor> accessor);
 
-   SelectBuilder select(DoubleField field, Ref<DoubleAccessor> accessor);
+    SelectBuilder select(DoubleField field, Ref<DoubleAccessor> accessor);
 
-   SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
+    SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
 
-   IntegerAccessor retrieve(IntegerField field);
+    SelectBuilder orderAsc(Field field);
 
-   LongAccessor retrieve(LongField field);
+    SelectBuilder orderDesc(Field field);
 
-   StringAccessor retrieve(StringField field);
+    SelectBuilder top(int n);
 
-   BooleanAccessor retrieve(BooleanField field);
+    SelectBuilder withKeys();
 
-   DoubleAccessor retrieve(DoubleField field);
+    IntegerAccessor retrieve(IntegerField field);
 
-   BlobAccessor retrieve(BlobField field);
+    LongAccessor retrieve(LongField field);
 
-   Accessor retrieveUnTyped(Field field);
+    StringAccessor retrieve(StringField field);
+
+    BooleanAccessor retrieve(BooleanField field);
+
+    DoubleAccessor retrieve(DoubleField field);
+
+    BlobAccessor retrieve(BlobField field);
+
+    Accessor retrieveUnTyped(Field field);
+
 }

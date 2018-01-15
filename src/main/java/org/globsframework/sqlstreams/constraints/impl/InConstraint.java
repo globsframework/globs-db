@@ -7,23 +7,23 @@ import org.globsframework.sqlstreams.constraints.ConstraintVisitor;
 import java.util.List;
 
 public class InConstraint implements Constraint {
-  private Field field;
-  private List values;
+    private Field field;
+    private List values;
 
-  public InConstraint(Field field, List values) {
-    this.field = field;
-    this.values = values;
-  }
+    public InConstraint(Field field, List values) {
+        this.field = field;
+        this.values = values;
+    }
 
-  public void visit(ConstraintVisitor constraintVisitor) {
-    constraintVisitor.visitIn(this);
-  }
+    public void visit(ConstraintVisitor constraintVisitor) {
+        constraintVisitor.visitIn(this);
+    }
 
-  public Field getField() {
-    return field;
-  }
+    public Field getField() {
+        return field;
+    }
 
-  public List getValues() {
-    return values;
-  }
+    public List getValues() {
+        return values;
+    }
 }

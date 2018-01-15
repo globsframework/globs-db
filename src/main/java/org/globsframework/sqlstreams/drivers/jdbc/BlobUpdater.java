@@ -5,5 +5,5 @@ import java.sql.SQLException;
 
 public interface BlobUpdater {
 
-  void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException;
+    void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException;
 }

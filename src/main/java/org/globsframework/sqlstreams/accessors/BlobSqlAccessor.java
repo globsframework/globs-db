@@ -3,11 +3,11 @@ package org.globsframework.sqlstreams.accessors;
 import org.globsframework.streams.accessors.BlobAccessor;
 
 public class BlobSqlAccessor extends SqlAccessor implements BlobAccessor {
-  public Object getObjectValue() {
-    return getValue();
-  }
+    public Object getObjectValue() {
+        return getValue();
+    }
 
-  public byte[] getValue() {
-    return getSqlMoStream().getBytes(getIndex());
-  }
+    public byte[] getValue() {
+        return getSqlMoStream().getBytes(getIndex());
+    }
 }

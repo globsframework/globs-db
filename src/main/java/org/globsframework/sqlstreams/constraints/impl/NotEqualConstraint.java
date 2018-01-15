@@ -5,11 +5,11 @@ import org.globsframework.sqlstreams.constraints.Operand;
 
 public class NotEqualConstraint extends BinaryOperandConstraint {
 
-  public NotEqualConstraint(Operand left, Operand right) {
-    super(left, right);
-  }
+    public NotEqualConstraint(Operand left, Operand right) {
+        super(left, right);
+    }
 
-  public void visit(ConstraintVisitor constraintVisitor) {
-    constraintVisitor.visitNotEqual(this);
-  }
+    public void visit(ConstraintVisitor constraintVisitor) {
+        constraintVisitor.visitNotEqual(this);
+    }
 }

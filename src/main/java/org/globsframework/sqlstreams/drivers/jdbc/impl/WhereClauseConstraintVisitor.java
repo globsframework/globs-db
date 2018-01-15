@@ -11,85 +11,113 @@ import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import java.util.Set;
 
 public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandVisitor {
-  private StringPrettyWriter prettyWriter;
-  private SqlService sqlService;
-  private Set<GlobType> globTypes;
+    private StringPrettyWriter prettyWriter;
+    private SqlService sqlService;
+    private Set<GlobType> globTypes;
 
-  public WhereClauseConstraintVisitor(StringPrettyWriter prettyWriter, SqlService sqlService,
-                                      Set<GlobType> GlobeTypeSetToUpdate) {
-    this.prettyWriter = prettyWriter;
-    this.sqlService = sqlService;
-    this.globTypes = GlobeTypeSetToUpdate;
-  }
-
-  public void visitEqual(EqualConstraint constraint) {
-    visitBinary(constraint, " = ");
-  }
-
-  public void visitNotEqual(NotEqualConstraint constraint) {
-    visitBinary(constraint, " <> ");
-  }
-
-  public void visitAnd(AndConstraint constraint) {
-    visitBinary(constraint, " AND ");
-  }
-
-  public void visitOr(OrConstraint constraint) {
-    visitBinary(constraint, " OR ");
-  }
-
-  public void visitLessThan(LessThanConstraint constraint) {
-    visitBinary(constraint, " <= ");
-  }
-
-  public void visitBiggerThan(BiggerThanConstraint constraint) {
-    visitBinary(constraint, " >= ");
-  }
-
-  public void visitStricklyBiggerThan(StrictlyBiggerThanConstraint constraint) {
-    visitBinary(constraint, " > ");
-  }
-
-  public void visitStricklyLesserThan(StrictlyLesserThanConstraint constraint) {
-    visitBinary(constraint, " < ");
-  }
-
-  public void visitIn(InConstraint inConstraint) {
-    visitFieldOperand(inConstraint.getField());
-    prettyWriter.append(" in (");
-    int length = inConstraint.getValues().size();
-    for (int i = 0; i < length; i++) {
-      prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
+    public WhereClauseConstraintVisitor(StringPrettyWriter prettyWriter, SqlService sqlService,
+                                        Set<GlobType> GlobeTypeSetToUpdate) {
+        this.prettyWriter = prettyWriter;
+        this.sqlService = sqlService;
+        this.globTypes = GlobeTypeSetToUpdate;
     }
-    prettyWriter.append(")");
-  }
 
-  public void visitValueOperand(ValueOperand value) {
-    prettyWriter.append(" ? ");
-  }
+    public void visitEqual(EqualConstraint constraint) {
+        visitBinary(constraint, " = ");
+    }
 
-  public void visitAccessorOperand(AccessorOperand accessorOperand) {
-    prettyWriter.append(" ? ");
-  }
+    public void visitNotEqual(NotEqualConstraint constraint) {
+        visitBinary(constraint, " <> ");
+    }
 
-  public void visitFieldOperand(Field field) {
-    globTypes.add(field.getGlobType());
-    prettyWriter.append(sqlService.getTableName(field.getGlobType()))
-      .append(".")
-      .append(sqlService.getColumnName(field));
-  }
+    public void visitAnd(AndConstraint constraint) {
+        visitBinary(constraint, " AND ");
+    }
 
-  private void visitBinary(BinaryOperandConstraint constraint, String operator) {
-    constraint.getLeftOperand().visitOperand(this);
-    prettyWriter.append(operator);
-    constraint.getRightOperand().visitOperand(this);
-  }
+    public void visitOr(OrConstraint constraint) {
+        visitBinary(constraint, " OR ");
+    }
 
-  private void visitBinary(BinaryConstraint constraint, String operator) {
-    prettyWriter.append("(");
-    constraint.getLeftConstraint().visit(this);
-    prettyWriter.append(operator);
-    constraint.getRightConstraint().visit(this);
-    prettyWriter.append(")").newLine();
-  }
+    public void visitLessThan(LessThanConstraint constraint) {
+        visitBinary(constraint, " <= ");
+    }
+
+    public void visitBiggerThan(BiggerThanConstraint constraint) {
+        visitBinary(constraint, " >= ");
+    }
+
+    public void visitStrictlyBiggerThan(StrictlyBiggerThanConstraint constraint) {
+        visitBinary(constraint, " > ");
+    }
+
+    public void visitStrictlyLesserThan(StrictlyLesserThanConstraint constraint) {
+        visitBinary(constraint, " < ");
+    }
+
+    public void visitIn(InConstraint inConstraint) {
+        visitFieldOperand(inConstraint.getField());
+        prettyWriter.append(" in (");
+        int length = inConstraint.getValues().size();
+        for (int i = 0; i < length; i++) {
+            prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
+        }
+        prettyWriter.append(")");
+    }
+
+    public void visitIsOrNotNull(NullOrNotConstraint constraint) {
+        visitFieldOperand(constraint.getField());
+        if (constraint.checkNull()) {
+            prettyWriter.append(" IS NULL ");
+        }
+        else {
+            prettyWriter.append(" IS NOT NULL ");
+        }
+    }
+
+    public void visitNotIn(NotInConstraint constraint) {
+        visitFieldOperand(constraint.getField());
+        prettyWriter.append(" NOT IN (");
+        int length = constraint.getValues().size();
+        for (int i = 0; i < length; i++) {
+            prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
+        }
+        prettyWriter.append(")");
+    }
+
+    public void visitContains(Field field, String value, boolean contains) {
+        visitFieldOperand(field);
+        if (!contains) {
+            prettyWriter.append(" NOT ");
+        }
+        prettyWriter.append(" LIKE '%" + value + "%'");
+    }
+
+    public void visitValueOperand(ValueOperand value) {
+        prettyWriter.append(" ? ");
+    }
+
+    public void visitAccessorOperand(AccessorOperand accessorOperand) {
+        prettyWriter.append(" ? ");
+    }
+
+    public void visitFieldOperand(Field field) {
+        globTypes.add(field.getGlobType());
+        prettyWriter.append(sqlService.getTableName(field.getGlobType()))
+              .append(".")
+              .append(sqlService.getColumnName(field));
+    }
+
+    private void visitBinary(BinaryOperandConstraint constraint, String operator) {
+        constraint.getLeftOperand().visitOperand(this);
+        prettyWriter.append(operator);
+        constraint.getRightOperand().visitOperand(this);
+    }
+
+    private void visitBinary(BinaryConstraint constraint, String operator) {
+        prettyWriter.append("(");
+        constraint.getLeftConstraint().visit(this);
+        prettyWriter.append(operator);
+        constraint.getRightConstraint().visit(this);
+        prettyWriter.append(")").newLine();
+    }
 }

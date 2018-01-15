@@ -6,23 +6,23 @@ import org.globsframework.sqlstreams.constraints.OperandVisitor;
 import org.globsframework.streams.accessors.Accessor;
 
 public class AccessorOperand implements Operand {
-  private Field field;
-  private Accessor accessor;
+    private Field field;
+    private Accessor accessor;
 
-  public AccessorOperand(Field field, Accessor accessor) {
-    this.field = field;
-    this.accessor = accessor;
-  }
+    public AccessorOperand(Field field, Accessor accessor) {
+        this.field = field;
+        this.accessor = accessor;
+    }
 
-  public void visitOperand(OperandVisitor visitor) {
-    visitor.visitAccessorOperand(this);
-  }
+    public void visitOperand(OperandVisitor visitor) {
+        visitor.visitAccessorOperand(this);
+    }
 
-  public Accessor getAccessor() {
-    return accessor;
-  }
+    public Accessor getAccessor() {
+        return accessor;
+    }
 
-  public Field getField() {
-    return field;
-  }
+    public Field getField() {
+        return field;
+    }
 }
