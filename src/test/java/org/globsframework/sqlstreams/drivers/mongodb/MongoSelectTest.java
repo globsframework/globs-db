@@ -3,7 +3,10 @@ package org.globsframework.sqlstreams.drivers.mongodb;
 import com.github.fakemongo.junit.FongoAsyncRule;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
-import org.bson.*;
+import org.bson.BsonBinary;
+import org.bson.BsonReader;
+import org.bson.BsonType;
+import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -16,7 +19,10 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.*;
+import org.globsframework.model.Glob;
+import org.globsframework.model.GlobList;
+import org.globsframework.model.KeyBuilder;
+import org.globsframework.model.MutableGlob;
 import org.globsframework.model.impl.DefaultGlob;
 import org.globsframework.model.repository.DefaultGlobRepository;
 import org.globsframework.sqlstreams.SqlConnection;
@@ -42,37 +48,37 @@ public class MongoSelectTest {
         MongoSqlService sqlService = new MongoSqlService(database);
 
         MongoCollection<Glob> globMongoCollection = database
-              .getCollection(sqlService.getTableName(DummyObject.TYPE), Glob.class)
-              .withCodecRegistry(CodecRegistries.fromProviders(new CodecProvider() {
-                  public <T> Codec<T> get(Class<T> aClass, CodecRegistry codecRegistry) {
-                      if (aClass == DefaultGlob.class || aClass == Glob.class){
-                          return (Codec<T>) new GlobCodec(DummyObject.TYPE, sqlService);
-                      }
-                      return  null;
-                  }
-              }));
+                .getCollection(sqlService.getTableName(DummyObject.TYPE), Glob.class)
+                .withCodecRegistry(CodecRegistries.fromProviders(new CodecProvider() {
+                    public <T> Codec<T> get(Class<T> aClass, CodecRegistry codecRegistry) {
+                        if (aClass == DefaultGlob.class || aClass == Glob.class) {
+                            return (Codec<T>) new GlobCodec(DummyObject.TYPE, sqlService);
+                        }
+                        return null;
+                    }
+                }));
 
 //        MongoCollection<Document> globMongoCollection = database
 //              .getCollection(sqlService.getTableName(DummyObject.TYPE), Document.class);
 
         insert(globMongoCollection, DummyObject.TYPE.instantiate()
-              .set(DummyObject.ID, 1)
-              .set(DummyObject.NAME, "name 1")
-              .set(DummyObject.VALUE, 3.14), sqlService);
+                .set(DummyObject.ID, 1)
+                .set(DummyObject.NAME, "name 1")
+                .set(DummyObject.VALUE, 3.14), sqlService);
         insert(globMongoCollection, DummyObject.TYPE.instantiate()
-              .set(DummyObject.ID, 2)
-              .set(DummyObject.NAME, "name 2")
-              .set(DummyObject.VALUE, 3.14 * 2.), sqlService);
+                .set(DummyObject.ID, 2)
+                .set(DummyObject.NAME, "name 2")
+                .set(DummyObject.VALUE, 3.14 * 2.), sqlService);
         insert(globMongoCollection, DummyObject.TYPE.instantiate()
-              .set(DummyObject.ID, 3)
-              .set(DummyObject.NAME, "name 3")
-              .set(DummyObject.VALUE, 3.14 * 3.), sqlService);
+                .set(DummyObject.ID, 3)
+                .set(DummyObject.NAME, "name 3")
+                .set(DummyObject.VALUE, 3.14 * 3.), sqlService);
 
         SqlConnection mangoDbConnection = new MangoDbConnection(database, sqlService);
         GlobList globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE)
-              .selectAll()
-              .getQuery()
-              .executeAsGlobs();
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
         DefaultGlobRepository globRepository = new DefaultGlobRepository();
         globRepository.add(globs);
 
@@ -105,7 +111,7 @@ public class MongoSelectTest {
 
         static {
             GlobTypeLoaderFactory.create(DummyObject.class)
-                  .load();
+                    .load();
         }
     }
 
@@ -167,7 +173,7 @@ public class MongoSelectTest {
         }
     }
 
-    static class FieldWriterVisitor implements FieldVisitorWithTwoContext<BsonWriter, Glob>{
+    static class FieldWriterVisitor implements FieldVisitorWithTwoContext<BsonWriter, Glob> {
         private Map<Field, String> fieldStringMap;
 
         public FieldWriterVisitor(Map<Field, String> fieldStringMap) {
@@ -188,8 +194,7 @@ public class MongoSelectTest {
                 bsonWriter.writeName(fieldStringMap.get(field));
                 if (field.hasAnnotation(IsBigDecimal.KEY)) {
                     bsonWriter.writeDecimal128(new Decimal128(new BigDecimal(value)));
-                }
-                else {
+                } else {
                     bsonWriter.writeDouble(value);
                 }
             }

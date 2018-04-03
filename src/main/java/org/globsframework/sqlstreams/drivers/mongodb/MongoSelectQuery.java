@@ -57,19 +57,19 @@ public class MongoSelectQuery implements SelectQuery {
     private DocumentsIterator getDocumentsIterator() {
         LinkedBlockingDeque<Document> objects = new LinkedBlockingDeque<>();
         Bson include = include(fieldsAndAccessor.keySet()
-              .stream().map(sqlService::getColumnName).collect(Collectors.toList()));
+                .stream().map(sqlService::getColumnName).collect(Collectors.toList()));
         collection.find()
-              .projection(include)
-              .forEach(document -> {
-                  if (document != null) {
-                      objects.add(document);
-                  }
-              }, (aVoid, throwable) -> {
-                  if (throwable != null) {
-                      throwable.printStackTrace();
-                  }
-                  objects.add(END);
-              });
+                .projection(include)
+                .forEach(document -> {
+                    if (document != null) {
+                        objects.add(document);
+                    }
+                }, (aVoid, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    }
+                    objects.add(END);
+                });
         return new DocumentsIterator(currentDoc, objects);
     }
 
@@ -77,7 +77,7 @@ public class MongoSelectQuery implements SelectQuery {
         DocumentsIterator iterator = getDocumentsIterator();
         return new GlobStream() {
             public boolean next() {
-                if (iterator.hasNext()){
+                if (iterator.hasNext()) {
                     iterator.next();
                     return true;
                 }
@@ -134,7 +134,7 @@ public class MongoSelectQuery implements SelectQuery {
         }
 
         public boolean hasNext() {
-            if (current == END){
+            if (current == END) {
                 currentDoc.set(null);
                 return false;
             }

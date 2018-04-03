@@ -14,34 +14,34 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class MysqlConnection extends JdbcConnection {
-  public MysqlConnection(Connection connection, SqlService sqlService) {
-    super(connection, sqlService, new BlobUpdater() {
-      public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
-        preparedStatement.setBytes(index, bytes);
-      }
-    });
-  }
+    public MysqlConnection(Connection connection, SqlService sqlService) {
+        super(connection, sqlService, new BlobUpdater() {
+            public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
+                preparedStatement.setBytes(index, bytes);
+            }
+        });
+    }
 
-  protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter) {
-    return new SqlFieldCreationVisitor(sqlService, prettyWriter) {
+    protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter) {
+        return new SqlFieldCreationVisitor(sqlService, prettyWriter) {
 
-      public void visitString(StringField field) throws Exception {
-         Glob annotation = field.getAnnotation(MaxSizeType.KEY);
-         int maxSize = 255;
-         if (annotation != null){
-            maxSize = annotation.get(MaxSizeType.VALUE, 255);
-         }
-         add("VARCHAR(" + maxSize + ")", field);
-      }
+            public void visitString(StringField field) throws Exception {
+                Glob annotation = field.getAnnotation(MaxSizeType.KEY);
+                int maxSize = 255;
+                if (annotation != null) {
+                    maxSize = annotation.get(MaxSizeType.VALUE, 255);
+                }
+                add("VARCHAR(" + maxSize + ")", field);
+            }
 
-      public String getAutoIncrementKeyWord() {
-        return "AUTO_INCREMENT";
-      }
-    };
+            public String getAutoIncrementKeyWord() {
+                return "AUTO_INCREMENT";
+            }
+        };
 
-  }
+    }
 
-  protected boolean isRollbackSQLState(SQLException e) {
-    return e.getErrorCode() == 1099 && "HY000".equals(e.getSQLState());
-  }
+    protected boolean isRollbackSQLState(SQLException e) {
+        return e.getErrorCode() == 1099 && "HY000".equals(e.getSQLState());
+    }
 }

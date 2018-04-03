@@ -9,37 +9,37 @@ import org.globsframework.utils.Ref;
 
 public interface SelectBuilder {
 
-   SelectQuery getQuery();
+    SelectQuery getQuery();
 
-   SelectQuery getNotAutoCloseQuery();
+    SelectQuery getNotAutoCloseQuery();
 
-   SelectBuilder select(Field field);
+    SelectBuilder select(Field field);
 
-   SelectBuilder selectAll();
+    SelectBuilder selectAll();
 
-   SelectBuilder select(IntegerField field, Ref<IntegerAccessor> accessor);
+    SelectBuilder select(IntegerField field, Ref<IntegerAccessor> accessor);
 
-   SelectBuilder select(LongField field, Ref<LongAccessor> accessor);
+    SelectBuilder select(LongField field, Ref<LongAccessor> accessor);
 
-   SelectBuilder select(BooleanField field, Ref<BooleanAccessor> accessor);
+    SelectBuilder select(BooleanField field, Ref<BooleanAccessor> accessor);
 
-   SelectBuilder select(StringField field, Ref<StringAccessor> accessor);
+    SelectBuilder select(StringField field, Ref<StringAccessor> accessor);
 
-   SelectBuilder select(DoubleField field, Ref<DoubleAccessor> accessor);
+    SelectBuilder select(DoubleField field, Ref<DoubleAccessor> accessor);
 
-   SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
+    SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
 
-   IntegerAccessor retrieve(IntegerField field);
+    IntegerAccessor retrieve(IntegerField field);
 
-   LongAccessor retrieve(LongField field);
+    LongAccessor retrieve(LongField field);
 
-   StringAccessor retrieve(StringField field);
+    StringAccessor retrieve(StringField field);
 
-   BooleanAccessor retrieve(BooleanField field);
+    BooleanAccessor retrieve(BooleanField field);
 
-   DoubleAccessor retrieve(DoubleField field);
+    DoubleAccessor retrieve(DoubleField field);
 
-   BlobAccessor retrieve(BlobField field);
+    BlobAccessor retrieve(BlobField field);
 
-   Accessor retrieveUnTyped(Field field);
+    Accessor retrieveUnTyped(Field field);
 }

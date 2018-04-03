@@ -5,9 +5,9 @@ import org.globsframework.metamodel.GlobType;
 
 public interface SqlService {
 
-  SqlConnection getDb();
+    SqlConnection getDb();
 
-  String getTableName(GlobType globType);
+    String getTableName(GlobType globType);
 
-  String getColumnName(Field field);
+    String getColumnName(Field field);
 }

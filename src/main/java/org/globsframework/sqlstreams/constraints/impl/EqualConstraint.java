@@ -5,12 +5,12 @@ import org.globsframework.sqlstreams.constraints.Operand;
 
 public class EqualConstraint extends BinaryOperandConstraint {
 
-  public EqualConstraint(Operand leftOp, Operand rightOp) {
-    super(leftOp, rightOp);
-  }
+    public EqualConstraint(Operand leftOp, Operand rightOp) {
+        super(leftOp, rightOp);
+    }
 
-  public void visit(ConstraintVisitor constraintVisitor) {
-    constraintVisitor.visitEqual(this);
-  }
+    public void visit(ConstraintVisitor constraintVisitor) {
+        constraintVisitor.visitEqual(this);
+    }
 
 }

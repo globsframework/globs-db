@@ -22,117 +22,114 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class SqlSelectQuery implements SelectQuery {
-  private Set<GlobType> globTypes = new HashSet<GlobType>();
-  private Constraint constraint;
-  private BlobUpdater blobUpdater;
-  private boolean autoClose;
-  private Map<Field, SqlAccessor> fieldToAccessorHolder;
-  private SqlService sqlService;
-  private PreparedStatement preparedStatement;
-  private String sql;
+    private Set<GlobType> globTypes = new HashSet<GlobType>();
+    private Constraint constraint;
+    private BlobUpdater blobUpdater;
+    private boolean autoClose;
+    private Map<Field, SqlAccessor> fieldToAccessorHolder;
+    private SqlService sqlService;
+    private PreparedStatement preparedStatement;
+    private String sql;
 
-  public SqlSelectQuery(Connection connection, Constraint constraint,
-                        Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
-                        BlobUpdater blobUpdater, boolean autoClose) {
-    this.constraint = constraint;
-    this.blobUpdater = blobUpdater;
-    this.autoClose = autoClose;
-    this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
-    this.sqlService = sqlService;
-    sql = prepareSqlRequest();
-    try {
-      preparedStatement = connection.prepareStatement(sql);
+    public SqlSelectQuery(Connection connection, Constraint constraint,
+                          Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
+                          BlobUpdater blobUpdater, boolean autoClose) {
+        this.constraint = constraint;
+        this.blobUpdater = blobUpdater;
+        this.autoClose = autoClose;
+        this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
+        this.sqlService = sqlService;
+        sql = prepareSqlRequest();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new UnexpectedApplicationState("for request " + sql, e);
+        }
     }
-    catch (SQLException e) {
-      throw new UnexpectedApplicationState("for request " + sql, e);
-    }
-  }
 
-  private String prepareSqlRequest() {
-    int index = 0;
-    StringPrettyWriter prettyWriter = new StringPrettyWriter();
-    prettyWriter.append("select ");
-    for (Iterator<Map.Entry<Field, SqlAccessor>> iterator = fieldToAccessorHolder.entrySet().iterator();
-         iterator.hasNext();) {
-      Map.Entry<Field, SqlAccessor> fieldAndAccessor = iterator.next();
-      fieldAndAccessor.getValue().setIndex(++index);
-      GlobType globType = fieldAndAccessor.getKey().getGlobType();
-      globTypes.add(globType);
-      String tableName = sqlService.getTableName(globType);
-      prettyWriter.append(tableName)
-        .append(".")
-        .append(sqlService.getColumnName(fieldAndAccessor.getKey()))
-        .appendIf(", ", iterator.hasNext());
+    private String prepareSqlRequest() {
+        int index = 0;
+        StringPrettyWriter prettyWriter = new StringPrettyWriter();
+        prettyWriter.append("select ");
+        for (Iterator<Map.Entry<Field, SqlAccessor>> iterator = fieldToAccessorHolder.entrySet().iterator();
+             iterator.hasNext(); ) {
+            Map.Entry<Field, SqlAccessor> fieldAndAccessor = iterator.next();
+            fieldAndAccessor.getValue().setIndex(++index);
+            GlobType globType = fieldAndAccessor.getKey().getGlobType();
+            globTypes.add(globType);
+            String tableName = sqlService.getTableName(globType);
+            prettyWriter.append(tableName)
+                    .append(".")
+                    .append(sqlService.getColumnName(fieldAndAccessor.getKey()))
+                    .appendIf(", ", iterator.hasNext());
+        }
+        StringPrettyWriter where = null;
+        if (constraint != null) {
+            where = new StringPrettyWriter();
+            where.append(" WHERE ");
+            constraint.visit(new WhereClauseConstraintVisitor(where, sqlService, globTypes));
+        }
+        prettyWriter.append(" from ");
+        for (Iterator it = globTypes.iterator(); it.hasNext(); ) {
+            GlobType globType = (GlobType) it.next();
+            prettyWriter.append(sqlService.getTableName(globType))
+                    .appendIf(", ", it.hasNext());
+        }
+        if (where != null) {
+            prettyWriter.append(where.toString());
+        }
+        return prettyWriter.toString();
     }
-    StringPrettyWriter where = null;
-    if (constraint != null) {
-      where = new StringPrettyWriter();
-      where.append(" WHERE ");
-      constraint.visit(new WhereClauseConstraintVisitor(where, sqlService, globTypes));
-    }
-    prettyWriter.append(" from ");
-    for (Iterator it = globTypes.iterator(); it.hasNext();) {
-      GlobType globType = (GlobType)it.next();
-      prettyWriter.append(sqlService.getTableName(globType))
-        .appendIf(", ", it.hasNext());
-    }
-    if (where != null) {
-      prettyWriter.append(where.toString());
-    }
-    return prettyWriter.toString();
-  }
 
-  public GlobStream execute() {
-    if (preparedStatement == null) {
-      throw new UnexpectedApplicationState("Query closed " + sql);
+    public GlobStream execute() {
+        if (preparedStatement == null) {
+            throw new UnexpectedApplicationState("Query closed " + sql);
+        }
+        try {
+            if (constraint != null) {
+                constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
+            }
+            return new SqlGlobStream(preparedStatement.executeQuery(), fieldToAccessorHolder, this);
+        } catch (SQLException e) {
+            throw new UnexpectedApplicationState("for request : " + sql, e);
+        }
     }
-    try {
-      if (constraint != null) {
-        constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
-      }
-      return new SqlGlobStream(preparedStatement.executeQuery(), fieldToAccessorHolder, this);
-    }
-    catch (SQLException e) {
-      throw new UnexpectedApplicationState("for request : " + sql, e);
-    }
-  }
 
-  public GlobList executeAsGlobs() {
-    GlobStream globStream = execute();
-    AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(globStream);
-    GlobList result = new GlobList();
-    while (globStream.next()) {
-      result.addAll(accessorGlobBuilder.getGlobs());
+    public GlobList executeAsGlobs() {
+        GlobStream globStream = execute();
+        AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(globStream);
+        GlobList result = new GlobList();
+        while (globStream.next()) {
+            result.addAll(accessorGlobBuilder.getGlobs());
+        }
+        return result;
     }
-    return result;
-  }
 
-  public Glob executeUnique() throws ItemNotFound, TooManyItems {
-    GlobList globs = executeAsGlobs();
-    if (globs.size() == 1) {
-      return globs.get(0);
+    public Glob executeUnique() throws ItemNotFound, TooManyItems {
+        GlobList globs = executeAsGlobs();
+        if (globs.size() == 1) {
+            return globs.get(0);
+        }
+        if (globs.isEmpty()) {
+            throw new ItemNotFound("No result returned for: " + sql);
+        }
+        throw new TooManyItems("Too many results for: " + sql);
     }
-    if (globs.isEmpty()) {
-      throw new ItemNotFound("No result returned for: " + sql);
-    }
-    throw new TooManyItems("Too many results for: " + sql);
-  }
 
-  public void resultSetClose() {
-    if (autoClose) {
-      close();
+    public void resultSetClose() {
+        if (autoClose) {
+            close();
+        }
     }
-  }
 
-  public void close() {
-    if (preparedStatement != null) {
-      try {
-        preparedStatement.close();
-        preparedStatement = null;
-      }
-      catch (SQLException e) {
-        throw new UnexpectedApplicationState("PreparedStatement close fail", e);
-      }
+    public void close() {
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+                preparedStatement = null;
+            } catch (SQLException e) {
+                throw new UnexpectedApplicationState("PreparedStatement close fail", e);
+            }
+        }
     }
-  }
 }

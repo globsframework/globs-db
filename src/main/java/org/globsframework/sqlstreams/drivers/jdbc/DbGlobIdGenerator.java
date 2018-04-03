@@ -14,62 +14,58 @@ import org.globsframework.streams.accessors.IntegerAccessor;
 import org.globsframework.utils.Ref;
 
 public class DbGlobIdGenerator {
-  private GlobType globType;
-  private StringField tableNameField;
-  private IntegerField idField;
-  private SqlService sqlService;
+    private GlobType globType;
+    private StringField tableNameField;
+    private IntegerField idField;
+    private SqlService sqlService;
 
-  public DbGlobIdGenerator(GlobType globType, StringField tableNameField,
-                           IntegerField idField, SqlService sqlService) {
-    this.globType = globType;
-    this.tableNameField = tableNameField;
-    this.idField = idField;
-    this.sqlService = sqlService;
-  }
-
-  synchronized public int getNextId(String tableName, int idCount) {
-    SqlConnection sqlConnection = sqlService.getDb();
-    while (true) {
-      try {
-        Ref<IntegerAccessor> idRef = new Ref<IntegerAccessor>();
-        Constraint constraint = Constraints.and(getAdditionalConstraint(),
-                                                Constraints.equal(tableNameField, tableName));
-        GlobStream globStream = sqlConnection.getQueryBuilder(globType, constraint)
-          .select(idField, idRef).getQuery().execute();
-        int id;
-        if (globStream.next()) {
-          id = idRef.get().getInteger() + idCount;
-          sqlConnection.getUpdateBuilder(globType, Constraints.equal(tableNameField, tableName))
-            .update(idField, id).getRequest().run();
-        }
-        else {
-          id = idCount;
-          CreateBuilder builder = sqlConnection.getCreateBuilder(globType)
-            .setObject(idField, idCount)
-            .setObject(tableNameField, tableName);
-          addAdditionalInfo(builder);
-          builder.getRequest().run();
-        }
-        sqlConnection.commitAndClose();
-        return id - idCount;
-      }
-      catch (RollbackFailed e) {
-        try {
-          Thread.sleep(10);
-        }
-        catch (InterruptedException e1) {
-        }
-      }
-      finally {
-        sqlConnection.rollbackAndClose();
-      }
+    public DbGlobIdGenerator(GlobType globType, StringField tableNameField,
+                             IntegerField idField, SqlService sqlService) {
+        this.globType = globType;
+        this.tableNameField = tableNameField;
+        this.idField = idField;
+        this.sqlService = sqlService;
     }
-  }
 
-  protected void addAdditionalInfo(CreateBuilder builder) {
-  }
+    synchronized public int getNextId(String tableName, int idCount) {
+        SqlConnection sqlConnection = sqlService.getDb();
+        while (true) {
+            try {
+                Ref<IntegerAccessor> idRef = new Ref<IntegerAccessor>();
+                Constraint constraint = Constraints.and(getAdditionalConstraint(),
+                        Constraints.equal(tableNameField, tableName));
+                GlobStream globStream = sqlConnection.getQueryBuilder(globType, constraint)
+                        .select(idField, idRef).getQuery().execute();
+                int id;
+                if (globStream.next()) {
+                    id = idRef.get().getInteger() + idCount;
+                    sqlConnection.getUpdateBuilder(globType, Constraints.equal(tableNameField, tableName))
+                            .update(idField, id).getRequest().run();
+                } else {
+                    id = idCount;
+                    CreateBuilder builder = sqlConnection.getCreateBuilder(globType)
+                            .setObject(idField, idCount)
+                            .setObject(tableNameField, tableName);
+                    addAdditionalInfo(builder);
+                    builder.getRequest().run();
+                }
+                sqlConnection.commitAndClose();
+                return id - idCount;
+            } catch (RollbackFailed e) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e1) {
+                }
+            } finally {
+                sqlConnection.rollbackAndClose();
+            }
+        }
+    }
 
-  protected Constraint getAdditionalConstraint() {
-    return null;
-  }
+    protected void addAdditionalInfo(CreateBuilder builder) {
+    }
+
+    protected Constraint getAdditionalConstraint() {
+        return null;
+    }
 }

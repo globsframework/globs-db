@@ -4,7 +4,6 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.model.impl.DefaultGlob;
 import org.globsframework.streams.GlobStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.collections.MultiMap;
@@ -15,27 +14,27 @@ import java.util.List;
 import java.util.Map;
 
 public class AccessorGlobBuilder {
-  private MultiMap<GlobType, Pair<Field, Accessor>> accessors = new MultiMap<GlobType, Pair<Field, Accessor>>();
+    private MultiMap<GlobType, Pair<Field, Accessor>> accessors = new MultiMap<GlobType, Pair<Field, Accessor>>();
 
-  public AccessorGlobBuilder(GlobStream globStream) {
-    for (Field field : globStream.getFields()) {
-      accessors.put(field.getGlobType(), new Pair<Field, Accessor>(field, globStream.getAccessor(field)));
+    public AccessorGlobBuilder(GlobStream globStream) {
+        for (Field field : globStream.getFields()) {
+            accessors.put(field.getGlobType(), new Pair<Field, Accessor>(field, globStream.getAccessor(field)));
+        }
     }
-  }
 
-  public static AccessorGlobBuilder init(GlobStream globStream) {
-    return new AccessorGlobBuilder(globStream);
-  }
-
-  public List<Glob> getGlobs() {
-    List globs = new ArrayList();
-    for (Map.Entry<GlobType, List<Pair<Field, Accessor>>> entry : accessors.entries()) {
-      MutableGlob defaultGlob = entry.getKey().instantiate();
-      for (Pair<Field, Accessor> pair : entry.getValue()) {
-        defaultGlob.setValue(pair.getFirst(), pair.getSecond().getObjectValue());
-      }
-      globs.add(defaultGlob);
+    public static AccessorGlobBuilder init(GlobStream globStream) {
+        return new AccessorGlobBuilder(globStream);
     }
-    return globs;
-  }
+
+    public List<Glob> getGlobs() {
+        List globs = new ArrayList();
+        for (Map.Entry<GlobType, List<Pair<Field, Accessor>>> entry : accessors.entries()) {
+            MutableGlob defaultGlob = entry.getKey().instantiate();
+            for (Pair<Field, Accessor> pair : entry.getValue()) {
+                defaultGlob.setValue(pair.getFirst(), pair.getSecond().getObjectValue());
+            }
+            globs.add(defaultGlob);
+        }
+        return globs;
+    }
 }

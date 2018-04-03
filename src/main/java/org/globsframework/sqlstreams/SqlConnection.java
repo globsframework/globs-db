@@ -10,31 +10,31 @@ import java.sql.Connection;
 
 public interface SqlConnection {
 
-  SelectBuilder getQueryBuilder(GlobType globType);
+    SelectBuilder getQueryBuilder(GlobType globType);
 
-  SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint);
+    SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint);
 
-  CreateBuilder getCreateBuilder(GlobType globType);
+    CreateBuilder getCreateBuilder(GlobType globType);
 
-  UpdateBuilder getUpdateBuilder(GlobType globType, Constraint constraint);
+    UpdateBuilder getUpdateBuilder(GlobType globType, Constraint constraint);
 
-  SqlRequest getDeleteRequest(GlobType globType);
+    SqlRequest getDeleteRequest(GlobType globType);
 
-  SqlRequest getDeleteRequest(GlobType globType, Constraint constraint);
+    SqlRequest getDeleteRequest(GlobType globType, Constraint constraint);
 
-  void commit() throws RollbackFailed, DbConstraintViolation;
+    void commit() throws RollbackFailed, DbConstraintViolation;
 
-  void commitAndClose() throws RollbackFailed, DbConstraintViolation;
+    void commitAndClose() throws RollbackFailed, DbConstraintViolation;
 
-  void rollbackAndClose();
+    void rollbackAndClose();
 
-  Connection getConnection();
+    Connection getConnection();
 
-  void createTable(GlobType... globType);
+    void createTable(GlobType... globType);
 
-  void emptyTable(GlobType... globType);
+    void emptyTable(GlobType... globType);
 
-  void showDb();
+    void showDb();
 
-  void populate(GlobList all);
+    void populate(GlobList all);
 }

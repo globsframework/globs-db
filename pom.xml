@@ -3,8 +3,8 @@
     <groupId>org.globsframework</groupId>
     <packaging>jar</packaging>
     <artifactId>globs-sql</artifactId>
-    <name>Sql access</name>
-    <version>2.0</version>
+    <name>db access</name>
+    <version>3.0</version>
 
     <build>
         <plugins>
@@ -63,12 +63,12 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>2.1-SNAPSHOT</version>
+            <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>2.1-SNAPSHOT</version>
+            <version>3.0</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>

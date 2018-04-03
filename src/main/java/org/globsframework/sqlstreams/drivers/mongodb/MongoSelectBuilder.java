@@ -15,8 +15,6 @@ import org.globsframework.utils.Ref;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class MongoSelectBuilder implements SelectBuilder {
     private final static MongoFieldVisitor MONGO_FIELD_VISITOR = new MongoFieldVisitor();
@@ -130,7 +128,7 @@ public class MongoSelectBuilder implements SelectBuilder {
         throw new RuntimeException("TODO : Not implemented");
     }
 
-    static class MongoFieldVisitor implements FieldVisitorWithContext<MongoSelectBuilder>{
+    static class MongoFieldVisitor implements FieldVisitorWithContext<MongoSelectBuilder> {
 
         public void visitInteger(IntegerField field, MongoSelectBuilder builder) throws Exception {
             builder.retrieve(field);

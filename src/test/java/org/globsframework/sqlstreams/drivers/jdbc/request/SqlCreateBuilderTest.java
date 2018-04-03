@@ -11,17 +11,17 @@ import org.junit.Test;
 
 public class SqlCreateBuilderTest extends DbServicesTestCase {
 
-   @Test
-   public void testSimpleCreate() throws Exception {
-      sqlConnection.createTable(DummyObject.TYPE);
-      sqlConnection.getCreateBuilder(DummyObject.TYPE)
-         .set(DummyObject.ID, new ValueIntegerAccessor(1))
-         .set(DummyObject.NAME, new ValueStringAccessor("hello"))
-         .set(DummyObject.PASSWORD, new ValueBlobAccessor("world".getBytes()))
-         .getRequest()
-         .run();
-      checkDb(KeyBuilder.newKey(DummyObject.TYPE, 1), DummyObject.NAME, "hello", sqlConnection);
-      Assert.assertEquals("world",
-                          new String((byte[])getNextValue(KeyBuilder.newKey(DummyObject.TYPE, 1), sqlConnection, DummyObject.PASSWORD)));
-   }
+    @Test
+    public void testSimpleCreate() throws Exception {
+        sqlConnection.createTable(DummyObject.TYPE);
+        sqlConnection.getCreateBuilder(DummyObject.TYPE)
+                .set(DummyObject.ID, new ValueIntegerAccessor(1))
+                .set(DummyObject.NAME, new ValueStringAccessor("hello"))
+                .set(DummyObject.PASSWORD, new ValueBlobAccessor("world".getBytes()))
+                .getRequest()
+                .run();
+        checkDb(KeyBuilder.newKey(DummyObject.TYPE, 1), DummyObject.NAME, "hello", sqlConnection);
+        Assert.assertEquals("world",
+                new String((byte[]) getNextValue(KeyBuilder.newKey(DummyObject.TYPE, 1), sqlConnection, DummyObject.PASSWORD)));
+    }
 }
