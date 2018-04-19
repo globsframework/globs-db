@@ -6,4 +6,6 @@ public interface PrettyWriter {
     void appendIf(String s, boolean shouldAppend);
 
     PrettyWriter newLine();
+
+    PrettyWriter removeLast();
 }

@@ -28,8 +28,6 @@ public interface SqlConnection {
 
     void rollbackAndClose();
 
-    Connection getConnection();
-
     void createTable(GlobType... globType);
 
     void emptyTable(GlobType... globType);

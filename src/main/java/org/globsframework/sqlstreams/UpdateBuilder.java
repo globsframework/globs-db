@@ -36,4 +36,5 @@ public interface UpdateBuilder {
 
     SqlRequest getRequest();
 
+    BulkDbRequest getBulkRequest();
 }

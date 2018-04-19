@@ -8,7 +8,8 @@ public class BiggerThanConstraint extends BinaryOperandConstraint {
         super(leftOperand, rightOperand);
     }
 
-    public void visit(ConstraintVisitor visitor) {
+    public <T extends ConstraintVisitor> T visit(T visitor) {
         visitor.visitBiggerThan(this);
+        return visitor;
     }
 }

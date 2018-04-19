@@ -1,10 +1,7 @@
 package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.Field;
-import org.globsframework.metamodel.fields.BlobField;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.LongField;
-import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.metamodel.fields.*;
 import org.globsframework.streams.accessors.*;
 
 public interface CreateBuilder {
@@ -16,11 +13,19 @@ public interface CreateBuilder {
 
     CreateBuilder set(LongField field, Long value);
 
+    CreateBuilder set(DoubleField field, Double value);
+
+    CreateBuilder set(BooleanField field, Boolean value);
+
     CreateBuilder set(IntegerField field, IntegerAccessor accessor);
 
     CreateBuilder set(LongField field, LongAccessor accessor);
 
     CreateBuilder set(StringField field, StringAccessor accessor);
+
+    CreateBuilder set(DoubleField field, DoubleAccessor accessor);
+
+    CreateBuilder set(BooleanField field, BooleanAccessor accessor);
 
     CreateBuilder set(BlobField field, BlobAccessor accessor);
 
@@ -29,4 +34,7 @@ public interface CreateBuilder {
     CreateBuilder setObject(Field field, Object value);
 
     SqlRequest getRequest();
+
+    BulkDbRequest getBulkRequest();
+
 }

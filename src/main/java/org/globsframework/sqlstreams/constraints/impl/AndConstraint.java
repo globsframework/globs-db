@@ -9,7 +9,8 @@ public class AndConstraint extends BinaryConstraint implements Constraint {
         super(leftOperand, rightOperand);
     }
 
-    public void visit(ConstraintVisitor constraintVisitor) {
-        constraintVisitor.visitAnd(this);
+    public <T extends ConstraintVisitor> T visit(T visitor) {
+        visitor.visitAnd(this);
+        return visitor;
     }
 }

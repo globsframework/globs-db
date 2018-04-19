@@ -13,8 +13,9 @@ public class ValueOperand implements Operand {
         this.value = value;
     }
 
-    public void visitOperand(OperandVisitor visitor) {
+    public <T extends OperandVisitor> T visitOperand(T visitor) {
         visitor.visitValueOperand(this);
+        return visitor;
     }
 
     public Field getField() {

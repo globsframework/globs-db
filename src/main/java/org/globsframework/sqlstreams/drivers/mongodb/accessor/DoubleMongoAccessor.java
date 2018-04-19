@@ -15,7 +15,17 @@ public class DoubleMongoAccessor implements DoubleAccessor {
     }
 
     public Double getDouble() {
-        return currentDoc.get().getDouble(columnName);
+        Object o = currentDoc.get().get(columnName);
+        if (o == null) {
+            return null;
+        }
+        if (o instanceof Double) {
+            return (Double) o;
+        } else if (o instanceof Number) {
+            return ((Number) o).doubleValue();
+        } else {
+            throw new RuntimeException("Double type expected but got : " + o.getClass());
+        }
     }
 
     public double getValue(double valueIfNull) {

@@ -11,7 +11,8 @@ public class FieldOperand implements Operand {
         this.field = field;
     }
 
-    public void visitOperand(OperandVisitor visitor) {
+    public <T extends OperandVisitor> T visitOperand(T visitor) {
         visitor.visitFieldOperand(field);
+        return visitor;
     }
 }

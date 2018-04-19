@@ -9,7 +9,8 @@ public class NotEqualConstraint extends BinaryOperandConstraint {
         super(left, right);
     }
 
-    public void visit(ConstraintVisitor constraintVisitor) {
-        constraintVisitor.visitNotEqual(this);
+    public <T extends ConstraintVisitor> T visit(T visitor) {
+        visitor.visitNotEqual(this);
+        return visitor;
     }
 }

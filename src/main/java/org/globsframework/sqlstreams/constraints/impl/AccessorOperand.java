@@ -14,8 +14,9 @@ public class AccessorOperand implements Operand {
         this.accessor = accessor;
     }
 
-    public void visitOperand(OperandVisitor visitor) {
+    public <T extends OperandVisitor> T visitOperand(T visitor) {
         visitor.visitAccessorOperand(this);
+        return visitor;
     }
 
     public Accessor getAccessor() {

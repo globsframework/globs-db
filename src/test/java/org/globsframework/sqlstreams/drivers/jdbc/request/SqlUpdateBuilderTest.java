@@ -1,9 +1,9 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
-import org.globsframework.metamodel.DummyObject;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.model.Key;
 import org.globsframework.model.KeyBuilder;
+import org.globsframework.model.DummyObject;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.UpdateBuilder;
 import org.globsframework.sqlstreams.constraints.Constraints;

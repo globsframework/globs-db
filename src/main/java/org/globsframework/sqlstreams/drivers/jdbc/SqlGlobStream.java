@@ -10,6 +10,9 @@ import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -102,16 +105,31 @@ public class SqlGlobStream implements GlobStream {
 
     public Integer getInteger(int index) {
         try {
-            Number number = (Number) resultSet.getObject(index);
-            if (number == null) {
+//            if (resultSet.wasNull()) {
+//                return null;
+//            }
+            Object object = resultSet.getObject(index);
+            if (object == null) {
                 return null;
             }
+            if (object instanceof Number) {
+                Number number = (Number) object;
             if (number instanceof Integer) {
                 return (Integer) number;
             }
             return number.intValue();
+            } else if (object instanceof Date) {
+                LocalDateTime ldt = LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
+                return Math.toIntExact(ldt.getLong(ChronoField.EPOCH_DAY));
+            }
+            throw new RuntimeException("Can not convert " + object);
         } catch (SQLException e) {
-            throw new SqlException(e);
+            String columnName = null;
+            try {
+                columnName = resultSet.getMetaData().getColumnName(index);
+            } catch (SQLException e1) {
+            }
+            throw new SqlException("for " + columnName, e);
         }
     }
 
@@ -119,7 +137,19 @@ public class SqlGlobStream implements GlobStream {
         try {
             return (String) resultSet.getObject(index);
         } catch (SQLException e) {
-            throw new SqlException(e);
+            String columnName = null;
+            try {
+                columnName = resultSet.getMetaData().getColumnName(index);
+            } catch (SQLException e1) {
+            }
+            throw new SqlException("for " + columnName, e);
+        } catch (Exception e) {
+            String columnName = null;
+            try {
+                columnName = resultSet.getMetaData().getColumnName(index);
+            } catch (SQLException e1) {
+            }
+            throw new RuntimeException("For " + columnName, e);
         }
     }
 

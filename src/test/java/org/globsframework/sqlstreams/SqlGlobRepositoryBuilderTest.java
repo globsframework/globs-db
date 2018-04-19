@@ -1,8 +1,8 @@
 package org.globsframework.sqlstreams;
 
-import org.globsframework.metamodel.DummyObject;
-import org.globsframework.metamodel.DummyObject2;
 import org.globsframework.metamodel.GlobModel;
+import org.globsframework.model.DummyObject;
+import org.globsframework.model.DummyObject2;
 import org.globsframework.model.GlobChecker;
 import org.globsframework.model.GlobRepository;
 import org.globsframework.sqlstreams.constraints.Constraints;

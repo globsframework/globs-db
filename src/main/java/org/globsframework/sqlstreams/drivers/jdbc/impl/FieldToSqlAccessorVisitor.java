@@ -3,7 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc.impl;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.accessors.*;
 
-public class FieldToSqlAccessorVisitor implements FieldVisitor {
+public class FieldToSqlAccessorVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private SqlAccessor accessor;
 
     public SqlAccessor getAccessor() {

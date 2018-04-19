@@ -6,7 +6,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-public class SqlValueFieldVisitor implements FieldVisitor {
+public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private PreparedStatement preparedStatement;
     private BlobUpdater blobUpdater;
     private Object value;

@@ -59,6 +59,7 @@ public class SqlGlobRepositoryBuilder {
         SqlConnection sqlConnection = sqlService.getDb();
         for (T3uples<Constraint, GlobType, Field[]> t3uples : requestToRetrieve) {
             SelectBuilder builder = sqlConnection.getQueryBuilder(t3uples.getSecond(), t3uples.getFirst());
+            builder.withKeys();
             for (Field field : t3uples.getThird()) {
                 builder.select(field);
             }

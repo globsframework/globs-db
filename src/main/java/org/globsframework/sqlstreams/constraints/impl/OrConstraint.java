@@ -8,7 +8,8 @@ public class OrConstraint extends BinaryConstraint implements Constraint {
         super(leftOperand, rightOperand);
     }
 
-    public void visit(ConstraintVisitor constraintVisitor) {
-        constraintVisitor.visitOr(this);
+    public <T extends ConstraintVisitor> T visit(T visitor) {
+        visitor.visitOr(this);
+        return visitor;
     }
 }

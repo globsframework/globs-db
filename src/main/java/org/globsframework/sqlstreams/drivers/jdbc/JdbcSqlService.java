@@ -1,5 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
+import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sqlstreams.drivers.mysql.MysqlConnection;
@@ -20,17 +22,45 @@ public class JdbcSqlService extends AbstractSqlService {
     private String dbName;
     private Properties dbInfo;
     private DbFactory dbFactory;
+    NamingMapping namingMapping;
 
-    public JdbcSqlService(String dbName, String user, String password) {
+    public JdbcSqlService(String dbName, String user, String password, NamingMapping namingMapping) {
         this.dbName = dbName;
+        this.namingMapping = namingMapping;
         dbInfo = new Properties();
         dbInfo.put("user", user);
         dbInfo.put("password", password);
         loadDriver();
     }
 
+    public JdbcSqlService(String dbName, String user, String password) {
+        this(dbName, user, password, new NamingMapping() {
+            public String getTableName(GlobType globType) {
+                return AbstractSqlService.toSqlName(globType.getName());
+            }
+
+            public String getColumnName(Field field) {
+                return AbstractSqlService.toSqlName(field.getName());
+            }
+        });
+    }
+
+    public interface NamingMapping {
+        String getTableName(GlobType globType);
+
+        String getColumnName(Field field);
+    }
+
     interface DbFactory {
         SqlConnection create();
+    }
+
+    public String getTableName(GlobType globType) {
+        return namingMapping.getTableName(globType);
+    }
+
+    public String getColumnName(Field field) {
+        return namingMapping.getColumnName(field);
     }
 
     private void loadDriver() {

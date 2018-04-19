@@ -56,11 +56,11 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         visitBinary(constraint);
     }
 
-    public void visitStricklyBiggerThan(StrictlyBiggerThanConstraint constraint) {
+    public void visitStrictlyBiggerThan(StrictlyBiggerThanConstraint constraint) {
         visitBinary(constraint);
     }
 
-    public void visitStricklyLesserThan(StrictlyLesserThanConstraint constraint) {
+    public void visitStrictlyLesserThan(StrictlyLesserThanConstraint constraint) {
         visitBinary(constraint);
     }
 
@@ -70,6 +70,17 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
             setValue(value, ++index);
             field.safeVisit(this);
         }
+    }
+
+    public void visitIsOrNotNull(NullOrNotConstraint constraint) {
+    }
+
+    public void visitNotIn(NotInConstraint constraint) {
+
+    }
+
+    public void visitContains(Field field, String value, boolean contains) {
+
     }
 
     public void visitValueOperand(ValueOperand value) {

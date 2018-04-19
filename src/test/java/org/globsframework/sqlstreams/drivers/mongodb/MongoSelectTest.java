@@ -1,80 +1,50 @@
 package org.globsframework.sqlstreams.drivers.mongodb;
 
 import com.github.fakemongo.junit.FongoAsyncRule;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
-import org.bson.BsonBinary;
-import org.bson.BsonReader;
-import org.bson.BsonType;
-import org.bson.BsonWriter;
-import org.bson.codecs.Codec;
-import org.bson.codecs.DecoderContext;
-import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecProvider;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.types.Decimal128;
-import org.globsframework.metamodel.Field;
+import com.github.fakemongo.junit.FongoRule;
+import com.mongodb.Block;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.GlobTypeLoader;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.KeyField;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.metamodel.annotations.Target;
+import org.globsframework.metamodel.fields.DoubleField;
+import org.globsframework.metamodel.fields.GlobField;
+import org.globsframework.metamodel.fields.IntegerField;
+import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.metamodel.index.MultiFieldUniqueIndex;
 import org.globsframework.model.GlobList;
 import org.globsframework.model.KeyBuilder;
-import org.globsframework.model.MutableGlob;
-import org.globsframework.model.impl.DefaultGlob;
 import org.globsframework.model.repository.DefaultGlobRepository;
 import org.globsframework.sqlstreams.SqlConnection;
-import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.annotations.IsBigDecimal;
-import org.globsframework.sqlstreams.utils.AbstractSqlService;
+import org.globsframework.sqlstreams.annotations.typed.TypedDbRef;
+import org.globsframework.sqlstreams.annotations.typed.TypedIsDbKey;
+import org.globsframework.sqlstreams.constraints.Constraints;
+import org.globsframework.utils.Ref;
+import org.globsframework.utils.Utils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.Collections;
+
+import static org.globsframework.sqlstreams.drivers.mongodb.MongoSelectTest.DummyObject.*;
 
 public class MongoSelectTest {
+    @Rule
+    public FongoRule fongoRule = new FongoRule();
     @Rule
     public FongoAsyncRule fongoAsyncRule = new FongoAsyncRule();
 
     @Test
-    public void Select() throws Exception {
-        MongoDatabase database = fongoAsyncRule.getDatabase();
-        MongoSqlService sqlService = new MongoSqlService(database);
+    public void Select() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
 
-        MongoCollection<Glob> globMongoCollection = database
-                .getCollection(sqlService.getTableName(DummyObject.TYPE), Glob.class)
-                .withCodecRegistry(CodecRegistries.fromProviders(new CodecProvider() {
-                    public <T> Codec<T> get(Class<T> aClass, CodecRegistry codecRegistry) {
-                        if (aClass == DefaultGlob.class || aClass == Glob.class) {
-                            return (Codec<T>) new GlobCodec(DummyObject.TYPE, sqlService);
-                        }
-                        return null;
-                    }
-                }));
-
-//        MongoCollection<Document> globMongoCollection = database
-//              .getCollection(sqlService.getTableName(DummyObject.TYPE), Document.class);
-
-        insert(globMongoCollection, DummyObject.TYPE.instantiate()
-                .set(DummyObject.ID, 1)
-                .set(DummyObject.NAME, "name 1")
-                .set(DummyObject.VALUE, 3.14), sqlService);
-        insert(globMongoCollection, DummyObject.TYPE.instantiate()
-                .set(DummyObject.ID, 2)
-                .set(DummyObject.NAME, "name 2")
-                .set(DummyObject.VALUE, 3.14 * 2.), sqlService);
-        insert(globMongoCollection, DummyObject.TYPE.instantiate()
-                .set(DummyObject.ID, 3)
-                .set(DummyObject.NAME, "name 3")
-                .set(DummyObject.VALUE, 3.14 * 3.), sqlService);
-
-        SqlConnection mangoDbConnection = new MangoDbConnection(database, sqlService);
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
         GlobList globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE)
                 .selectAll()
                 .getQuery()
@@ -84,23 +54,135 @@ public class MongoSelectTest {
 
         Assert.assertEquals(globRepository.get(KeyBuilder.newKey(DummyObject.TYPE, 1)).get(DummyObject.NAME), "name 1");
         Assert.assertEquals(globRepository.get(KeyBuilder.newKey(DummyObject.TYPE, 2)).get(DummyObject.NAME), "name 2");
-        Assert.assertEquals(globRepository.get(KeyBuilder.newKey(DummyObject.TYPE, 3)).get(DummyObject.VALUE), 3.14 * 3, 0.01);
+        Assert.assertEquals(globRepository.get(KeyBuilder.newKey(DummyObject.TYPE, 3)).get(VALUE), 3.14 * 3, 0.01);
     }
 
-    private void insert(MongoCollection<Glob> globMongoCollection, MutableGlob data, MongoSqlService sqlService) throws InterruptedException, java.util.concurrent.ExecutionException {
-        CompletableFuture waitOn = new CompletableFuture();
+    @Test
+    public void IsNullIsExist() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
 
-        globMongoCollection.insertOne(data, (aVoid, throwable) -> {
-            if (throwable != null) {
-                throwable.printStackTrace();
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
+        GlobList globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.isNull(DummyObject.NAME_2))
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
+        Assert.assertEquals(3, globs.size());
+
+        globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.isNotNull(DummyObject.NAME_2))
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
+        Assert.assertEquals(1, globs.size());
+    }
+
+
+    @Test
+    public void contains() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
+
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
+        GlobList globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.contains(DummyObject.NAME, "2"))
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
+        Assert.assertEquals(1, globs.size());
+
+        globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.notContains(DummyObject.NAME, "2"))
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
+        Assert.assertEquals(3, globs.size());
+    }
+
+    @Test
+    public void notIn() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
+
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
+        GlobList globs = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.notIn(DummyObject.NAME, Utils.set("name 1", "name 2")))
+                .selectAll()
+                .getQuery()
+                .executeAsGlobs();
+        Assert.assertEquals(2, globs.size());
+        Assert.assertTrue(globs.stream()
+                .map(g -> g.get(DummyObject.NAME))
+                .anyMatch(s -> s.equals("name 3")));
+    }
+
+    @Test
+    public void orderAndLimit() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
+
+        GlobList sortedFirstGlob = mangoDbConnection.getQueryBuilder(DummyObject.TYPE)
+                .orderDesc(VALUE)
+                .orderAsc(NAME)
+                .top(1)
+                .selectAll()
+                .getQuery().executeAsGlobs();
+
+        Assert.assertEquals(1, sortedFirstGlob.size());
+        Assert.assertEquals(4, sortedFirstGlob.get(0).get(ID).intValue());
+    }
+
+    @Test
+    public void testInOp() {
+        InitDb initDb = new InitDb().invoke();
+        MongoDatabase database = initDb.getDatabase();
+        MongoDbService sqlService = initDb.getSqlService();
+        SqlConnection mangoDbConnection = new MongoDbConnection(database, sqlService);
+
+        GlobList sortedFirstGlob = mangoDbConnection.getQueryBuilder(DummyObject.TYPE, Constraints.in(DummyObject.NAME, Utils.set("name 1", "name 3")))
+                .selectAll()
+                .orderAsc(DummyObject.ID)
+                .getQuery().executeAsGlobs();
+
+        Assert.assertEquals(2, sortedFirstGlob.size());
+        Assert.assertEquals(1, sortedFirstGlob.get(0).get(ID).intValue());
+        Assert.assertEquals(3, sortedFirstGlob.get(1).get(ID).intValue());
+    }
+
+    @Test
+    public void checkIndexCreation() {
+        MongoDatabase database = fongoRule.getDatabase();
+        com.mongodb.client.MongoCollection<Document> globMongoCollection = database.getCollection(DummyObject.TYPE.getName(), Document.class);
+        MongoDbService sqlService = new MongoDbService(database);
+        MongoUtils.createIndexIfNeeded(globMongoCollection, Collections.singleton(NAME_INDEX), sqlService);
+        Ref<Boolean> future = new Ref<>();
+        globMongoCollection.listIndexes().forEach((Block<? super Document>) document -> {
+            if (MongoUtils.contain(NAME_INDEX, document, sqlService)) {
+                future.set(Boolean.TRUE);
             }
-            waitOn.complete(null);
         });
-        waitOn.get();
+        Assert.assertTrue(future.get());
+    }
+
+    static public class InnerValue {
+        public static GlobType TYPE;
+
+        public static IntegerField DATE;
+
+        public static DoubleField VALUE;
+
+        static {
+            GlobTypeLoaderFactory.create(InnerValue.class)
+                    .load();
+        }
     }
 
     static public class DummyObject {
         public static GlobType TYPE;
+
+        @TypedIsDbKey
+        public static StringField UUID;
 
         @KeyField
         public static IntegerField ID;
@@ -109,176 +191,101 @@ public class MongoSelectTest {
 
         public static StringField NAME;
 
+        public static StringField NAME_2;
+
+        @Target(InnerValue.class)
+        public static GlobField LAST;
+
+//        @Target(InnerValue.class)
+//        public static GlobArrayField HISTO;
+
+        public static MultiFieldUniqueIndex NAME_INDEX;
+
         static {
-            GlobTypeLoaderFactory.create(DummyObject.class)
+            GlobTypeLoader globTypeLoader = GlobTypeLoaderFactory.create(DummyObject.class);
+            globTypeLoader.load();
+            globTypeLoader.defineMultiFieldUniqueIndex(NAME_INDEX, NAME, NAME_2);
+        }
+    }
+
+    static public class DummyObjectWithRef {
+        public static GlobType TYPE;
+
+        @TypedIsDbKey
+        public static StringField UUID;
+
+        @KeyField
+        public static IntegerField ID;
+
+        @TypedDbRef(to = "DummyObject")
+        @KeyField
+        public static StringField NAME;
+
+        public static MultiFieldUniqueIndex NAME_INDEX;
+
+        static {
+            GlobTypeLoader globTypeLoader = GlobTypeLoaderFactory.create(DummyObjectWithRef.class);
+            globTypeLoader.load();
+        }
+    }
+
+
+    private class InitDb {
+        private com.mongodb.client.MongoDatabase database;
+        private MongoDbService sqlService;
+
+        public com.mongodb.client.MongoDatabase getDatabase() {
+            return database;
+        }
+
+        public MongoDbService getSqlService() {
+            return sqlService;
+        }
+
+        public InitDb invoke() {
+            return invoke(new MongoDbService.DefaultUpdateAdapterFactory());
+        }
+
+        public InitDb invoke(MongoDbService.UpdateAdapterFactory updateAdapterFactory) {
+            database = fongoRule.getDatabase();
+            sqlService = new MongoDbService(database, updateAdapterFactory);
+            sqlService.getDb().populate(new GlobList(
+                    DummyObject.TYPE.instantiate()
+                            .set(DummyObject.ID, 1)
+                            .set(DummyObject.NAME, "name 1")
+                            .set(DummyObject.NAME_2, "second name")
+                            .set(VALUE, 3.14),
+                    DummyObject.TYPE.instantiate()
+                            .set(DummyObject.ID, 2)
+                            .set(DummyObject.NAME, "name 2")
+                            .set(VALUE, 3.14 * 2.),
+                    DummyObject.TYPE.instantiate()
+                            .set(DummyObject.ID, 3)
+                            .set(DummyObject.NAME, "name 3")
+                            .set(VALUE, 3.14 * 3.),
+                    DummyObject.TYPE.instantiate()
+                            .set(DummyObject.ID, 4)
+                            .set(DummyObject.NAME, "my name")
+                            .set(VALUE, 3.14 * 3.),
+                    DummyObjectWithRef.TYPE.instantiate()
+                            .set(DummyObjectWithRef.ID, 1)
+                            .set(DummyObjectWithRef.NAME, "5a9d63a875e8c98bb09ee1d3")));
+            return this;
+        }
+    }
+
+    static public class InnerObject {
+        public static GlobType TYPE;
+
+        public static IntegerField DATE;
+
+        public static DoubleField VALUE;
+
+        static {
+            GlobTypeLoader globTypeLoader = GlobTypeLoaderFactory.create(InnerObject.class)
                     .load();
         }
     }
 
-    private static class GlobCodec implements Codec<Glob> {
-        private final GlobType type;
-        Map<String, Field> mongoNameToField = new HashMap<>();
-        Map<Field, String> fieldToMongoName = new HashMap<>();
-        FieldReaderVisitor FIELD_READER_VISITOR;
-        FieldWriterVisitor FIELD_WRITER_VISITOR;
 
-        private GlobCodec(GlobType type, SqlService sqlService) {
-            this.type = type;
-            for (Field field : type.getFields()) {
-                String columnName = sqlService.getColumnName(field);
-                mongoNameToField.put(columnName, field);
-                fieldToMongoName.put(field, columnName);
-            }
-
-            FIELD_READER_VISITOR = new FieldReaderVisitor();
-            FIELD_WRITER_VISITOR = new FieldWriterVisitor(fieldToMongoName);
-        }
-
-        public Glob decode(BsonReader reader, DecoderContext decoderContext) {
-            reader.readStartDocument();
-
-            MutableGlob mutableGlob = type.instantiate();
-            while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-                String fieldName = reader.readName();
-                Field field = mongoNameToField.get(fieldName);
-                if (field != null) {
-                    read(reader, decoderContext, mutableGlob, field);
-                }
-            }
-
-            reader.readEndDocument();
-            return null;
-        }
-
-        void read(BsonReader reader, DecoderContext decoderContext, MutableGlob mutableGlob, Field field) {
-            BsonType bsonType = reader.getCurrentBsonType();
-            if (bsonType == BsonType.NULL) {
-                reader.readNull();
-            } else {
-                field.safeVisit(FIELD_READER_VISITOR, reader, mutableGlob);
-            }
-        }
-
-
-        public void encode(BsonWriter bsonWriter, Glob glob, EncoderContext encoderContext) {
-            bsonWriter.writeStartDocument();
-            for (Field field : type.getFields()) {
-                field.safeVisit(FIELD_WRITER_VISITOR, bsonWriter, glob);
-            }
-            bsonWriter.writeEndDocument();
-        }
-
-        public Class<Glob> getEncoderClass() {
-            return Glob.class;
-        }
-    }
-
-    static class FieldWriterVisitor implements FieldVisitorWithTwoContext<BsonWriter, Glob> {
-        private Map<Field, String> fieldStringMap;
-
-        public FieldWriterVisitor(Map<Field, String> fieldStringMap) {
-            this.fieldStringMap = fieldStringMap;
-        }
-
-        public void visitInteger(IntegerField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            Integer value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                bsonWriter.writeInt32(value);
-            }
-        }
-
-        public void visitDouble(DoubleField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            Double value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                if (field.hasAnnotation(IsBigDecimal.KEY)) {
-                    bsonWriter.writeDecimal128(new Decimal128(new BigDecimal(value)));
-                } else {
-                    bsonWriter.writeDouble(value);
-                }
-            }
-        }
-
-        public void visitString(StringField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            String value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                bsonWriter.writeString(value);
-            }
-        }
-
-        public void visitBoolean(BooleanField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            Boolean value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                bsonWriter.writeBoolean(value);
-            }
-        }
-
-        public void visitLong(LongField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            Long value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                bsonWriter.writeInt64(value);
-            }
-        }
-
-        public void visitBlob(BlobField field, BsonWriter bsonWriter, Glob glob) throws Exception {
-            byte[] value = glob.get(field);
-            if (value != null) {
-                bsonWriter.writeName(fieldStringMap.get(field));
-                bsonWriter.writeBinaryData(new BsonBinary(value));
-            }
-        }
-    }
-
-    static class FieldReaderVisitor implements FieldVisitorWithTwoContext<BsonReader, MutableGlob> {
-
-        public void visitInteger(IntegerField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            mutableGlob.set(field, reader.readInt32());
-        }
-
-        public void visitDouble(DoubleField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            if (reader.getCurrentBsonType() == BsonType.DECIMAL128) {
-                mutableGlob.set(field, reader.readDecimal128().bigDecimalValue().doubleValue());
-            } else {
-                mutableGlob.set(field, reader.readDouble());
-            }
-        }
-
-        public void visitString(StringField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            mutableGlob.set(field, reader.readString());
-        }
-
-        public void visitBoolean(BooleanField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            mutableGlob.set(field, reader.readBoolean());
-        }
-
-        public void visitLong(LongField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            if (reader.getCurrentBsonType() == BsonType.INT32) {
-                mutableGlob.set(field, reader.readInt32());
-            } else if (reader.getCurrentBsonType() == BsonType.INT64) {
-                mutableGlob.set(field, reader.readInt64());
-            } else {
-                throw new RuntimeException("TODO " + reader.getCurrentBsonType() + " not converted");
-            }
-        }
-
-        public void visitBlob(BlobField field, BsonReader reader, MutableGlob mutableGlob) throws Exception {
-            mutableGlob.set(field, reader.readBinaryData().getData());
-        }
-    }
-
-    private static class MongoSqlService extends AbstractSqlService {
-        private final MongoDatabase database;
-
-        public MongoSqlService(MongoDatabase database) {
-            this.database = database;
-        }
-
-        public SqlConnection getDb() {
-            return new MangoDbConnection(database, this);
-        }
-    }
 }

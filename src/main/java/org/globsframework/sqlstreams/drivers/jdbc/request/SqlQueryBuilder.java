@@ -11,12 +11,12 @@ import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.SqlSelectQuery;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.FieldToSqlAccessorVisitor;
+import org.globsframework.sqlstreams.drivers.mongodb.MongoSelectBuilder;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.Ref;
 
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SqlQueryBuilder implements SelectBuilder {
     private Connection connection;
@@ -26,6 +26,19 @@ public class SqlQueryBuilder implements SelectBuilder {
     private BlobUpdater blobUpdater;
     private boolean autoClose = true;
     private Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
+    private final List<Order> orders = new ArrayList<>();
+    private int top = -1;
+    private Set<Field> distinct = new HashSet<>();
+
+    public static class Order {
+        public final Field field;
+        public final boolean asc;
+
+        public Order(Field field, boolean asc) {
+            this.field = field;
+            this.asc = asc;
+        }
+    }
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;
@@ -37,8 +50,7 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectQuery getQuery() {
         try {
-            completeWithKeys();
-            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose);
+            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, orders, top, distinct);
         } finally {
             fieldToAccessorHolder.clear();
         }
@@ -47,6 +59,11 @@ public class SqlQueryBuilder implements SelectBuilder {
     public SelectQuery getNotAutoCloseQuery() {
         autoClose = false;
         return getQuery();
+    }
+
+    public SelectBuilder withKeys() {
+        completeWithKeys();
+        return this;
     }
 
     private void completeWithKeys() {
@@ -95,6 +112,26 @@ public class SqlQueryBuilder implements SelectBuilder {
         return createAccessor(field, accessor, new BlobSqlAccessor());
     }
 
+    public SelectBuilder orderAsc(Field field) {
+        orders.add(new Order(field, true));
+        return this;
+    }
+
+    public SelectBuilder orderDesc(Field field) {
+        orders.add(new Order(field, false));
+        return this;
+    }
+
+    public SelectBuilder top(int n) {
+        top = n;
+        return this;
+    }
+
+    public SelectBuilder distinct(Collection<Field> fields) {
+        this.distinct.addAll(fields);
+        return this;
+    }
+
     public BooleanAccessor retrieve(BooleanField field) {
         BooleanSqlAccessor accessor = new BooleanSqlAccessor();
         fieldToAccessorHolder.put(field, accessor);
@@ -137,13 +174,17 @@ public class SqlQueryBuilder implements SelectBuilder {
         return visitor.get();
     }
 
+    public GlobAccessor retrieve(GlobField field) {
+        throw new RuntimeException("Not Implemented " + field.getFullName());
+    }
+
     private <T extends Accessor, D extends T> SelectBuilder createAccessor(Field field, Ref<T> ref, D accessor) {
         ref.set(accessor);
         fieldToAccessorHolder.put(field, (SqlAccessor) accessor);
         return this;
     }
 
-    private class AccessorToFieldVisitor implements FieldVisitor {
+    private class AccessorToFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
         private Accessor accessor;
 
         public AccessorToFieldVisitor() {

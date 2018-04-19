@@ -22,4 +22,9 @@ public class StringPrettyWriter implements PrettyWriter {
         builder.append("\n");
         return this;
     }
+
+    public PrettyWriter removeLast() {
+        builder.delete(builder.length() - 1, builder.length());
+        return this;
+    }
 }

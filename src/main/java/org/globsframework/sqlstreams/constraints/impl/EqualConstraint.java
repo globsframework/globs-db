@@ -9,8 +9,9 @@ public class EqualConstraint extends BinaryOperandConstraint {
         super(leftOp, rightOp);
     }
 
-    public void visit(ConstraintVisitor constraintVisitor) {
-        constraintVisitor.visitEqual(this);
+    public <T extends ConstraintVisitor> T visit(T visitor) {
+        visitor.visitEqual(this);
+        return visitor;
     }
 
 }

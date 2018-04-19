@@ -1,5 +1,6 @@
 package org.globsframework.sqlstreams.constraints;
 
+import org.globsframework.metamodel.Field;
 import org.globsframework.sqlstreams.constraints.impl.*;
 
 public interface ConstraintVisitor {
@@ -15,9 +16,15 @@ public interface ConstraintVisitor {
 
     void visitBiggerThan(BiggerThanConstraint constraint);
 
-    void visitStricklyBiggerThan(StrictlyBiggerThanConstraint constraint);
+    void visitStrictlyBiggerThan(StrictlyBiggerThanConstraint constraint);
 
-    void visitStricklyLesserThan(StrictlyLesserThanConstraint constraint);
+    void visitStrictlyLesserThan(StrictlyLesserThanConstraint constraint);
 
     void visitIn(InConstraint constraint);
+
+    void visitIsOrNotNull(NullOrNotConstraint constraint);
+
+    void visitNotIn(NotInConstraint constraint);
+
+    void visitContains(Field field, String value, boolean contains);
 }

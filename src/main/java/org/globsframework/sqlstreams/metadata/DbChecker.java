@@ -3,6 +3,8 @@ package org.globsframework.sqlstreams.metadata;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.SqlService;
+import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
+import org.globsframework.sqlstreams.drivers.mongodb.MongoDbConnection;
 import org.globsframework.utils.exceptions.InvalidData;
 
 import java.sql.DatabaseMetaData;
@@ -20,7 +22,7 @@ public class DbChecker {
 
     private static DatabaseMetaData getMetaData(SqlConnection sqlConnection) {
         try {
-            return sqlConnection.getConnection().getMetaData();
+            return ((JdbcConnection) sqlConnection).getConnection().getMetaData();
         } catch (SQLException e) {
             throw new InvalidData(e);
         }

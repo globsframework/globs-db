@@ -112,8 +112,8 @@ public abstract class JdbcConnection implements SqlConnection {
             count++;
         }
         Field[] keyFields = globType.getKeyFields();
-        Field last = keyFields[keyFields.length - 1];
         if (keyFields.length != 0) {
+            Field last = keyFields[keyFields.length - 1];
             writer.append(", PRIMARY KEY (");
             for (Field field : keyFields) {
                 writer.append(sqlService.getColumnName(field))

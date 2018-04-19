@@ -1,7 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
-import org.globsframework.metamodel.DummyObject;
 import org.globsframework.model.KeyBuilder;
+import org.globsframework.model.DummyObject;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.streams.accessors.utils.ValueBlobAccessor;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;

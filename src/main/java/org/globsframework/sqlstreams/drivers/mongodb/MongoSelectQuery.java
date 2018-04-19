@@ -1,6 +1,10 @@
 package org.globsframework.sqlstreams.drivers.mongodb;
 
-import com.mongodb.async.client.MongoCollection;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Sorts;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.globsframework.metamodel.Field;
@@ -9,68 +13,95 @@ import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.drivers.jdbc.AccessorGlobBuilder;
+import org.globsframework.sqlstreams.constraints.Constraint;
+import org.globsframework.sqlstreams.drivers.jdbc.AccessorGlobsBuilder;
 import org.globsframework.streams.GlobStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.TooManyItems;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Spliterators;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Projections.include;
 
 public class MongoSelectQuery implements SelectQuery {
+    public static final Logger LOGGER = LoggerFactory.getLogger(MongoSelectQuery.class);
     private final MongoCollection<Document> collection;
     private final Map<Field, Accessor> fieldsAndAccessor;
     private final Ref<Document> currentDoc;
     private final GlobType globType;
-    private final String requete;
+    private final String request;
+    private String lastFullRequest;
     private SqlService sqlService;
-
+    private Constraint constraint;
+    private final List<MongoSelectBuilder.Order> orders;
+    private final int top;
 
     public MongoSelectQuery(MongoCollection<Document> collection, Map<Field, Accessor> fieldsAndAccessor,
-                            Ref<Document> currentDoc, GlobType globType, SqlService sqlService) {
+                            Ref<Document> currentDoc, GlobType globType, SqlService sqlService, Constraint constraint,
+                            List<MongoSelectBuilder.Order> orders, int top) {
         this.collection = collection;
         this.fieldsAndAccessor = fieldsAndAccessor;
         this.currentDoc = currentDoc;
         this.globType = globType;
-        requete = "select on " + globType.getName();
+        request = "select on " + globType.getName();
         this.sqlService = sqlService;
+        this.constraint = constraint;
+        this.orders = orders;
+        this.top = top;
     }
 
-
-    static final Document END = new Document();
-
-    public Stream<Object> executeAsStream() {
+    public Stream<?> executeAsStream() {
         DocumentsIterator iterator = getDocumentsIterator();
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), true);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 
     private DocumentsIterator getDocumentsIterator() {
-        LinkedBlockingDeque<Document> objects = new LinkedBlockingDeque<>();
+        Bson filter;
+        if (constraint != null) {
+            MongoConstraintVisitor constraintVisitor = new MongoConstraintVisitor(sqlService);
+            constraint.visit(constraintVisitor);
+            filter = constraintVisitor.filter;
+        } else {
+            filter = new Document();
+        }
+
+        lastFullRequest = request + " where " + filter.toBsonDocument(BsonDocument.class, collection.getCodecRegistry());
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Request filter : " + lastFullRequest);
+        }
         Bson include = include(fieldsAndAccessor.keySet()
-                .stream().map(sqlService::getColumnName).collect(Collectors.toList()));
-        collection.find()
+              .stream()
+              .map(sqlService::getColumnName).collect(Collectors.toList()));
+        FindIterable<Document> findIterable = collection.find()
+              .filter(filter);
+        if (!orders.isEmpty()) {
+            List<Bson> bsonOrders = new ArrayList<>();
+            for (MongoSelectBuilder.Order order : orders) {
+                if (order.asc) {
+                    bsonOrders.add(Sorts.ascending(sqlService.getColumnName(order.field)));
+                } else {
+                    bsonOrders.add(Sorts.descending(sqlService.getColumnName(order.field)));
+                }
+            }
+            findIterable.sort(Sorts.orderBy(bsonOrders));
+        }
+        if (top != -1) {
+            findIterable.limit(top);
+        }
+        MongoCursor<Document> iterator = findIterable
                 .projection(include)
-                .forEach(document -> {
-                    if (document != null) {
-                        objects.add(document);
-                    }
-                }, (aVoid, throwable) -> {
-                    if (throwable != null) {
-                        throwable.printStackTrace();
-                    }
-                    objects.add(END);
-                });
-        return new DocumentsIterator(currentDoc, objects);
+              .iterator();
+        return new DocumentsIterator(currentDoc, iterator, lastFullRequest);
     }
 
     public GlobStream execute() {
@@ -93,18 +124,19 @@ public class MongoSelectQuery implements SelectQuery {
             }
 
             public void close() {
-
+                iterator.close();
             }
         };
     }
 
     public GlobList executeAsGlobs() {
         GlobStream globStream = execute();
-        AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(globStream);
+        AccessorGlobsBuilder accessorGlobsBuilder = AccessorGlobsBuilder.init(globStream);
         GlobList result = new GlobList();
         while (globStream.next()) {
-            result.addAll(accessorGlobBuilder.getGlobs());
+            result.addAll(accessorGlobsBuilder.getGlobs());
         }
+        globStream.close();
         return result;
     }
 
@@ -114,9 +146,9 @@ public class MongoSelectQuery implements SelectQuery {
             return globs.get(0);
         }
         if (globs.isEmpty()) {
-            throw new ItemNotFound("No result returned for: " + requete);
+            throw new ItemNotFound("No result returned for: " + lastFullRequest);
         }
-        throw new TooManyItems("Too many results for: " + requete);
+        throw new TooManyItems("Too many results for: " + lastFullRequest);
     }
 
     public void close() {
@@ -124,32 +156,30 @@ public class MongoSelectQuery implements SelectQuery {
 
     private static class DocumentsIterator implements Iterator<Object> {
         private Ref<Document> currentDoc;
-        private final LinkedBlockingDeque<Document> documents;
-        Document current;
+        private MongoCursor<Document> iterator;
+        private String lastFullRequest;
 
-        public DocumentsIterator(Ref<Document> currentDoc, LinkedBlockingDeque<Document> documents) {
+        public DocumentsIterator(Ref<Document> currentDoc, MongoCursor<Document> iterator, String lastFullRequest) {
             this.currentDoc = currentDoc;
-            this.documents = documents;
-            current = null;
+            this.iterator = iterator;
+            this.lastFullRequest = lastFullRequest;
         }
 
         public boolean hasNext() {
-            if (current == END) {
-                currentDoc.set(null);
-                return false;
-            }
-            if (current != null) {
-                return true;
-            }
-            current = documents.poll();
-            return current != END;
+            return iterator.hasNext();
         }
 
         public Object next() {
-            Document current = this.current;
-            this.current = null;
-            currentDoc.set(current);
-            return current;
+            Document next = iterator.next();
+            currentDoc.set(next);
+            return next;
+        }
+
+        public void close() {
+            if (iterator.hasNext()) {
+                LOGGER.warn("All data not read : for " + lastFullRequest);
+            }
         }
     }
+
 }

@@ -25,15 +25,6 @@ public class MysqlConnection extends JdbcConnection {
     protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter) {
         return new SqlFieldCreationVisitor(sqlService, prettyWriter) {
 
-            public void visitString(StringField field) throws Exception {
-                Glob annotation = field.getAnnotation(MaxSizeType.KEY);
-                int maxSize = 255;
-                if (annotation != null) {
-                    maxSize = annotation.get(MaxSizeType.VALUE, 255);
-                }
-                add("VARCHAR(" + maxSize + ")", field);
-            }
-
             public String getAutoIncrementKeyWord() {
                 return "AUTO_INCREMENT";
             }

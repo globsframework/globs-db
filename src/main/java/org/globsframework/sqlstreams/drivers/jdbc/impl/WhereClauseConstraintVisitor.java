@@ -46,11 +46,11 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
         visitBinary(constraint, " >= ");
     }
 
-    public void visitStricklyBiggerThan(StrictlyBiggerThanConstraint constraint) {
+    public void visitStrictlyBiggerThan(StrictlyBiggerThanConstraint constraint) {
         visitBinary(constraint, " > ");
     }
 
-    public void visitStricklyLesserThan(StrictlyLesserThanConstraint constraint) {
+    public void visitStrictlyLesserThan(StrictlyLesserThanConstraint constraint) {
         visitBinary(constraint, " < ");
     }
 
@@ -62,6 +62,34 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
             prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
         }
         prettyWriter.append(")");
+    }
+
+    public void visitIsOrNotNull(NullOrNotConstraint constraint) {
+        visitFieldOperand(constraint.getField());
+        if (constraint.checkNull()) {
+            prettyWriter.append(" IS NULL ");
+        }
+        else {
+            prettyWriter.append(" IS NOT NULL ");
+        }
+    }
+
+    public void visitNotIn(NotInConstraint constraint) {
+        visitFieldOperand(constraint.getField());
+        prettyWriter.append(" NOT IN (");
+        int length = constraint.getValues().size();
+        for (int i = 0; i < length; i++) {
+            prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
+        }
+        prettyWriter.append(")");
+    }
+
+    public void visitContains(Field field, String value, boolean contains) {
+        visitFieldOperand(field);
+        if (!contains) {
+            prettyWriter.append(" NOT ");
+        }
+        prettyWriter.append(" LIKE '%" + value + "%'");
     }
 
     public void visitValueOperand(ValueOperand value) {

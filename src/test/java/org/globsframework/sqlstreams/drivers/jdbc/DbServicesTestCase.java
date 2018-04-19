@@ -2,8 +2,12 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.directory.DefaultDirectory;
 import org.globsframework.directory.Directory;
-import org.globsframework.metamodel.*;
+import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.GlobModel;
+import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
+import org.globsframework.model.DummyObject;
+import org.globsframework.model.DummyObject2;
 import org.globsframework.model.Key;
 import org.globsframework.sqlstreams.*;
 import org.globsframework.sqlstreams.constraints.Constraint;

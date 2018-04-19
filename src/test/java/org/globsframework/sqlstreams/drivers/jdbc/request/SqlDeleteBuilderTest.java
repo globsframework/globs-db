@@ -1,9 +1,9 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
-import org.globsframework.metamodel.DummyObject;
-import org.globsframework.metamodel.DummyObject2;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.model.GlobList;
+import org.globsframework.model.DummyObject;
+import org.globsframework.model.DummyObject2;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
@@ -22,7 +22,7 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);
         sqlConnection.getDeleteRequest(DummyObject.TYPE).run();
-        assertEquals(0, sqlConnection.getQueryBuilder(DummyObject.TYPE).getQuery().executeAsGlobs().size());
+        assertEquals(0, sqlConnection.getQueryBuilder(DummyObject.TYPE).withKeys().getQuery().executeAsGlobs().size());
     }
 
     @Test
@@ -34,9 +34,11 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
                 "<dummyObject2 id='1' label='hello'/>", directory.get(GlobModel.class)));
         Constraint constraint = Constraints.equal(DummyObject.NAME, "hello");
         sqlConnection.getDeleteRequest(DummyObject.TYPE, constraint).run();
-        GlobList globs = sqlConnection.getQueryBuilder(DummyObject.TYPE).getQuery().executeAsGlobs();
+        GlobList globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
+              .withKeys()
+              .getQuery().executeAsGlobs();
         assertEquals(1, globs.size());
         assertEquals(2, globs.get(0).get(DummyObject.ID).intValue());
-        assertEquals(1, sqlConnection.getQueryBuilder(DummyObject2.TYPE).getQuery().executeAsGlobs().size());
+        assertEquals(1, sqlConnection.getQueryBuilder(DummyObject2.TYPE).withKeys().getQuery().executeAsGlobs().size());
     }
 }

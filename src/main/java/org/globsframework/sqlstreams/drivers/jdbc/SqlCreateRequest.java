@@ -104,7 +104,7 @@ public class SqlCreateRequest implements SqlRequest {
         return prepareRequest(fields, globType, new DebugValue());
     }
 
-    private static class DebugValue implements Value, FieldVisitor {
+    private static class DebugValue extends FieldVisitor.AbstractWithErrorVisitor implements Value{
         private Object value;
         private String convertValue;
 
