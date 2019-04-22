@@ -19,18 +19,20 @@ import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.utils.exceptions.GlobsException;
 import org.globsframework.utils.exceptions.OperationDenied;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public abstract class JdbcConnection implements SqlConnection {
+    private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
+
     private Connection connection;
-    protected SqlService sqlService;
+    protected JdbcSqlService sqlService;
     private BlobUpdater blobUpdater;
     private DbChecker checker;
 
-    public JdbcConnection(Connection connection, SqlService sqlService, BlobUpdater blobUpdater) {
+    public JdbcConnection(Connection connection, JdbcSqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;
         this.sqlService = sqlService;
         this.blobUpdater = blobUpdater;
@@ -91,13 +93,7 @@ public abstract class JdbcConnection implements SqlConnection {
         return new SqlCreateBuilder(connection, globType, sqlService, blobUpdater, this);
     }
 
-    public void createTable(GlobType... globTypes) {
-        for (GlobType type : globTypes) {
-            createTable(type);
-        }
-    }
-
-    private void createTable(GlobType globType) {
+    public void createTable(GlobType globType) {
         if (checker.tableExists(globType)) {
             return;
         }
@@ -131,13 +127,7 @@ public abstract class JdbcConnection implements SqlConnection {
         }
     }
 
-    public void emptyTable(GlobType... globTypes) {
-        for (GlobType globType : globTypes) {
-            emptyTable(globType);
-        }
-    }
-
-    private void emptyTable(GlobType globType) {
+    public void emptyTable(GlobType globType) {
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("DELETE FROM ")
                 .append(sqlService.getTableName(globType))
@@ -162,6 +152,10 @@ public abstract class JdbcConnection implements SqlConnection {
             }
             createBuilder.getRequest().run();
         }
+    }
+
+    public SqlService getJdbcSqlService() {
+        return sqlService;
     }
 
     abstract protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter);
@@ -212,5 +206,9 @@ public abstract class JdbcConnection implements SqlConnection {
                 throw ex;
             }
         }
+    }
+
+    public GlobTypeExtractor extractType(String tableName) {
+        return new DefaultGlobTypeExtractor(sqlService, tableName);
     }
 }

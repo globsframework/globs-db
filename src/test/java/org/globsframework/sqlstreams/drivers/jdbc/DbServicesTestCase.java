@@ -6,14 +6,14 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.model.DummyObject;
-import org.globsframework.model.DummyObject2;
+import org.globsframework.sqlstreams.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.model.Key;
 import org.globsframework.sqlstreams.*;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.utils.MultiCreateBuilder;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.junit.After;
 import org.junit.Assert;
@@ -73,12 +73,12 @@ public abstract class DbServicesTestCase {
         }
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(key.getGlobType(), constraint);
         Accessor accessor = queryBuilder.retrieveUnTyped(field);
-        GlobStream globStream = queryBuilder.getQuery().execute();
-        Assert.assertTrue(globStream.next());
+        DbStream dbStream = queryBuilder.getQuery().execute();
+        Assert.assertTrue(dbStream.next());
         return accessor.getObjectValue();
     }
 
-    protected void populate(SqlConnection connection, GlobStream stream) {
+    protected void populate(SqlConnection connection, DbStream stream) {
         Set<GlobType> types = new HashSet<GlobType>();
         for (Field field : stream.getFields()) {
             types.add(field.getGlobType());

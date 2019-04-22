@@ -14,8 +14,8 @@ import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.constraints.Constraint;
-import org.globsframework.sqlstreams.drivers.jdbc.AccessorGlobsBuilder;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.sqlstreams.drivers.jdbc.AccessorGlobBuilder;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.exceptions.ItemNotFound;
@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Projections.include;
 
 public class MongoSelectQuery implements SelectQuery {
@@ -64,6 +62,21 @@ public class MongoSelectQuery implements SelectQuery {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 
+    public Stream<Glob> executeAsGlobStream() {
+        DocumentsIterator iterator = getDocumentsIterator();
+        AccessorGlobBuilder globBuilder = AccessorGlobBuilder.init(fieldsAndAccessor.keySet(), fieldsAndAccessor::get);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Glob>() {
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            public Glob next() {
+                iterator.next();
+                return globBuilder.getGlob();
+            }
+        }, 0), false);
+    }
+
     private DocumentsIterator getDocumentsIterator() {
         Bson filter;
         if (constraint != null) {
@@ -80,10 +93,10 @@ public class MongoSelectQuery implements SelectQuery {
             LOGGER.info("Request filter : " + lastFullRequest);
         }
         Bson include = include(fieldsAndAccessor.keySet()
-              .stream()
-              .map(sqlService::getColumnName).collect(Collectors.toList()));
+                .stream()
+                .map(sqlService::getColumnName).collect(Collectors.toList()));
         FindIterable<Document> findIterable = collection.find()
-              .filter(filter);
+                .filter(filter);
         if (!orders.isEmpty()) {
             List<Bson> bsonOrders = new ArrayList<>();
             for (MongoSelectBuilder.Order order : orders) {
@@ -100,13 +113,13 @@ public class MongoSelectQuery implements SelectQuery {
         }
         MongoCursor<Document> iterator = findIterable
                 .projection(include)
-              .iterator();
+                .iterator();
         return new DocumentsIterator(currentDoc, iterator, lastFullRequest);
     }
 
-    public GlobStream execute() {
+    public DbStream execute() {
         DocumentsIterator iterator = getDocumentsIterator();
-        return new GlobStream() {
+        return new DbStream() {
             public boolean next() {
                 if (iterator.hasNext()) {
                     iterator.next();
@@ -130,13 +143,13 @@ public class MongoSelectQuery implements SelectQuery {
     }
 
     public GlobList executeAsGlobs() {
-        GlobStream globStream = execute();
-        AccessorGlobsBuilder accessorGlobsBuilder = AccessorGlobsBuilder.init(globStream);
+        DbStream dbStream = execute();
+        AccessorGlobBuilder accessorGlobsBuilder = AccessorGlobBuilder.init(dbStream);
         GlobList result = new GlobList();
-        while (globStream.next()) {
-            result.addAll(accessorGlobsBuilder.getGlobs());
+        while (dbStream.next()) {
+            result.add(accessorGlobsBuilder.getGlob());
         }
-        globStream.close();
+        dbStream.close();
         return result;
     }
 

@@ -67,6 +67,11 @@
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
+            <artifactId>globs-gson</artifactId>
+            <version>3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
             <version>3.0</version>
             <scope>test</scope>
@@ -76,6 +81,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.globsframework</groupId>
+            <artifactId>globs-xml</artifactId>
+            <version>3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,6 +105,13 @@
             <artifactId>hsqldb</artifactId>
             <version>1.8.0.7</version>
         </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.6</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>

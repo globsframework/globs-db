@@ -1,9 +1,9 @@
 package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.GlobModel;
-import org.globsframework.model.DummyObject;
-import org.globsframework.model.DummyObject2;
-import org.globsframework.model.GlobChecker;
+import org.globsframework.sqlstreams.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject2;
+import org.globsframework.sqlstreams.model.GlobChecker;
 import org.globsframework.model.GlobRepository;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;

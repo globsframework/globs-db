@@ -103,6 +103,16 @@ public class MongoSelectBuilder implements SelectBuilder {
         return this;
     }
 
+    public SelectBuilder select(GlobField field, Ref<GlobAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
     public SelectBuilder orderAsc(Field field) {
         orders.add(new Order(field, true));
         return this;
@@ -123,6 +133,26 @@ public class MongoSelectBuilder implements SelectBuilder {
         return this;
     }
 
+    @Override
+    public IntegerAccessor max(IntegerField field) {
+        return null;
+    }
+
+    @Override
+    public LongAccessor max(LongField field) {
+        return null;
+    }
+
+    @Override
+    public IntegerAccessor min(IntegerField field) {
+        return null;
+    }
+
+    @Override
+    public LongAccessor min(LongField field) {
+        return null;
+    }
+
     private void completeWithKeys() {
         for (Field field : globType.getKeyFields()) {
             if (!fieldsAndAccessor.containsKey(field)) {
@@ -141,7 +171,7 @@ public class MongoSelectBuilder implements SelectBuilder {
 
     public StringAccessor retrieve(StringField field) {
         return (StringAccessor) fieldsAndAccessor.computeIfAbsent(field, f -> {
-            StringAccessor stringAccessor = (StringAccessor) sqlService.getAdapter(f).getAccessor(currentDoc);
+            StringAccessor stringAccessor = (StringAccessor) sqlService.getAdapter(f).getAccessor(currentDoc, sqlService);
             if (stringAccessor != null) {
                 return stringAccessor;
             }
@@ -184,34 +214,42 @@ public class MongoSelectBuilder implements SelectBuilder {
         return (GlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobMongoAccessor(field, currentDoc, sqlService ));
     }
 
+    public GlobsAccessor retrieve(GlobArrayField field) {
+        return (GlobsAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobsMongoAccessor(field, currentDoc, sqlService ));
+    }
+
     static class MongoFieldVisitor extends FieldVisitorWithContext.AbstractWithErrorVisitor<MongoSelectBuilder> {
         Accessor accessor;
 
-        public void visitInteger(IntegerField field, MongoSelectBuilder builder) throws Exception {
+        public void visitInteger(IntegerField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitDouble(DoubleField field, MongoSelectBuilder builder) throws Exception {
+        public void visitDouble(DoubleField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitString(StringField field, MongoSelectBuilder builder) throws Exception {
+        public void visitString(StringField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitBoolean(BooleanField field, MongoSelectBuilder builder) throws Exception {
+        public void visitBoolean(BooleanField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitLong(LongField field, MongoSelectBuilder builder) throws Exception {
+        public void visitLong(LongField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitBlob(BlobField field, MongoSelectBuilder builder) throws Exception {
+        public void visitBlob(BlobField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
 
-        public void visitGlob(GlobField field, MongoSelectBuilder builder) throws Exception {
+        public void visitGlob(GlobField field, MongoSelectBuilder builder) {
+            accessor = builder.retrieve(field);
+        }
+
+        public void visitGlobArray(GlobArrayField field, MongoSelectBuilder builder) {
             accessor = builder.retrieve(field);
         }
     }

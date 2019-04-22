@@ -3,7 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 import org.globsframework.metamodel.Field;
 import org.globsframework.sqlstreams.accessors.SqlAccessor;
 import org.globsframework.sqlstreams.exceptions.SqlException;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
@@ -15,19 +15,27 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
-public class SqlGlobStream implements GlobStream {
+public class SqlDbStream implements DbStream {
     private ResultSet resultSet;
     private int rowId = 0;
     private Map<Field, SqlAccessor> fieldToAccessorHolder;
+    private List<SqlAccessor> additionalAccessor;
     private SqlSelectQuery query;
 
-    public SqlGlobStream(ResultSet resultSet, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlSelectQuery query) {
+    public SqlDbStream(ResultSet resultSet, Map<Field, SqlAccessor> fieldToAccessorHolder,
+                       List<SqlAccessor>  additionalAccessor,
+                       SqlSelectQuery query) {
         this.resultSet = resultSet;
         this.fieldToAccessorHolder = fieldToAccessorHolder;
+        this.additionalAccessor = additionalAccessor;
         this.query = query;
         for (SqlAccessor sqlAccessor : fieldToAccessorHolder.values()) {
+            sqlAccessor.setMoStream(this);
+        }
+        for (SqlAccessor sqlAccessor : additionalAccessor) {
             sqlAccessor.setMoStream(this);
         }
     }
@@ -65,25 +73,16 @@ public class SqlGlobStream implements GlobStream {
 
     public Double getDouble(int index) {
         try {
-            double aDouble = resultSet.getDouble(index);
-            if (aDouble == 0 && resultSet.wasNull()) {
+            Number number = ((Number) resultSet.getObject(index));
+            if (number == null) {
                 return null;
-            } else {
-                return aDouble;
             }
-        } catch (SQLException ex) {
-            try {
-                Number number = ((Number) resultSet.getObject(index));
-                if (number == null) {
-                    return null;
-                }
-                if (number instanceof Double) {
-                    return (Double) number;
-                }
-                return number.doubleValue();
-            } catch (SQLException e) {
-                throw new UnexpectedApplicationState(e);
+            if (number instanceof Double) {
+                return (Double) number;
             }
+            return number.doubleValue();
+        } catch (SQLException e) {
+            throw new UnexpectedApplicationState(e);
         }
     }
 
@@ -105,19 +104,16 @@ public class SqlGlobStream implements GlobStream {
 
     public Integer getInteger(int index) {
         try {
-//            if (resultSet.wasNull()) {
-//                return null;
-//            }
             Object object = resultSet.getObject(index);
             if (object == null) {
                 return null;
             }
             if (object instanceof Number) {
                 Number number = (Number) object;
-            if (number instanceof Integer) {
-                return (Integer) number;
-            }
-            return number.intValue();
+                if (number instanceof Integer) {
+                    return (Integer) number;
+                }
+                return number.intValue();
             } else if (object instanceof Date) {
                 LocalDateTime ldt = LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
                 return Math.toIntExact(ldt.getLong(ChronoField.EPOCH_DAY));

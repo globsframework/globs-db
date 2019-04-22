@@ -2,12 +2,12 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.model.GlobList;
-import org.globsframework.model.DummyObject;
-import org.globsframework.model.DummyObject2;
+import org.globsframework.sqlstreams.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Test;
 
@@ -17,7 +17,7 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
 
     @Test
     public void testDelete() throws Exception {
-        GlobStream streamToWrite =
+        DbStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);

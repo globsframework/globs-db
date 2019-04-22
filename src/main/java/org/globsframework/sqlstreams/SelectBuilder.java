@@ -29,6 +29,10 @@ public interface SelectBuilder {
 
     SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
 
+    SelectBuilder select(GlobField field, Ref<GlobAccessor> accessor);
+
+    SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor);
+
     SelectBuilder orderAsc(Field field);
 
     SelectBuilder orderDesc(Field field);
@@ -36,6 +40,14 @@ public interface SelectBuilder {
     SelectBuilder top(int n);
 
     SelectBuilder withKeys();
+
+    IntegerAccessor max(IntegerField field);
+
+    LongAccessor max(LongField field);
+
+    IntegerAccessor min(IntegerField field);
+
+    LongAccessor min(LongField field);
 
     IntegerAccessor retrieve(IntegerField field);
 
@@ -49,8 +61,10 @@ public interface SelectBuilder {
 
     BlobAccessor retrieve(BlobField field);
 
-    Accessor retrieveUnTyped(Field field);
-
     GlobAccessor retrieve(GlobField field);
+
+    GlobsAccessor retrieve(GlobArrayField field);
+
+    Accessor retrieveUnTyped(Field field);
 
 }

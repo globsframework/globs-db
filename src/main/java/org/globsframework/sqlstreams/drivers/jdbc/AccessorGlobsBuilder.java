@@ -4,7 +4,7 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.collections.MultiMap;
 import org.globsframework.utils.collections.Pair;
@@ -16,14 +16,14 @@ import java.util.Map;
 public class AccessorGlobsBuilder {
     private MultiMap<GlobType, Pair<Field, Accessor>> accessors = new MultiMap<GlobType, Pair<Field, Accessor>>();
 
-    public AccessorGlobsBuilder(GlobStream globStream) {
-        for (Field field : globStream.getFields()) {
-            accessors.put(field.getGlobType(), new Pair<Field, Accessor>(field, globStream.getAccessor(field)));
+    public AccessorGlobsBuilder(DbStream dbStream) {
+        for (Field field : dbStream.getFields()) {
+            accessors.put(field.getGlobType(), new Pair<Field, Accessor>(field, dbStream.getAccessor(field)));
         }
     }
 
-    public static AccessorGlobsBuilder init(GlobStream globStream) {
-        return new AccessorGlobsBuilder(globStream);
+    public static AccessorGlobsBuilder init(DbStream dbStream) {
+        return new AccessorGlobsBuilder(dbStream);
     }
 
     public List<Glob> getGlobs() {

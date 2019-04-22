@@ -6,7 +6,8 @@ import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.exceptions.DbConstraintViolation;
 import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 
-import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Set;
 
 public interface SqlConnection {
 
@@ -28,11 +29,25 @@ public interface SqlConnection {
 
     void rollbackAndClose();
 
-    void createTable(GlobType... globType);
+    void createTable(GlobType globType);
 
-    void emptyTable(GlobType... globType);
+    void emptyTable(GlobType globType);
 
-    void showDb();
+    GlobTypeExtractor extractType(String tableName);
+
+    default GlobType extractType(String tableName, Set<String> columnToIgnore){
+        return extractType(tableName).columnToIgnore(columnToIgnore).extract();
+    }
 
     void populate(GlobList all);
+
+    SqlService getJdbcSqlService();
+
+    default void createTable(GlobType ...types) {
+        Arrays.stream(types).forEach(this::createTable);
+    }
+
+    default void emptyTable(GlobType ...types) {
+        Arrays.stream(types).forEach(this::createTable);
+    }
 }

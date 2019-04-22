@@ -126,6 +126,16 @@ public class MongoUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
+    public UpdateBuilder update(GlobField field, GlobAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
     public SqlRequest getRequest() {
         return new MongoUpdateSqlRequest(sqlService, mongoDatabase, globType, constraint, fieldsValues, false);
     }

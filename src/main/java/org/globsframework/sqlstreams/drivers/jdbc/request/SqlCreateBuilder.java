@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.SqlRequest;
@@ -122,6 +123,39 @@ public class SqlCreateBuilder implements CreateBuilder {
     public CreateBuilder set(BooleanField field, Boolean value) {
         return setObject(field, new ValueBooleanAccessor(value));
     }
+
+    public CreateBuilder set(GlobField field, Glob value) {
+        return setObject(field, new ValueGlobAccessor(value));
+    }
+
+    public CreateBuilder set(GlobArrayField field, Glob[] values) {
+        return setObject(field, new ValueGlobsAccessor(values));
+    }
+
+    public CreateBuilder set(GlobUnionField field, Glob value) {
+        return setObject(field, new ValueGlobAccessor(value));
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, Glob[] values) {
+        return setObject(field, new ValueGlobsAccessor(values));
+    }
+
+    public CreateBuilder set(GlobField field, GlobAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
+    public CreateBuilder set(GlobArrayField field, GlobsAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
+    public CreateBuilder set(GlobUnionField field, GlobAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
 
     public CreateBuilder set(IntegerField field, Integer value) {
         return setObject(field, new ValueIntegerAccessor(value));

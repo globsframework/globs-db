@@ -2,6 +2,7 @@ package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.streams.accessors.*;
 
 public interface CreateBuilder {
@@ -17,6 +18,14 @@ public interface CreateBuilder {
 
     CreateBuilder set(BooleanField field, Boolean value);
 
+    CreateBuilder set(GlobField field, Glob value);
+
+    CreateBuilder set(GlobArrayField field, Glob[] values);
+
+    CreateBuilder set(GlobUnionField field, Glob value);
+
+    CreateBuilder set(GlobArrayUnionField field, Glob[] values);
+
     CreateBuilder set(IntegerField field, IntegerAccessor accessor);
 
     CreateBuilder set(LongField field, LongAccessor accessor);
@@ -28,6 +37,14 @@ public interface CreateBuilder {
     CreateBuilder set(BooleanField field, BooleanAccessor accessor);
 
     CreateBuilder set(BlobField field, BlobAccessor accessor);
+
+    CreateBuilder set(GlobField field, GlobAccessor accessor);
+
+    CreateBuilder set(GlobArrayField field, GlobsAccessor accessor);
+
+    CreateBuilder set(GlobUnionField field, GlobAccessor accessor);
+
+    CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor);
 
     CreateBuilder setObject(Field field, Accessor accessor);
 

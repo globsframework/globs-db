@@ -3,7 +3,7 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.globsframework.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.constraints.impl.AndConstraint;
@@ -13,8 +13,6 @@ import org.globsframework.sqlstreams.constraints.impl.OrConstraint;
 import org.globsframework.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class JSonConstraintTypeAdapterTest {
 

@@ -52,11 +52,15 @@ public class MongoDbConnection implements SqlConnection {
 
     }
 
-    public void createTable(GlobType... globType) {
+    public GlobTypeExtractor extractType(String tableName) {
         throw new RuntimeException("Not Implemented");
     }
 
-    public void emptyTable(GlobType... globType) {
+    public void createTable(GlobType globType) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    public void emptyTable(GlobType globType) {
         throw new RuntimeException("Not Implemented");
     }
 
@@ -65,6 +69,10 @@ public class MongoDbConnection implements SqlConnection {
 
     public void populate(GlobList all) {
         MongoUtils.fill(all, sqlService);
+    }
+
+    public SqlService getJdbcSqlService() {
+        return sqlService;
     }
 
     public interface IsComplete {

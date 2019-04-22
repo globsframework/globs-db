@@ -2,7 +2,8 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
-import org.globsframework.sqlstreams.SqlConnection;
+import org.globsframework.sqlstreams.annotations.DbFieldName;
+import org.globsframework.sqlstreams.annotations.TargetTypeName;
 import org.globsframework.sqlstreams.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sqlstreams.drivers.mysql.MysqlConnection;
 import org.globsframework.sqlstreams.utils.AbstractSqlService;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class JdbcSqlService extends AbstractSqlService {
-    private static Map<String, Driver> loadedDrivers = new HashMap<String, Driver>();
+    private static Map<String, Driver>  loadedDrivers = new HashMap<String, Driver>();
     private Driver driver;
     private String dbName;
     private Properties dbInfo;
@@ -34,15 +35,7 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public JdbcSqlService(String dbName, String user, String password) {
-        this(dbName, user, password, new NamingMapping() {
-            public String getTableName(GlobType globType) {
-                return AbstractSqlService.toSqlName(globType.getName());
-            }
-
-            public String getColumnName(Field field) {
-                return AbstractSqlService.toSqlName(field.getName());
-            }
-        });
+        this(dbName, user, password, DefaultNamingMapping.INSTANCE);
     }
 
     public interface NamingMapping {
@@ -52,7 +45,7 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     interface DbFactory {
-        SqlConnection create();
+        JdbcConnection create();
     }
 
     public String getTableName(GlobType globType) {
@@ -69,8 +62,19 @@ public class JdbcSqlService extends AbstractSqlService {
                 if (!loadedDrivers.containsKey("hsqldb")) {
                     driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").newInstance();
                 }
+                if (namingMapping == DefaultNamingMapping.INSTANCE) {
+                    namingMapping = new NamingMapping() {
+                        public String getTableName(GlobType globType) {
+                            return TargetTypeName.getOptName(globType).orElse(toSqlName(globType.getName()));
+                        }
+
+                        public String getColumnName(Field field) {
+                            return DbFieldName.getOptName(field).orElse(toSqlName(field.getName()));
+                        }
+                    };
+                }
                 dbFactory = new DbFactory() {
-                    public SqlConnection create() {
+                    public JdbcConnection create() {
                         Connection connection = getConnection();
                         try {
                             connection.setAutoCommit(false);
@@ -85,8 +89,9 @@ public class JdbcSqlService extends AbstractSqlService {
                     driver = (Driver) Class.forName("com.mysql.jdbc.Driver").newInstance();
                 }
 //    dbInfo.put("autoReconnect", Boolean.TRUE);
+                dbInfo.put("zeroDateTimeBehavior", "convertToNull");
                 dbFactory = new DbFactory() {
-                    public SqlConnection create() {
+                    public JdbcConnection create() {
                         Connection connection = getConnection();
                         try {
                             connection.setAutoCommit(false);
@@ -103,7 +108,11 @@ public class JdbcSqlService extends AbstractSqlService {
         }
     }
 
-    public SqlConnection getDb() {
+    public JdbcConnection getDb() {
+        return dbFactory.create();
+    }
+
+    public JdbcConnection getAutoCommitDb() {
         return dbFactory.create();
     }
 
@@ -112,6 +121,18 @@ public class JdbcSqlService extends AbstractSqlService {
             return driver.connect(dbName, dbInfo);
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("for " + dbInfo.get("user") + " on " + dbName, e);
+        }
+    }
+
+    private static class DefaultNamingMapping implements NamingMapping {
+        public static NamingMapping INSTANCE = new DefaultNamingMapping();
+
+        public String getTableName(GlobType globType) {
+            return TargetTypeName.getOptName(globType).orElse(globType.getName());
+        }
+
+        public String getColumnName(Field field) {
+            return DbFieldName.getOptName(field).orElse(field.getName());
         }
     }
 }

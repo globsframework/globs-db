@@ -6,7 +6,6 @@ import org.globsframework.model.GlobRepository;
 import org.globsframework.model.repository.DefaultGlobRepository;
 import org.globsframework.model.repository.GlobIdGenerator;
 import org.globsframework.sqlstreams.constraints.Constraint;
-import org.globsframework.utils.Log;
 import org.globsframework.utils.collections.T3uples;
 import org.globsframework.utils.exceptions.InvalidParameter;
 
@@ -24,7 +23,6 @@ public class SqlGlobRepositoryBuilder {
 
     public void add(Constraint constraint, Field... fields) {
         if (fields.length <= 0) {
-            Log.write("No field added to SqlGlobRepositoryBuilder");
             return;
         }
         T3uples<Constraint, GlobType, Field[]> t3uples =

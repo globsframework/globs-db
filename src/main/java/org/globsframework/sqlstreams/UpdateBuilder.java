@@ -34,6 +34,10 @@ public interface UpdateBuilder {
 
     UpdateBuilder update(BlobField field, BlobAccessor accessor);
 
+    UpdateBuilder update(GlobField field, GlobAccessor accessor);
+
+    UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor);
+
     SqlRequest getRequest();
 
     BulkDbRequest getBulkRequest();

@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.utils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.SqlConnection;
@@ -81,6 +82,46 @@ public class MultiCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(BlobField field, BlobAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobField field, Glob value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayField field, Glob[] values) {
+        createBuilders.get(field.getGlobType()).set(field, values);
+        return this;
+    }
+
+    public CreateBuilder set(GlobField field, GlobAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayField field, GlobsAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobUnionField field, Glob value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, Glob[] values) {
+        createBuilders.get(field.getGlobType()).set(field, values);
+        return this;
+    }
+
+    public CreateBuilder set(GlobUnionField field, GlobAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor) {
         createBuilders.get(field.getGlobType()).set(field, accessor);
         return this;
     }

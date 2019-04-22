@@ -2,18 +2,18 @@ package org.globsframework.sqlstreams;
 
 import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.TooManyItems;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface SelectQuery extends AutoCloseable {
     Stream<?> executeAsStream();
 
-    GlobStream execute();
+    Stream<Glob> executeAsGlobStream();
+
+    DbStream execute();
 
     GlobList executeAsGlobs();
 

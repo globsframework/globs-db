@@ -67,7 +67,7 @@ class MongoUpdateSqlRequest implements BulkDbRequest {
         for (Pair<MongoDbService.UpdateAdapter, Accessor> fieldsValue : fieldsValues) {
             Object objectValue = fieldsValue.getSecond().getObjectValue();
             if (objectValue != null) {
-                updates.add(fieldsValue.getFirst().update(objectValue));
+                updates.add(fieldsValue.getFirst().update(objectValue, sqlService));
             }
         }
         Bson combine = Updates.combine(updates);

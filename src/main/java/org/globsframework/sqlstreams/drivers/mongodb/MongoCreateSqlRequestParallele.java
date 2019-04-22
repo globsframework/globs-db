@@ -47,7 +47,7 @@ class MongoCreateSqlRequestParallele implements BulkDbRequest {
             Object objectValue = fieldAccessorEntry.getSecond().getObjectValue();
             MongoDbService.UpdateAdapter first = fieldAccessorEntry.getFirst();
             if (objectValue != null) {
-                first.create(objectValue, doc);
+                first.create(objectValue, doc, sqlService);
             }
         }
 

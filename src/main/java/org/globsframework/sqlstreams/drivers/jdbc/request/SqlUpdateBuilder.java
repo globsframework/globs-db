@@ -37,27 +37,27 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public UpdateBuilder updateUntyped(Field field, final Object value) {
         field.safeVisit(new FieldVisitor.AbstractWithErrorVisitor() {
-            public void visitInteger(IntegerField field) throws Exception {
+            public void visitInteger(IntegerField field) {
                 update(field, (Integer) value);
             }
 
-            public void visitLong(LongField field) throws Exception {
+            public void visitLong(LongField field) {
                 update(field, (Long) value);
             }
 
-            public void visitDouble(DoubleField field) throws Exception {
+            public void visitDouble(DoubleField field) {
                 update(field, (Double) value);
             }
 
-            public void visitString(StringField field) throws Exception {
+            public void visitString(StringField field) {
                 update(field, (String) value);
             }
 
-            public void visitBoolean(BooleanField field) throws Exception {
+            public void visitBoolean(BooleanField field) {
                 update(field, (Boolean) value);
             }
 
-            public void visitBlob(BlobField field) throws Exception {
+            public void visitBlob(BlobField field) {
                 update(field, (byte[]) value);
             }
 
@@ -120,6 +120,16 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(BlobField field, BlobAccessor accessor) {
+        values.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(GlobField field, GlobAccessor accessor) {
+        values.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor) {
         values.put(field, accessor);
         return this;
     }

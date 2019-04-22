@@ -1,10 +1,14 @@
 package org.globsframework.sqlstreams.drivers.jdbc.impl;
 
+import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
+import org.globsframework.sqlstreams.annotations.IsDate;
+import org.globsframework.sqlstreams.annotations.IsDateTime;
+import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 
-import java.sql.PreparedStatement;
-import java.sql.Types;
+import java.sql.*;
 
 public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private PreparedStatement preparedStatement;
@@ -23,18 +27,46 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
     }
 
     public void visitInteger(IntegerField field) throws Exception {
-        if (value == null) {
-            preparedStatement.setNull(index, Types.INTEGER);
+        if (field.hasAnnotation(IsDate.KEY)) {
+            if (value == null) {
+                preparedStatement.setNull(index, Types.DATE);
+            } else {
+                preparedStatement.setDate(index, new Date(((Integer) value) * 24L * 3600L * 1000L));
+            }
         } else {
-            preparedStatement.setInt(index, (Integer) value);
+            if (value == null) {
+                preparedStatement.setNull(index, Types.INTEGER);
+            } else {
+                preparedStatement.setInt(index, (Integer) value);
+            }
         }
     }
 
     public void visitLong(LongField field) throws Exception {
-        if (value == null) {
-            preparedStatement.setNull(index, Types.BIGINT);
+        if (field.hasAnnotation(IsDate.KEY)) {
+            if (value == null) {
+                preparedStatement.setNull(index, Types.DATE);
+            } else {
+                preparedStatement.setDate(index, new Date(((Integer) value) * 24L * 3600L * 1000L));
+            }
+        } else if (field.hasAnnotation(IsDateTime.KEY)) {
+            if (value == null) {
+                preparedStatement.setNull(index, Types.TIMESTAMP);
+            } else {
+                preparedStatement.setTimestamp(index, new Timestamp((Long) value));
+            }
+        } else if (field.hasAnnotation(IsTimestamp.KEY)) {
+            if (value == null) {
+                preparedStatement.setNull(index, Types.TIMESTAMP);
+            } else {
+                preparedStatement.setTimestamp(index, new Timestamp((Long) value));
+            }
         } else {
-            preparedStatement.setLong(index, (Long) value);
+            if (value == null) {
+                preparedStatement.setNull(index, Types.BIGINT);
+            } else {
+                preparedStatement.setLong(index, (Long) value);
+            }
         }
     }
 
@@ -59,6 +91,38 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
             preparedStatement.setNull(index, Types.BOOLEAN);
         } else {
             preparedStatement.setBoolean(index, (Boolean) value);
+        }
+    }
+
+    public void visitGlob(GlobField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, GSonUtils.encode((Glob) this.value, true));
+        }
+    }
+
+    public void visitGlobArray(GlobArrayField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, GSonUtils.encode((Glob[]) value, true));
+        }
+    }
+
+    public void visitUnionGlob(GlobUnionField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, GSonUtils.encode((Glob) this.value, true));
+        }
+    }
+
+    public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, GSonUtils.encode((Glob[]) value, true));
         }
     }
 

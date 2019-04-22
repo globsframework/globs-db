@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams.accessors;
 
-import org.globsframework.sqlstreams.drivers.jdbc.SqlGlobStream;
+import org.globsframework.sqlstreams.drivers.jdbc.SqlDbStream;
 import org.globsframework.streams.accessors.BooleanAccessor;
 
 public class BooleanSqlAccessor extends SqlAccessor implements BooleanAccessor {
@@ -9,7 +9,7 @@ public class BooleanSqlAccessor extends SqlAccessor implements BooleanAccessor {
     private int rowId;
 
     public Boolean getBoolean() {
-        SqlGlobStream moStream = getSqlMoStream();
+        SqlDbStream moStream = getSqlMoStream();
         if (moStream.getCurrentRowId() == rowId) {
             return cachedValue;
         } else {

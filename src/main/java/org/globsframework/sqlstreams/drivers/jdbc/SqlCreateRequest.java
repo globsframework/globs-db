@@ -1,8 +1,10 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
+import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.GeneratedKeyAccessor;
@@ -86,7 +88,6 @@ public class SqlCreateRequest implements SqlRequest {
             if (generatedKeyAccessor != null) {
                 generatedKeyAccessor.setResult(preparedStatement.getGeneratedKeys());
             }
-//      Log.write(getDebugRequest());
         } catch (SQLException e) {
             throw jdbcConnection.getTypedException(getDebugRequest(), e);
         }
@@ -118,29 +119,44 @@ public class SqlCreateRequest implements SqlRequest {
             return convertValue;
         }
 
-        public void visitInteger(IntegerField field) throws Exception {
+        public void visitInteger(IntegerField field) {
             convertValue = value.toString();
         }
 
-        public void visitDouble(DoubleField field) throws Exception {
+        public void visitDouble(DoubleField field) {
             convertValue = value.toString();
         }
 
-        public void visitString(StringField field) throws Exception {
+        public void visitString(StringField field) {
             convertValue = "'" + value.toString() + "'";
         }
 
-        public void visitBoolean(BooleanField field) throws Exception {
+        public void visitBoolean(BooleanField field) {
             convertValue = value.toString();
         }
 
-        public void visitBlob(BlobField field) throws Exception {
+        public void visitBlob(BlobField field) {
             convertValue = "'" + value.toString() + "'";
         }
 
-        public void visitLong(LongField field) throws Exception {
+        public void visitLong(LongField field) {
             convertValue = value.toString();
         }
 
+        public void visitGlob(GlobField field) {
+            convertValue = GSonUtils.encode((Glob) value, true);
+        }
+
+        public void visitGlobArray(GlobArrayField field) {
+            convertValue = GSonUtils.encode((Glob[]) value, true);
+        }
+
+        public void visitUnionGlob(GlobUnionField field) throws Exception {
+            convertValue = GSonUtils.encode((Glob) value, true);
+        }
+
+        public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
+            convertValue = GSonUtils.encode((Glob[]) value, true);
+        }
     }
 }

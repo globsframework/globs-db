@@ -10,6 +10,8 @@ import org.globsframework.model.Glob;
 import org.globsframework.model.Key;
 import org.globsframework.sqlstreams.annotations.typed.TargetTypeNameAnnotation;
 
+import java.util.Optional;
+
 public class TargetTypeName {
     public static GlobType TYPE;
 
@@ -33,6 +35,10 @@ public class TargetTypeName {
 
     public static String getName(GlobType type) {
         return type.hasAnnotation(UNIQUE_KEY) ? type.getAnnotation(UNIQUE_KEY).get(NAME) : type.getName();
+    }
+
+    public static Optional<String> getOptName(GlobType type) {
+        return type.hasAnnotation(UNIQUE_KEY) ? Optional.of(type.getAnnotation(UNIQUE_KEY).get(NAME)) : Optional.empty();
     }
 
     public static Glob create(String typeName) {

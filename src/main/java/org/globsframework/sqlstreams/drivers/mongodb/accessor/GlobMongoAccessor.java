@@ -1,15 +1,11 @@
 package org.globsframework.sqlstreams.drivers.mongodb.accessor;
 
 import org.bson.Document;
-import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.fields.GlobField;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.drivers.mongodb.MongoDbService;
-import org.globsframework.streams.accessors.BlobAccessor;
 import org.globsframework.streams.accessors.GlobAccessor;
 import org.globsframework.utils.Ref;
-
-import java.util.Base64;
 
 public class GlobMongoAccessor implements GlobAccessor {
     private GlobField field;
@@ -23,7 +19,17 @@ public class GlobMongoAccessor implements GlobAccessor {
     }
 
     public Glob getGlob() {
-        return mongoDbService.fromDocument(field.getType(), currentDoc.get());
+        Document document = currentDoc.get();
+        Object o = document.get(mongoDbService.getRootName(field));
+        if (o instanceof Document) {
+            return mongoDbService.fromDocument(field.getType(), (Document) o);
+        } else {
+            if (o == null) {
+                return null;
+            } else {
+                throw new RuntimeException("A document[] was expected but got " + o.getClass());
+            }
+        }
     }
 
     public Object getObjectValue() {

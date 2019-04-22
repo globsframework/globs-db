@@ -5,29 +5,35 @@ import com.github.fakemongo.junit.FongoRule;
 import com.mongodb.Block;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoader;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.annotations.Target;
-import org.globsframework.metamodel.fields.DoubleField;
-import org.globsframework.metamodel.fields.GlobField;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.metamodel.fields.*;
 import org.globsframework.metamodel.index.MultiFieldUniqueIndex;
+import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.model.KeyBuilder;
+import org.globsframework.model.MutableGlob;
+import org.globsframework.model.format.GlobPrinter;
 import org.globsframework.model.repository.DefaultGlobRepository;
+import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.annotations.typed.TypedDbRef;
 import org.globsframework.sqlstreams.annotations.typed.TypedIsDbKey;
 import org.globsframework.sqlstreams.constraints.Constraints;
+import org.globsframework.sqlstreams.drivers.jdbc.SqlSelectQueryTest;
+import org.globsframework.streams.accessors.GlobAccessor;
+import org.globsframework.streams.accessors.GlobsAccessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.Utils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.globsframework.sqlstreams.drivers.mongodb.MongoSelectTest.DummyObject.*;
@@ -229,7 +235,6 @@ public class MongoSelectTest {
         }
     }
 
-
     private class InitDb {
         private com.mongodb.client.MongoDatabase database;
         private MongoDbService sqlService;
@@ -274,7 +279,7 @@ public class MongoSelectTest {
         }
     }
 
-    static public class InnerObject {
+    public static class ValueType {
         public static GlobType TYPE;
 
         public static IntegerField DATE;
@@ -282,10 +287,60 @@ public class MongoSelectTest {
         public static DoubleField VALUE;
 
         static {
-            GlobTypeLoader globTypeLoader = GlobTypeLoaderFactory.create(InnerObject.class)
-                    .load();
+            GlobTypeLoaderFactory.create(ValueType.class).load();
         }
     }
 
+    public static class GlobWithGlobType {
+        public static GlobType TYPE;
 
+        @KeyField
+        public static StringField ID;
+
+        @Target(ValueType.class)
+        public static GlobField VALUE;
+
+        @Target(ValueType.class)
+        public static GlobArrayField VALUES;
+
+        static {
+            GlobTypeLoaderFactory.create(GlobWithGlobType.class).load();
+        }
+    }
+
+    @Test
+    public void checkGlobAreRetrieved() {
+        MongoDatabase database = fongoRule.getDatabase();
+        MongoDbService sqlService = new MongoDbService(database, new MongoDbService.DefaultUpdateAdapterFactory());
+        SqlConnection db = sqlService.getDb();
+        MutableGlob val1 = ValueType.TYPE.instantiate().set(ValueType.DATE, 1).set(ValueType.VALUE, 3.14);
+        MutableGlob val2 = ValueType.TYPE.instantiate().set(ValueType.DATE, 2).set(ValueType.VALUE, 6.28);
+        db.getCreateBuilder(GlobWithGlobType.TYPE)
+                .set(GlobWithGlobType.ID, new ObjectId().toHexString())
+                .set(GlobWithGlobType.VALUE, val1)
+                .set(GlobWithGlobType.VALUES, new Glob[]{val1, val2})
+                .getRequest().run();
+
+        SelectBuilder queryBuilder = db.getQueryBuilder(GlobWithGlobType.TYPE);
+        GlobAccessor globAccessor = queryBuilder.retrieve(GlobWithGlobType.VALUE);
+        GlobsAccessor globsAccessor = queryBuilder.retrieve(GlobWithGlobType.VALUES);
+
+        GlobList globs = queryBuilder.getQuery().executeAsGlobs();
+        Assert.assertEquals(1, globs.size());
+        Assert.assertEquals(globAccessor.getGlob(), val1);
+
+        Assert.assertTrue(Arrays.equals(globsAccessor.getGlobs(), new Glob[]{val1, val2}));
+
+        String s = GlobPrinter.toString(globs.get(0));
+        Assert.assertEquals("id=null\n" +
+                "value=[\n" +
+                "  date=1\n" +
+                "  value=3.14]\n" +
+                "values=[  [\n" +
+                "    date=1\n" +
+                "    value=3.14],\n" +
+                "  [\n" +
+                "    date=2\n" +
+                "    value=6.28]  ]\n", s);
+    }
 }

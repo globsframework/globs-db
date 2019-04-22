@@ -21,7 +21,10 @@ public abstract class AbstractSqlService implements SqlService {
 //    }
 
     public static String toSqlName(String name) {
-        String upper = Strings.toNiceUpperCase(name);
+        return replaceReserved(Strings.toNiceUpperCase(name));
+    }
+
+    public static String replaceReserved(String upper) {
         for (String keyword : RESERVED_KEYWORDS) {
             if (upper.equals(keyword)) {
                 return "_" + upper + "_";

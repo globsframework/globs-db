@@ -1,7 +1,11 @@
-package org.globsframework.model;
+package org.globsframework.sqlstreams.model;
 
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.model.ChangeSet;
+import org.globsframework.model.GlobList;
+import org.globsframework.model.GlobRepository;
+import org.globsframework.model.GlobRepositoryBuilder;
 import org.globsframework.xml.tests.XmlComparisonMode;
 
 public class GlobChecker {

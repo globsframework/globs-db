@@ -7,6 +7,8 @@ public interface SqlService {
 
     SqlConnection getDb();
 
+    SqlConnection getAutoCommitDb();
+
     String getTableName(GlobType globType);
 
     String getColumnName(Field field);

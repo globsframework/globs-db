@@ -3,24 +3,27 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.model.Key;
 import org.globsframework.model.KeyBuilder;
-import org.globsframework.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.UpdateBuilder;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.constraints.impl.KeyConstraint;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.utils.ValueDoubleAccessor;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+
 public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
     @Test
     public void testUpdate() throws Exception {
-        GlobStream streamToWrite =
+        DbStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true' password='zerzer'/>" +
                                 "<dummyObject id='2' name='hello' value='0.0' present='true' password='gzsefd'/>", directory.get(GlobModel.class));
@@ -29,7 +32,10 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         ValueIntegerAccessor keyValue = new ValueIntegerAccessor();
         UpdateBuilder updateBuilder = sqlConnection.getUpdateBuilder(DummyObject.TYPE, Constraints.equal(DummyObject.ID, keyValue));
 
-        updateBuilder.update(DummyObject.DATE, 19991201);
+        int nbDays = (int) LocalDate.parse("2017-12-03").getLong(ChronoField.EPOCH_DAY);
+        updateBuilder.update(DummyObject.DATE, nbDays);
+
+        updateBuilder.update(DummyObject.CREATED_AT, 123321L);
 
         ValueDoubleAccessor valueAccessor = new ValueDoubleAccessor(2.2);
         updateBuilder.updateUntyped(DummyObject.VALUE, valueAccessor);
@@ -40,7 +46,8 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
         keyValue.setValue(1);
         updateRequest.run();
-        checkDb(key1, DummyObject.DATE, 19991201, sqlConnection);
+        checkDb(key1, DummyObject.DATE, nbDays, sqlConnection);
+        checkDb(key1, DummyObject.CREATED_AT, 123321L, sqlConnection);
         checkDb(key1, DummyObject.VALUE, 2.2, sqlConnection);
         Assert.assertEquals(new String((byte[]) getNextValue(key1, sqlConnection, DummyObject.PASSWORD)), "some blog");
 
@@ -56,7 +63,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
     @Test
     public void testUpdateWithKey() throws Exception {
-        GlobStream streamToWrite =
+        DbStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
                                 "<dummyObject id='2' name='hello' value='0.0' present='true'/>", directory.get(GlobModel.class));

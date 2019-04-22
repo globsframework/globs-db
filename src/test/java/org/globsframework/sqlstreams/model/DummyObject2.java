@@ -1,4 +1,4 @@
-package org.globsframework.model;
+package org.globsframework.sqlstreams.model;
 
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;

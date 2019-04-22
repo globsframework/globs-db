@@ -4,54 +4,60 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.streams.GlobStream;
+import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
-import org.globsframework.utils.collections.MultiMap;
+import org.globsframework.utils.Check;
 import org.globsframework.utils.collections.Pair;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class AccessorGlobBuilder {
-    private final GlobType type;
-    private List<Pair<Field, Accessor>> accessors = new ArrayList<>();
+    private Field[] fields;
+    private Accessor[] accessors;
+    private GlobType globType = null;
 
-    public AccessorGlobBuilder(GlobStream globStream) {
-        this(globStream, null);
+    private AccessorGlobBuilder(DbStream dbStream) {
+        this(dbStream.getFields(), dbStream::getAccessor);
     }
 
-    public AccessorGlobBuilder(GlobStream globStream, GlobType globType) {
-        for (Field field : globStream.getFields()) {
-            if (globType == null) {
-                globType = field.getGlobType();
-            } else if (globType != field.getGlobType()) {
-                throw new RuntimeException("Multiple type " + globType.getName() + " and " + field.getGlobType().getName());
+    private AccessorGlobBuilder(Collection<Field> fields, FieldAccessor fieldAccessor) {
+        this.fields = new Field[fields.size()];
+        this.accessors = new Accessor[fields.size()];
+        int i = 0;
+        for (Field field : fields) {
+            GlobType type = field.getGlobType();
+            if (globType != null && type != globType) {
+                throw new RuntimeException("Different globType in same stream " + type.getName() + " and " + globType.getName());
             }
-            accessors.add(new Pair<>(field, getAccessor(globStream, field)));
+            globType = type;
+            this.fields[i] = field;
+            this.accessors[i] = Check.requireNonNull(fieldAccessor.get(field), field);
+            ++i;
         }
-        if (globType == null) {
-            throw new RuntimeException("No field selected");
+    }
+
+    public interface FieldAccessor {
+        Accessor get(Field field);
+    }
+
+    public static AccessorGlobBuilder init(Collection<Field> fields, FieldAccessor fieldAccessor) {
+        return new AccessorGlobBuilder(fields, fieldAccessor);
+    }
+
+    public static AccessorGlobBuilder init(DbStream dbStream) {
+        return new AccessorGlobBuilder(dbStream);
+    }
+
+    public Glob getGlob() {
+        MutableGlob mutableGlob = globType.instantiate();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            Accessor accessor = accessors[i];
+            mutableGlob.setValue(field, accessor.getObjectValue());
         }
-        type = globType;
-    }
-
-    public Accessor getAccessor(GlobStream globStream, Field field) {
-        return globStream.getAccessor(field);
-    }
-
-    public static AccessorGlobBuilder init(GlobStream globStream) {
-        return new AccessorGlobBuilder(globStream, null);
-    }
-
-    public static AccessorGlobBuilder init(GlobStream globStream, GlobType globType) {
-        return new AccessorGlobBuilder(globStream, globType);
-    }
-
-    public MutableGlob getGlob() {
-        MutableGlob defaultGlob = type.instantiate();
-        for (Pair<Field, Accessor> pair : accessors) {
-                defaultGlob.setValue(pair.getFirst(), pair.getSecond().getObjectValue());
-            }
-        return defaultGlob;
+        return mutableGlob;
     }
 }

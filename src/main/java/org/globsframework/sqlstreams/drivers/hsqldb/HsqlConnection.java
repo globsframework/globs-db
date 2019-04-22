@@ -1,9 +1,10 @@
 package org.globsframework.sqlstreams.drivers.hsqldb;
 
-import org.globsframework.metamodel.fields.BlobField;
+import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
+import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.hsqldb.jdbc.jdbcBlob;
@@ -14,7 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class HsqlConnection extends JdbcConnection {
-    public HsqlConnection(Connection connection, SqlService sqlService) {
+    public HsqlConnection(Connection connection, JdbcSqlService sqlService) {
         super(connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBlob(index, new jdbcBlob(bytes));
@@ -28,8 +29,24 @@ public class HsqlConnection extends JdbcConnection {
                 return "IDENTITY";
             }
 
-            public void visitBlob(BlobField field) throws Exception {
+            public void visitBlob(BlobField field) {
                 add("LONGVARBINARY", field);
+            }
+
+            public void visitGlob(GlobField field) {
+                add("LONGVARCHAR", field);
+            }
+
+            public void visitGlobArray(GlobArrayField field) {
+                add("LONGVARCHAR", field);
+            }
+
+            public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
+                add("LONGVARCHAR", field);
+            }
+
+            public void visitUnionGlob(GlobUnionField field) throws Exception {
+                add("LONGVARCHAR", field);
             }
         };
     }

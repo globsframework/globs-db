@@ -1,11 +1,8 @@
 package org.globsframework.sqlstreams.drivers.mysql;
 
-import org.globsframework.metamodel.annotations.MaxSizeType;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
+import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 
@@ -14,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class MysqlConnection extends JdbcConnection {
-    public MysqlConnection(Connection connection, SqlService sqlService) {
+    public MysqlConnection(Connection connection, JdbcSqlService sqlService) {
         super(connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBytes(index, bytes);

@@ -4,6 +4,7 @@ import com.mongodb.client.MongoDatabase;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.SqlRequest;
@@ -81,6 +82,45 @@ public class MongoCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(BlobField field, BlobAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobField field, Glob value) {
+        fieldsValues.put(field, new ValueGlobAccessor(value));
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayField field, Glob[] values) {
+        fieldsValues.put(field, new ValueGlobsAccessor(values));
+        return this;
+    }
+
+    public CreateBuilder set(GlobField field, GlobAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayField field, GlobsAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+    public CreateBuilder set(GlobUnionField field, Glob value) {
+        fieldsValues.put(field, new ValueGlobAccessor(value));
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, Glob[] values) {
+        fieldsValues.put(field, new ValueGlobsAccessor(values));
+        return this;
+    }
+
+    public CreateBuilder set(GlobUnionField field, GlobAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor) {
         fieldsValues.put(field, accessor);
         return this;
     }

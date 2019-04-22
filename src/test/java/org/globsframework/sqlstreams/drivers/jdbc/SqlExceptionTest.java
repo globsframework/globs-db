@@ -1,7 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.model.Glob;
-import org.globsframework.model.DummyObject;
+import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.constraints.Constraints;

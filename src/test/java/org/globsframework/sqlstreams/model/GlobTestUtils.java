@@ -1,8 +1,9 @@
-package org.globsframework.model;
+package org.globsframework.sqlstreams.model;
 
 import junit.framework.AssertionFailedError;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.model.*;
 import org.globsframework.utils.exceptions.InvalidParameter;
 import org.globsframework.xml.XmlChangeSetWriter;
 import org.globsframework.xml.XmlGlobParser;

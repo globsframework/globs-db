@@ -6,6 +6,9 @@ import org.globsframework.metamodel.annotations.MaxSizeType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SqlService;
+import org.globsframework.sqlstreams.annotations.IsDate;
+import org.globsframework.sqlstreams.annotations.IsDateTime;
+import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 
 public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithErrorVisitor {
@@ -24,11 +27,23 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     public void visitInteger(IntegerField field) throws Exception {
-        add("INTEGER", field);
+        if (field.hasAnnotation(IsDate.KEY)) {
+            add("DATE",field);
+        } else {
+            add("INTEGER", field);
+        }
     }
 
     public void visitLong(LongField field) throws Exception {
-        add("BIGINT", field);
+        if (field.hasAnnotation(IsDate.KEY)) {
+            add("DATE",field);
+        } else if (field.hasAnnotation(IsDateTime.KEY)) {
+            add("DATETIME", field);
+        } else if (field.hasAnnotation(IsTimestamp.KEY)) {
+            add("TIMESTAMP", field);
+        } else {
+            add("BIGINT", field);
+        }
     }
 
     public void visitDouble(DoubleField field) throws Exception {
@@ -50,6 +65,22 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     public void visitBlob(BlobField field) throws Exception {
         add("BLOB", field);
+    }
+
+    public void visitGlob(GlobField field) throws Exception {
+        add("LONGTEXT", field);
+    }
+
+    public void visitGlobArray(GlobArrayField field) throws Exception {
+        add("LONGTEXT", field);
+    }
+
+    public void visitUnionGlob(GlobUnionField field) throws Exception {
+        add("LONGTEXT", field);
+    }
+
+    public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
+        add("LONGTEXT", field);
     }
 
     protected void add(String param, Field field) {

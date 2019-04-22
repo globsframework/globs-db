@@ -1,4 +1,4 @@
-package org.globsframework.model;
+package org.globsframework.sqlstreams.model;
 
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoader;
@@ -8,6 +8,8 @@ import org.globsframework.metamodel.annotations.*;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.metamodel.index.NotUniqueIndex;
 import org.globsframework.metamodel.links.DirectLink;
+import org.globsframework.sqlstreams.annotations.typed.TypedIsDate;
+import org.globsframework.sqlstreams.annotations.typed.TypedIsDateTime;
 
 public class DummyObject {
 
@@ -23,7 +25,13 @@ public class DummyObject {
     public static DoubleField VALUE;
     public static IntegerField COUNT;
     public static BooleanField PRESENT;
+
+    @TypedIsDate
     public static IntegerField DATE;
+
+    @TypedIsDateTime
+    public static LongField CREATED_AT;
+
     public static BlobField PASSWORD;
 
     @ContainmentLink

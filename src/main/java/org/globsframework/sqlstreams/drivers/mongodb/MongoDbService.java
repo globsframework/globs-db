@@ -2,8 +2,6 @@ package org.globsframework.sqlstreams.drivers.mongodb;
 
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Updates;
-import org.bson.BsonReader;
-import org.bson.BsonType;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -18,12 +16,16 @@ import org.globsframework.sqlstreams.drivers.mongodb.accessor.KeyStringMongoAcce
 import org.globsframework.sqlstreams.utils.AbstractSqlService;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.streams.accessors.GlobAccessor;
+import org.globsframework.streams.accessors.GlobsAccessor;
 import org.globsframework.utils.Ref;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 import static org.globsframework.sqlstreams.drivers.mongodb.MongoUtils.getDbName;
 
@@ -48,10 +50,13 @@ public class MongoDbService extends AbstractSqlService {
         return new MongoDbConnection(database, this);
     }
 
+    public SqlConnection getAutoCommitDb() {
+        return new MongoDbConnection(database, this);
+    }
+
     public String getColumnName(Field field) {
         return updateAdapterFactory.getMongoFieldName(field);
     }
-
 
     public String getRootName(Field field) {
         return updateAdapterFactory.getRootName(field);
@@ -62,7 +67,12 @@ public class MongoDbService extends AbstractSqlService {
     }
 
     public UpdateAdapter getAdapter(Field field) {
-        return adapter.computeIfAbsent(field, updateAdapterFactory::get);
+        Function<Field, UpdateAdapter> get = this::createAdapter;
+        return adapter.computeIfAbsent(field, get);
+    }
+
+    private UpdateAdapter createAdapter(Field field) {
+        return updateAdapterFactory.get(field, this);
     }
 
     interface UpdateAdapterFactory {
@@ -71,7 +81,7 @@ public class MongoDbService extends AbstractSqlService {
 
         String getRootName(Field field);
 
-        UpdateAdapter get(Field field);
+        UpdateAdapter get(Field field, MongoDbService mongoDbService);
     }
 
     static public class DefaultUpdateAdapterFactory implements UpdateAdapterFactory {
@@ -84,9 +94,15 @@ public class MongoDbService extends AbstractSqlService {
             return getMongoFieldName(field);
         }
 
-        public UpdateAdapter get(Field field) {
+        public UpdateAdapter get(Field field, MongoDbService mongoDbService) {
             if (field.hasAnnotation(IsDbKey.KEY) || (field.isKeyField() && field.getGlobType().getKeyFields().length == 1 && field.getGlobType().findFieldWithAnnotation(IsDbKey.KEY) == null)) {
                 return new IdUpdateAdapter(field);
+            }
+            if (field instanceof GlobField) {
+                return new GlobUpdater(field, this);
+            }
+            if (field instanceof GlobArrayField) {
+                return new GlobArrayUpdater(field, this);
             } else {
                 return new DefaultUpdater(field, this);
             }
@@ -99,15 +115,15 @@ public class MongoDbService extends AbstractSqlService {
                 this.field = field;
             }
 
-            public void create(Object value, Document document) {
+            public void create(Object value, Document document, MongoDbService sqlService) {
                 document.put(ID_FIELD_NAME, new ObjectId((String) value));
             }
 
-            public Bson update(Object value) {
+            public Bson update(Object value, MongoDbService sqlService) {
                 throw new RuntimeException("Call to update on id filed not expected for " + field.getFullName());
             }
 
-            public Accessor getAccessor(Ref<Document> currentDoc) {
+            public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
                 return new KeyStringMongoAccessor(ID_FIELD_NAME, currentDoc);
             }
 
@@ -119,11 +135,11 @@ public class MongoDbService extends AbstractSqlService {
 
 
     public interface UpdateAdapter {
-        void create(Object value, Document document);
+        void create(Object value, Document document, MongoDbService sqlService);
 
-        Bson update(Object value);
+        Bson update(Object value, MongoDbService sqlService);
 
-        Accessor getAccessor(Ref<Document> currentDoc);
+        Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService);
 
         Object get(Document document);
     }
@@ -135,15 +151,15 @@ public class MongoDbService extends AbstractSqlService {
             name = defaultUpdateAdapterFactory.getMongoFieldName(field);
         }
 
-        public void create(Object value, Document doc) {
+        public void create(Object value, Document doc, MongoDbService sqlService) {
             doc.append(name, value);
         }
 
-        public Bson update(Object value) {
+        public Bson update(Object value, MongoDbService sqlService) {
             return Updates.set(name, value);
         }
 
-        public Accessor getAccessor(Ref<Document> currentDoc) {
+        public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
             // default is ok.
             return null;
         }
@@ -155,28 +171,26 @@ public class MongoDbService extends AbstractSqlService {
 
     static class GlobUpdater implements UpdateAdapter {
         private final String name;
-        private MongoDbService mongoDbService;
         private GlobField field;
 
-        public GlobUpdater(Field field, MongoDbService mongoDbService) {
+        public GlobUpdater(Field field, DefaultUpdateAdapterFactory updateAdapterFactory) {
             this.field = (GlobField) field;
-            name = mongoDbService.getColumnName(field);
-            this.mongoDbService = mongoDbService;
+            name = updateAdapterFactory.getRootName(field);
         }
 
-        public void create(Object value, Document document) {
-            document.put(name, mongoDbService.toDocument((Glob) value));
+        public void create(Object value, Document document, MongoDbService sqlService) {
+            document.put(name, sqlService.toDocument((Glob) value, sqlService));
         }
 
-        public Bson update(Object value) {
-            return Updates.set(name, mongoDbService.toDocument((Glob) value));
+        public Bson update(Object value, MongoDbService sqlService) {
+            return Updates.set(name, sqlService.toDocument((Glob) value, sqlService));
         }
 
-        public Accessor getAccessor(Ref<Document> currentDoc) {
+        public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
             return new GlobAccessor() {
                 public Glob getGlob() {
                     Document document = (Document) currentDoc.get().get(name);
-                    return document != null ? mongoDbService.fromDocument(field.getType(), document) : null;
+                    return document != null ? sqlService.fromDocument(field.getType(), document) : null;
                 }
 
                 public Object getObjectValue() {
@@ -190,12 +204,63 @@ public class MongoDbService extends AbstractSqlService {
         }
     }
 
+    static class GlobArrayUpdater implements UpdateAdapter {
+        private final String name;
+        private GlobArrayField field;
 
-    public Document toDocument(Glob glob) {
+        public GlobArrayUpdater(Field field, DefaultUpdateAdapterFactory updateAdapterFactory) {
+            this.field = (GlobArrayField) field;
+            name = updateAdapterFactory.getRootName(field);
+        }
+
+        public void create(Object value, Document document, MongoDbService sqlService) {
+            Glob[] values = (Glob[]) value;
+            ArrayList<Document> docs = new ArrayList<>();
+            for (int i = 0; i < values.length; i++) {
+                docs.add(sqlService.toDocument(values[i], sqlService));
+            }
+            document.put(name, docs);
+        }
+
+        public Bson update(Object value, MongoDbService sqlService) {
+            Glob[] values = (Glob[]) value;
+            ArrayList<Document> docs = new ArrayList<>();
+            for (int i = 0; i < values.length; i++) {
+                docs.add(sqlService.toDocument(values[i], sqlService));
+            }
+            return Updates.set(name, docs);
+        }
+
+        public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
+            return new GlobsAccessor() {
+
+                public Glob[] getGlobs() {
+                    List<Document> documents = (List<Document>) currentDoc.get().get(name);
+                    if (documents == null) {
+                        return null;
+                    }
+                    Glob[] globs = new Glob[documents.size()];
+                    Inserter<Glob> inserter = new Inserter<>(globs);
+                    documents.forEach(document -> inserter.add(sqlService.fromDocument(field.getType(), document)));
+                    return globs;
+                }
+
+                public Object getObjectValue() {
+                    return getGlobs();
+                }
+            };
+        }
+
+        public Object get(Document document) {
+            return null;
+        }
+    }
+
+    private Document toDocument(Glob glob, MongoDbService sqlService) {
         Document document = new Document();
         GlobType type = glob.getType();
         for (Field field : type.getFields()) {
-            getAdapter(field).create(glob.getValue(field), document);
+            getAdapter(field).create(glob.getValue(field), document, sqlService);
         }
         return document;
     }
@@ -220,8 +285,7 @@ public class MongoDbService extends AbstractSqlService {
             if (o != null) {
                 if (o instanceof Number) {
                     mutableGlob.set(field, ((Number) o).intValue());
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect an int but is a " + o.getClass());
                 }
             }
@@ -232,8 +296,7 @@ public class MongoDbService extends AbstractSqlService {
             if (o != null) {
                 if (o instanceof Number) {
                     mutableGlob.set(field, ((Number) o).doubleValue());
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect a double but is a " + o.getClass());
                 }
             }
@@ -258,8 +321,7 @@ public class MongoDbService extends AbstractSqlService {
             if (o != null) {
                 if (o instanceof Number) {
                     mutableGlob.set(field, ((Number) o).longValue());
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect a long but is a " + o.getClass());
                 }
             }
@@ -270,8 +332,7 @@ public class MongoDbService extends AbstractSqlService {
             if (o != null) {
                 if (o instanceof String) {
                     mutableGlob.set(field, Base64.getDecoder().decode((String) o));
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect a String but is a " + o.getClass());
                 }
             }
@@ -282,8 +343,7 @@ public class MongoDbService extends AbstractSqlService {
             if (o != null) {
                 if (o instanceof Document) {
                     mutableGlob.set(field, mongoDbService.fromDocument(field.getType(), (Document) o));
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect a Document but is a " + o.getClass());
                 }
             }
@@ -300,14 +360,11 @@ public class MongoDbService extends AbstractSqlService {
                         globs[i] = mongoDbService.fromDocument(field.getType(), subDocument);
                     }
                     mutableGlob.set(field, globs);
-                }
-                else {
+                } else {
                     throw new RuntimeException(field.getName() + " expect a Document[] but is a " + o.getClass());
                 }
             }
-
         }
     }
-
 }
 
