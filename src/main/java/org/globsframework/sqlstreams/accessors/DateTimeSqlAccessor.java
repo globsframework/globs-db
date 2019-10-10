@@ -4,10 +4,7 @@ import org.globsframework.streams.accessors.DateTimeAccessor;
 import org.globsframework.streams.accessors.LongAccessor;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 public class DateTimeSqlAccessor extends SqlAccessor implements DateTimeAccessor {
 
@@ -16,9 +13,11 @@ public class DateTimeSqlAccessor extends SqlAccessor implements DateTimeAccessor
         if (date == null) {
             return null;
         }
-        return ZonedDateTime.of(LocalDate.of(date.getYear() + 1900, date.getMonth() + 1, date.getDate()),
-                LocalTime.of(date.getHours(), date.getMinutes(),
-                        date.getSeconds(), date.getNanos()), ZoneId.systemDefault());
+        LocalDateTime localDateTime = date.toLocalDateTime();
+        return ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+//        return ZonedDateTime.of(LocalDate.of(date.getYear() + 1900, date.getMonth() + 1, date.getDate()),
+//                LocalTime.of(date.getHours(), date.getMinutes(),
+//                        date.getSeconds(), date.getNanos()), ZoneId.systemDefault());
     }
 
     public boolean wasNull() {

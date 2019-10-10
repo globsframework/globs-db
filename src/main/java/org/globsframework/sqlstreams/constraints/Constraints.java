@@ -194,6 +194,10 @@ public class Constraints {
         return new NotEqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
+    public static Constraint notEqualUncheck(Field field, Object value) {
+        return new NotEqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
     public static Constraint notIn(Field field, Set infos) {
         return new NotInConstraint(field, infos);
     }
@@ -203,8 +207,7 @@ public class Constraints {
     }
 
     public static Constraint notContains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false
-        );
+        return new ContainsConstraint(field, value, false);
     }
 
     public static Constraint isNull(Field field) {

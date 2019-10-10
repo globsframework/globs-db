@@ -5,6 +5,9 @@ import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.streams.accessors.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+
 public interface CreateBuilder {
     CreateBuilder set(IntegerField field, Integer value);
 
@@ -17,6 +20,10 @@ public interface CreateBuilder {
     CreateBuilder set(DoubleField field, Double value);
 
     CreateBuilder set(BooleanField field, Boolean value);
+
+    CreateBuilder set(DateTimeField field, ZonedDateTime value);
+
+    CreateBuilder set(DateField field, LocalDate value);
 
     CreateBuilder set(GlobField field, Glob value);
 
@@ -45,6 +52,10 @@ public interface CreateBuilder {
     CreateBuilder set(GlobUnionField field, GlobAccessor accessor);
 
     CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor);
+
+    CreateBuilder set(DateTimeField field, DateTimeAccessor accessor);
+
+    CreateBuilder set(DateField field, DateAccessor accessor);
 
     CreateBuilder setObject(Field field, Accessor accessor);
 

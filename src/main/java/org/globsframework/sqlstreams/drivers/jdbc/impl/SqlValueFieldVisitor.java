@@ -3,12 +3,17 @@ package org.globsframework.sqlstreams.drivers.jdbc.impl;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.annotations.IsDate;
-import org.globsframework.sqlstreams.annotations.IsDateTime;
+import org.globsframework.metamodel.annotations.IsDate;
+import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private PreparedStatement preparedStatement;
@@ -39,6 +44,22 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
             } else {
                 preparedStatement.setInt(index, (Integer) value);
             }
+        }
+    }
+
+    public void visitDate(DateField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.DATE);
+        } else {
+            preparedStatement.setDate(index, Date.valueOf(((LocalDate) value)));
+        }
+    }
+
+    public void visitDateTime(DateTimeField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.TIMESTAMP);
+        } else {
+            preparedStatement.setTimestamp(index, Timestamp.from(((ZonedDateTime) value).toInstant()));
         }
     }
 

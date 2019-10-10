@@ -6,8 +6,8 @@ import org.globsframework.metamodel.annotations.MaxSizeType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.annotations.IsDate;
-import org.globsframework.sqlstreams.annotations.IsDateTime;
+import org.globsframework.metamodel.annotations.IsDate;
+import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 
@@ -81,6 +81,14 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
         add("LONGTEXT", field);
+    }
+
+    public void visitDate(DateField field) throws Exception {
+        add("DATE", field);
+    }
+
+    public void visitDateTime(DateTimeField field) throws Exception {
+        add("DATETIME", field);
     }
 
     protected void add(String param, Field field) {

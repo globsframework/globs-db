@@ -9,8 +9,8 @@ import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.*;
-import org.globsframework.sqlstreams.annotations.IsDate;
-import org.globsframework.sqlstreams.annotations.IsDateTime;
+import org.globsframework.metamodel.annotations.IsDate;
+import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.*;
 import org.globsframework.streams.accessors.*;
@@ -147,6 +147,16 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectBuilder select(DoubleField field, Ref<DoubleAccessor> ref) {
         ref.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder select(DateTimeField field, Ref<DateTimeAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder select(DateField field, Ref<DateAccessor> accessor) {
+        accessor.set(retrieve(field));
         return this;
     }
 

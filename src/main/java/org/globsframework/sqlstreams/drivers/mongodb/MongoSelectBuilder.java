@@ -8,9 +8,7 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;
-import org.globsframework.sqlstreams.annotations.DbRef;
 import org.globsframework.sqlstreams.annotations.IsBigDecimal;
-import org.globsframework.sqlstreams.annotations.IsDbKey;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.mongodb.accessor.*;
 import org.globsframework.streams.accessors.*;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class MongoSelectBuilder implements SelectBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoSelectBuilder.class);
@@ -31,21 +28,11 @@ public class MongoSelectBuilder implements SelectBuilder {
     private final GlobType globType;
     private final MongoCollection<Document> collection;
     private final MongoDbService sqlService;
-    private Constraint constraint;
     private final Map<Field, Accessor> fieldsAndAccessor = new HashMap<>();
     private final Ref<Document> currentDoc = new Ref<>();
     private final List<Order> orders = new ArrayList<>();
+    private Constraint constraint;
     private int top = -1;
-
-    static class Order {
-        public final Field field;
-        public final boolean asc;
-
-        public Order(Field field, boolean asc) {
-            this.field = field;
-            this.asc = asc;
-        }
-    }
 
     public MongoSelectBuilder(MongoDatabase mongoDatabase, GlobType globType, MongoDbService sqlService, Constraint constraint) {
         this.mongoDatabase = mongoDatabase;
@@ -94,6 +81,16 @@ public class MongoSelectBuilder implements SelectBuilder {
     }
 
     public SelectBuilder select(DoubleField field, Ref<DoubleAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder select(DateTimeField field, Ref<DateTimeAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder select(DateField field, Ref<DateAccessor> accessor) {
         accessor.set(retrieve(field));
         return this;
     }
@@ -180,7 +177,7 @@ public class MongoSelectBuilder implements SelectBuilder {
 //            } else if (f.hasAnnotation(IsDbKey.KEY) || f.isKeyField() && f.getGlobType().getKeyFields().length == 1) {
 //                stringAccessor = new KeyStringMongoAccessor(sqlService.getColumnName(f), currentDoc);
 //            }  else {
-                stringAccessor = new StringMongoAccessor(sqlService.getColumnName(f), currentDoc);
+            stringAccessor = new StringMongoAccessor(sqlService.getColumnName(f), currentDoc);
 //            }
             return stringAccessor;
         });
@@ -202,6 +199,14 @@ public class MongoSelectBuilder implements SelectBuilder {
         });
     }
 
+    public DateTimeAccessor retrieve(DateTimeField field) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    public DateAccessor retrieve(DateField field) {
+        throw new RuntimeException("Not implemented");
+    }
+
     public BlobAccessor retrieve(BlobField field) {
         return (BlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new BlobMongoAccessor(sqlService.getColumnName(f), currentDoc));
     }
@@ -211,11 +216,21 @@ public class MongoSelectBuilder implements SelectBuilder {
     }
 
     public GlobAccessor retrieve(GlobField field) {
-        return (GlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobMongoAccessor(field, currentDoc, sqlService ));
+        return (GlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobMongoAccessor(field, currentDoc, sqlService));
     }
 
     public GlobsAccessor retrieve(GlobArrayField field) {
-        return (GlobsAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobsMongoAccessor(field, currentDoc, sqlService ));
+        return (GlobsAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobsMongoAccessor(field, currentDoc, sqlService));
+    }
+
+    static class Order {
+        public final Field field;
+        public final boolean asc;
+
+        public Order(Field field, boolean asc) {
+            this.field = field;
+            this.asc = asc;
+        }
     }
 
     static class MongoFieldVisitor extends FieldVisitorWithContext.AbstractWithErrorVisitor<MongoSelectBuilder> {

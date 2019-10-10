@@ -3,6 +3,8 @@ package org.globsframework.sqlstreams;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeBuilder;
+import org.globsframework.metamodel.annotations.IsDate;
+import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.metamodel.annotations.KeyAnnotationType;
 import org.globsframework.metamodel.fields.DoubleField;
 import org.globsframework.metamodel.fields.IntegerField;

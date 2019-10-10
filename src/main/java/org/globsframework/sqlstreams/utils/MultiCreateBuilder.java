@@ -11,6 +11,8 @@ import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.streams.accessors.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,6 +54,16 @@ public class MultiCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(BooleanField field, Boolean value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
+    public CreateBuilder set(DateField field, LocalDate value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
+    public CreateBuilder set(DateTimeField field, ZonedDateTime value) {
         createBuilders.get(field.getGlobType()).set(field, value);
         return this;
     }
@@ -122,6 +134,16 @@ public class MultiCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(DateTimeField field, DateTimeAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(DateField field, DateAccessor accessor) {
         createBuilders.get(field.getGlobType()).set(field, accessor);
         return this;
     }

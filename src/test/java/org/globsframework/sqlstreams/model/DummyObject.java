@@ -8,8 +8,8 @@ import org.globsframework.metamodel.annotations.*;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.metamodel.index.NotUniqueIndex;
 import org.globsframework.metamodel.links.DirectLink;
-import org.globsframework.sqlstreams.annotations.typed.TypedIsDate;
-import org.globsframework.sqlstreams.annotations.typed.TypedIsDateTime;
+import org.globsframework.metamodel.annotations.TypedIsDate;
+import org.globsframework.metamodel.annotations.TypedIsDateTime;
 
 public class DummyObject {
 
@@ -33,6 +33,8 @@ public class DummyObject {
     public static LongField CREATED_AT;
 
     public static BlobField PASSWORD;
+
+    public static DateTimeField REAL_DATE_TIME;
 
     @ContainmentLink
     public static IntegerField LINK_ID;

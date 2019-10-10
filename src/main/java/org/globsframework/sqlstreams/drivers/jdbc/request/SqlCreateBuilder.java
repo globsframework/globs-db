@@ -18,6 +18,8 @@ import org.globsframework.streams.accessors.utils.*;
 import org.globsframework.utils.collections.Pair;
 
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -124,6 +126,14 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, new ValueBooleanAccessor(value));
     }
 
+    public CreateBuilder set(DateTimeField field, ZonedDateTime value) {
+        return setObject(field, new ValueDateTimeAccessor(value));
+    }
+
+    public CreateBuilder set(DateField field, LocalDate value) {
+        return setObject(field, new ValueDateAccessor(value));
+    }
+
     public CreateBuilder set(GlobField field, Glob value) {
         return setObject(field, new ValueGlobAccessor(value));
     }
@@ -159,6 +169,14 @@ public class SqlCreateBuilder implements CreateBuilder {
 
     public CreateBuilder set(IntegerField field, Integer value) {
         return setObject(field, new ValueIntegerAccessor(value));
+    }
+
+    public CreateBuilder set(DateTimeField field, DateTimeAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
+    public CreateBuilder set(DateField field, DateAccessor accessor) {
+        return setObject(field, accessor);
     }
 
     public LongAccessor getKeyGeneratedAccessor() {

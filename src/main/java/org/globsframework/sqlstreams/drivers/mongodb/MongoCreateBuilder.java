@@ -11,6 +11,8 @@ import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.streams.accessors.utils.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +50,16 @@ public class MongoCreateBuilder implements CreateBuilder {
 
     public CreateBuilder set(BooleanField field, Boolean value) {
         fieldsValues.put(field, new ValueBooleanAccessor(value));
+        return this;
+    }
+
+    public CreateBuilder set(DateField field, LocalDate value) {
+        fieldsValues.put(field, new ValueDateAccessor(value));
+        return this;
+    }
+
+    public CreateBuilder set(DateTimeField field, ZonedDateTime value) {
+        fieldsValues.put(field, new ValueDateTimeAccessor(value));
         return this;
     }
 
@@ -121,6 +133,16 @@ public class MongoCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(GlobArrayUnionField field, GlobsAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(DateTimeField field, DateTimeAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(DateField field, DateAccessor accessor) {
         fieldsValues.put(field, accessor);
         return this;
     }
