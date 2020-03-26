@@ -1,10 +1,7 @@
 package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.Field;
-import org.globsframework.model.ChangeSetVisitor;
-import org.globsframework.model.FieldValues;
-import org.globsframework.model.FieldValuesWithPrevious;
-import org.globsframework.model.Key;
+import org.globsframework.model.*;
 import org.globsframework.sqlstreams.constraints.Constraints;
 
 public class InDbChangeSetVisitor implements ChangeSetVisitor {
@@ -27,14 +24,14 @@ public class InDbChangeSetVisitor implements ChangeSetVisitor {
         this.sqlConnection = sqlConnection;
     }
 
-    public void visitCreation(Key key, FieldValues values) throws Exception {
+    public void visitCreation(Key key, FieldsValueScanner values) throws Exception {
         createBuilder = sqlConnection.getCreateBuilder(key.getGlobType());
         key.applyOnKeyField(functorForCreate);
         values.apply(functorForCreate);
         createBuilder.getRequest().run();
     }
 
-    public void visitUpdate(Key key, FieldValuesWithPrevious values) throws Exception {
+    public void visitUpdate(Key key, FieldsValueWithPreviousScanner values) throws Exception {
         updateBuilder = sqlConnection.getUpdateBuilder(key.getGlobType(),
                 Constraints.fieldsEqual(key.asFieldValues()));
         key.applyOnKeyField(functorForUpdate);
@@ -42,7 +39,7 @@ public class InDbChangeSetVisitor implements ChangeSetVisitor {
         updateBuilder.getRequest().run();
     }
 
-    public void visitDeletion(Key key, FieldValues values) throws Exception {
+    public void visitDeletion(Key key, FieldsValueScanner values) throws Exception {
         sqlConnection.getDeleteRequest(key.getGlobType(), Constraints.fieldsEqual(key.asFieldValues())).run();
     }
 }
