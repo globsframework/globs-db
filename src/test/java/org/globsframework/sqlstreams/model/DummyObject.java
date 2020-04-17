@@ -22,6 +22,8 @@ public class DummyObject {
     @NamingField
     public static StringField NAME;
 
+//    public static StringArrayField ALIAS;
+
     public static DoubleField VALUE;
     public static IntegerField COUNT;
     public static BooleanField PRESENT;

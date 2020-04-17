@@ -7,6 +7,7 @@ import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
+import org.globsframework.utils.Strings;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private PreparedStatement preparedStatement;
@@ -104,6 +106,14 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
             preparedStatement.setString(index, (String) value);
+        }
+    }
+
+    public void visitStringArray(StringArrayField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, Strings.joinWithSeparator(",", Arrays.asList((String[]) value)));
         }
     }
 

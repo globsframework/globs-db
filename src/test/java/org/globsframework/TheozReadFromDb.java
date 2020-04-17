@@ -2,15 +2,14 @@ package org.globsframework;
 
 import com.google.gson.Gson;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.json.IsJsonContentType;
+import org.globsframework.json.annottations.IsJsonContentType;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobModelBuilder;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.annotations.AnnotationModel;
+import org.globsframework.metamodel.annotations.AllAnnotations;
 import org.globsframework.metamodel.fields.DoubleField;
 import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
 import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.model.GlobList;
@@ -18,24 +17,18 @@ import org.globsframework.model.MutableGlob;
 import org.globsframework.sqlstreams.GlobTypeExtractor;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.annotations.DbAnnotations;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.utils.serialization.SerializedOutput;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-
-import static java.lang.System.exit;
 
 public class TheozReadFromDb {
 
@@ -64,8 +57,8 @@ public class TheozReadFromDb {
             if (type == null) {
                 throw new RuntimeException(tableName + " not found");
             }
-            GlobModel globTypes = GlobModelBuilder.create(AnnotationModel.MODEL).add(IsJsonContentType.TYPE)
-                    .add(DbAnnotations.MODEL)
+            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContentType.TYPE)
+                    .add(org.globsframework.sqlstreams.annotations.AllAnnotations.MODEL)
                     .get();
 
             Gson gson = GlobsGson.create(globTypes::getType);

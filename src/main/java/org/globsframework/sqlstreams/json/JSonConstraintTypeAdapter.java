@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.globsframework.json.GlobTypeResolver;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
@@ -43,12 +44,16 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
               .registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver, currentType));
     }
 
-    static public GsonBuilder register(GsonBuilder gsonBuilder, GlobTypeResolver globTypeResolver, GlobType currentType) {
-        return gsonBuilder.registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver, currentType));
+    static public GsonBuilder register(GsonBuilder gsonBuilder, GlobTypeResolver globTypeResolver) {
+        return gsonBuilder.registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver, null));
+    }
+
+    public static Gson create(GlobTypeResolver globTypeResolver) {
+        return createBuilder(globTypeResolver, null).create();
     }
 
     public static Gson create(GlobTypeResolver globTypeResolver, GlobType currentType) {
-        return createBuilder(globTypeResolver, currentType).create();
+        return createBuilder(globTypeResolver, null).create();
     }
 
     public JSonConstraintTypeAdapter(GlobTypeResolver resolver, GlobType currentType) {
@@ -69,10 +74,10 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public Constraint read(JsonReader in) {
         JsonParser jsonParser = new JsonParser();
         JsonElement element = jsonParser.parse(in);
-        Constraint constraint = null;
-        JsonObject object = (JsonObject) element;
-        constraint = readConstraint(object);
-        return constraint;
+        if (element.isJsonNull()) {
+            return null;
+        }
+        return readConstraint((JsonObject) element);
     }
 
     private Constraint readConstraint(JsonObject object) {
@@ -222,11 +227,14 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     }
 
     private Field readField(JsonObject object) {
-        GlobType currentType = this.currentType;
+        GlobType currentType = null; //this.currentType;
         JsonObject field = object.getAsJsonObject(FIELD);
         JsonElement type = field.get(TYPE);
         if (type != null) {
             currentType = resolver.get(type.getAsString());
+        }
+        else {
+            throw new RuntimeException("A type is expected");
         }
         JsonElement name = field.get(FIELD_NAME);
         if (name != null) {

@@ -59,6 +59,15 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         add("VARCHAR(" + maxSize + ")", field);
     }
 
+    public void visitStringArray(StringArrayField field) throws Exception {
+        Glob annotation = field.findAnnotation(MaxSizeType.KEY);
+        int maxSize = 255;
+        if (annotation != null) {
+            maxSize = annotation.get(MaxSizeType.VALUE, 255);
+        }
+        add("VARCHAR(" + maxSize + ")", field);
+    }
+
     public void visitBoolean(BooleanField field) throws Exception {
         add("BOOLEAN", field);
     }
