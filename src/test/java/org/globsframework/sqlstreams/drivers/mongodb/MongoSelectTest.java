@@ -27,6 +27,7 @@ import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.drivers.jdbc.SqlSelectQueryTest;
 import org.globsframework.streams.accessors.GlobAccessor;
 import org.globsframework.streams.accessors.GlobsAccessor;
+import org.globsframework.streams.accessors.StringAccessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.Utils;
 import org.junit.Assert;
@@ -315,8 +316,9 @@ public class MongoSelectTest {
         SqlConnection db = sqlService.getDb();
         MutableGlob val1 = ValueType.TYPE.instantiate().set(ValueType.DATE, 1).set(ValueType.VALUE, 3.14);
         MutableGlob val2 = ValueType.TYPE.instantiate().set(ValueType.DATE, 2).set(ValueType.VALUE, 6.28);
+        String id = new ObjectId().toHexString();
         db.getCreateBuilder(GlobWithGlobType.TYPE)
-                .set(GlobWithGlobType.ID, new ObjectId().toHexString())
+                .set(GlobWithGlobType.ID, id)
                 .set(GlobWithGlobType.VALUE, val1)
                 .set(GlobWithGlobType.VALUES, new Glob[]{val1, val2})
                 .getRequest().run();
@@ -324,6 +326,7 @@ public class MongoSelectTest {
         SelectBuilder queryBuilder = db.getQueryBuilder(GlobWithGlobType.TYPE);
         GlobAccessor globAccessor = queryBuilder.retrieve(GlobWithGlobType.VALUE);
         GlobsAccessor globsAccessor = queryBuilder.retrieve(GlobWithGlobType.VALUES);
+        StringAccessor idAccessor = queryBuilder.retrieve(GlobWithGlobType.ID);
 
         GlobList globs = queryBuilder.getQuery().executeAsGlobs();
         Assert.assertEquals(1, globs.size());
@@ -332,7 +335,7 @@ public class MongoSelectTest {
         Assert.assertTrue(Arrays.equals(globsAccessor.getGlobs(), new Glob[]{val1, val2}));
 
         String s = GlobPrinter.toString(globs.get(0));
-        Assert.assertEquals("id=null\n" +
+        Assert.assertEquals("id=" + id + "\n" +
                 "value=[\n" +
                 "  date=1\n" +
                 "  value=3.14]\n" +
