@@ -43,6 +43,11 @@ public class MongoCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    public CreateBuilder set(StringArrayField field, String[] value) {
+        fieldsValues.put(field, new ValueStringArrayAccessor(value));
+        return this;
+    }
+
     public CreateBuilder set(DoubleField field, Double value) {
         fieldsValues.put(field, new ValueDoubleAccessor(value));
         return this;
@@ -79,6 +84,11 @@ public class MongoCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(StringField field, StringAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(StringArrayField field, StringArrayAccessor accessor) {
         fieldsValues.put(field, accessor);
         return this;
     }

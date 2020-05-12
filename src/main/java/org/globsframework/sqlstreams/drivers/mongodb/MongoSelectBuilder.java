@@ -211,6 +211,10 @@ public class MongoSelectBuilder implements SelectBuilder {
         return (BlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new BlobMongoAccessor(sqlService.getColumnName(f), currentDoc));
     }
 
+    public StringArrayAccessor retrieve(StringArrayField field) {
+        return (StringArrayAccessor) fieldsAndAccessor.computeIfAbsent(field, f -> new StringArrayMongoAccessor(sqlService.getColumnName(f), currentDoc));
+    }
+
     public Accessor retrieveUnTyped(Field field) {
         return fieldsAndAccessor.computeIfAbsent(field, (f) -> field.safeVisit(MONGO_FIELD_VISITOR, this).accessor);
     }

@@ -101,8 +101,18 @@ public class MongoUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
+    public UpdateBuilder update(StringArrayField field, StringArrayAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
     public UpdateBuilder update(StringField field, String value) {
         fieldsValues.put(field, new ValueStringAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(StringArrayField field, String[] value) {
+        fieldsValues.put(field, new ValueStringArrayAccessor(value));
         return this;
     }
 

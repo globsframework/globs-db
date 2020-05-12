@@ -102,8 +102,17 @@ public class SqlUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
+    public UpdateBuilder update(StringArrayField field, StringArrayAccessor accessor) {
+        values.put(field, accessor);
+        return this;
+    }
+
     public UpdateBuilder update(StringField field, String value) {
         return update(field, new ValueStringAccessor(value));
+    }
+
+    public UpdateBuilder update(StringArrayField field, String[] value) {
+        return update(field, new ValueStringArrayAccessor(value));
     }
 
     public UpdateBuilder update(BooleanField field, BooleanAccessor accessor) {

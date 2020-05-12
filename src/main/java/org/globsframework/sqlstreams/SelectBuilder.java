@@ -69,6 +69,8 @@ public interface SelectBuilder {
 
     BlobAccessor retrieve(BlobField field);
 
+    StringArrayAccessor retrieve(StringArrayField field);
+
     GlobAccessor retrieve(GlobField field);
 
     GlobsAccessor retrieve(GlobArrayField field);

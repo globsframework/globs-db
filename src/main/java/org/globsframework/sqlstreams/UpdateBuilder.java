@@ -24,7 +24,11 @@ public interface UpdateBuilder {
 
     UpdateBuilder update(StringField field, StringAccessor accessor);
 
+    UpdateBuilder update(StringArrayField field, StringArrayAccessor accessor);
+
     UpdateBuilder update(StringField field, String value);
+
+    UpdateBuilder update(StringArrayField field, String[] value);
 
     UpdateBuilder update(BooleanField field, BooleanAccessor accessor);
 

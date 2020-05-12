@@ -15,6 +15,8 @@ public interface CreateBuilder {
 
     CreateBuilder set(StringField field, String value);
 
+    CreateBuilder set(StringArrayField field, String[] value);
+
     CreateBuilder set(LongField field, Long value);
 
     CreateBuilder set(DoubleField field, Double value);
@@ -38,6 +40,8 @@ public interface CreateBuilder {
     CreateBuilder set(LongField field, LongAccessor accessor);
 
     CreateBuilder set(StringField field, StringAccessor accessor);
+
+    CreateBuilder set(StringArrayField field, StringArrayAccessor accessor);
 
     CreateBuilder set(DoubleField field, DoubleAccessor accessor);
 

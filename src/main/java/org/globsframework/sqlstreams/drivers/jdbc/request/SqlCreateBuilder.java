@@ -70,6 +70,10 @@ public class SqlCreateBuilder implements CreateBuilder {
                 setObject(field, new ValueStringAccessor((String) value));
             }
 
+            public void visitStringArray(StringArrayField field) throws Exception {
+                setObject(field, new ValueStringArrayAccessor((String[]) value));
+            }
+
             public void visitBoolean(BooleanField field) {
                 setObject(field, new ValueBooleanAccessor((Boolean) value));
             }
@@ -94,6 +98,10 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, accessor);
     }
 
+    public CreateBuilder set(StringArrayField field, StringArrayAccessor accessor) {
+        return setObject(field, accessor);
+    }
+
     public CreateBuilder set(DoubleField field, DoubleAccessor accessor) {
         return setObject(field, accessor);
     }
@@ -112,6 +120,10 @@ public class SqlCreateBuilder implements CreateBuilder {
 
     public CreateBuilder set(StringField field, String value) {
         return setObject(field, new ValueStringAccessor(value));
+    }
+
+    public CreateBuilder set(StringArrayField field, String[] value) {
+        return setObject(field, new ValueStringArrayAccessor(value));
     }
 
     public CreateBuilder set(LongField field, Long value) {

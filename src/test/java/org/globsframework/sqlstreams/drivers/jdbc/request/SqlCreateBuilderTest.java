@@ -11,6 +11,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.streams.accessors.utils.ValueBlobAccessor;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.streams.accessors.utils.ValueStringAccessor;
+import org.globsframework.streams.accessors.utils.ValueStringArrayAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 public class SqlCreateBuilderTest extends DbServicesTestCase {
 
@@ -37,6 +39,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
         sqlConnection.getCreateBuilder(DummyObject.TYPE)
                 .set(DummyObject.ID, new ValueIntegerAccessor(1))
                 .set(DummyObject.NAME, new ValueStringAccessor("hello"))
+                .set(DummyObject.ALIAS, new ValueStringArrayAccessor(new String[]{"hello", "world"}))
                 .set(DummyObject.PASSWORD, new ValueBlobAccessor("world".getBytes()))
                 .set(DummyObject.CREATED_AT, 4324L)
                 .set(DummyObject.REAL_DATE_TIME, dateTime)
@@ -51,6 +54,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
                 .selectAll()
                 .getQuery().executeUnique();
         Assert.assertEquals(dateTime, glob.get(DummyObject.REAL_DATE_TIME));
+        Assert.assertArrayEquals(new String[]{"hello", "world"}, glob.get(DummyObject.ALIAS));
 
     }
 }

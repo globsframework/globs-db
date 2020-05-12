@@ -43,6 +43,11 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    public CreateBuilder set(StringArrayField field, String[] value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
     public CreateBuilder set(LongField field, Long value) {
         createBuilders.get(field.getGlobType()).set(field, value);
         return this;
@@ -79,6 +84,11 @@ public class MultiCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder set(StringField field, StringAccessor accessor) {
+        createBuilders.get(field.getGlobType()).set(field, accessor);
+        return this;
+    }
+
+    public CreateBuilder set(StringArrayField field, StringArrayAccessor accessor) {
         createBuilders.get(field.getGlobType()).set(field, accessor);
         return this;
     }

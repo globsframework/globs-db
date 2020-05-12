@@ -2,6 +2,8 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.fields.StringArrayField;
+import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.junit.Test;
@@ -21,7 +23,11 @@ public class MetadataTest extends DbServicesTestCase {
         for (Field field : DummyObject.TYPE.getFields()) {
             Field actualField = type.findField(sqlService.getColumnName(field));
             assertNotNull(field.getName(), actualField);
-            assertTrue(actualField.getClass().getName() + " != " + field.getClass().getName(), actualField.getClass().isInstance(field));
+            if (field instanceof StringArrayField) {
+                assertTrue(actualField.getClass().getName() + " != " + StringField.class.getName(), StringField.class.isAssignableFrom(actualField.getClass()));
+            } else {
+                assertTrue(actualField.getClass().getName() + " != " + field.getClass().getName(), actualField.getClass().isInstance(field));
+            }
         }
     }
 

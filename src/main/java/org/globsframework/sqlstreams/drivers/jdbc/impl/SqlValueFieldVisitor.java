@@ -113,7 +113,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, Strings.joinWithSeparator(",", Arrays.asList((String[]) value)));
+            preparedStatement.setString(index, String.join(",", (String[]) value));
         }
     }
 

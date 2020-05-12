@@ -17,9 +17,11 @@ import org.globsframework.sqlstreams.utils.AbstractSqlService;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.streams.accessors.GlobAccessor;
 import org.globsframework.streams.accessors.GlobsAccessor;
+import org.globsframework.streams.accessors.StringArrayAccessor;
 import org.globsframework.utils.Ref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,7 +105,10 @@ public class MongoDbService extends AbstractSqlService {
             }
             if (field instanceof GlobArrayField) {
                 return new GlobArrayUpdater(field, this);
-            } else {
+            } if (field instanceof StringArrayField) {
+                return new StringArrayUpdater((StringArrayField) field, this);
+            }
+            else {
                 return new DefaultUpdater(field, this);
             }
         }
@@ -162,6 +167,41 @@ public class MongoDbService extends AbstractSqlService {
         public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
             // default is ok.
             return null;
+        }
+
+        public Object get(Document document) {
+            return null;
+        }
+    }
+
+    static class StringArrayUpdater implements UpdateAdapter {
+        private final String name;
+        private final StringArrayField field;
+
+        StringArrayUpdater(StringArrayField field, DefaultUpdateAdapterFactory updateAdapterFactory) {
+            name = updateAdapterFactory.getRootName(field);
+            this.field = field;
+        }
+
+        public void create(Object value, Document document, MongoDbService sqlService) {
+            document.put(name, Arrays.asList((String[]) value));
+        }
+
+        public Bson update(Object value, MongoDbService sqlService) {
+            return Updates.set(name, Arrays.asList(((String[]) value)));
+        }
+
+        public Accessor getAccessor(Ref<Document> currentDoc, MongoDbService sqlService) {
+            return new StringArrayAccessor() {
+                public String[] getString() {
+                    Object o = currentDoc.get().get(name);
+                    return o != null ? (String[]) ((List) o).toArray(new String[0]) : null;
+                }
+
+                public Object getObjectValue() {
+                    return getString();
+                }
+            };
         }
 
         public Object get(Document document) {
