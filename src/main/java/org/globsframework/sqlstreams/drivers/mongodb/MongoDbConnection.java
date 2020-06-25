@@ -1,6 +1,7 @@
 package org.globsframework.sqlstreams.drivers.mongodb;
 
 import com.mongodb.client.MongoDatabase;
+import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.*;
@@ -57,6 +58,10 @@ public class MongoDbConnection implements SqlConnection {
     }
 
     public void createTable(GlobType globType) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    public void addColumn(Field column) {
         throw new RuntimeException("Not Implemented");
     }
 

@@ -3,15 +3,14 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.LongField;
+import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.model.KeyBuilder;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
-import org.globsframework.streams.accessors.utils.ValueBlobAccessor;
-import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
-import org.globsframework.streams.accessors.utils.ValueStringAccessor;
-import org.globsframework.streams.accessors.utils.ValueStringArrayAccessor;
+import org.globsframework.sqlstreams.model.DummyObjectWithGlob;
+import org.globsframework.streams.accessors.utils.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,5 +55,37 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
         Assert.assertEquals(dateTime, glob.get(DummyObject.REAL_DATE_TIME));
         Assert.assertArrayEquals(new String[]{"hello", "world"}, glob.get(DummyObject.ALIAS));
 
+    }
+
+    @Test
+    public void createGlobInField() {
+        sqlConnection.createTable(DummyObjectWithGlob.TYPE);
+        GlobType globType = sqlConnection.extractType(sqlService.getTableName(DummyObjectWithGlob.TYPE))
+                .forceType(sqlService.getColumnName(DummyObjectWithGlob.arrayField), DataType.String)
+                .forceType(sqlService.getColumnName(DummyObjectWithGlob.simple), DataType.String)
+                .extract();
+
+        Field arrayField = globType.getField(sqlService.getColumnName(DummyObjectWithGlob.arrayField));
+
+        Assert.assertTrue(arrayField.getDataType().name(), arrayField instanceof StringField);
+
+        sqlConnection.getCreateBuilder(DummyObjectWithGlob.TYPE)
+                .set(DummyObjectWithGlob.ID, new ValueIntegerAccessor(1))
+                .set(DummyObjectWithGlob.simple, new ValueGlobAccessor(DummyObjectWithGlob.TYPE.instantiate()
+                        .set(DummyObjectWithGlob.ID, 2)
+                ))
+                .set(DummyObjectWithGlob.arrayField, new ValueGlobsAccessor(new Glob[]{DummyObjectWithGlob.TYPE.instantiate()
+                        .set(DummyObjectWithGlob.ID, 3), DummyObjectWithGlob.TYPE.instantiate()
+                        .set(DummyObjectWithGlob.ID, 4)}))
+                .getRequest()
+                .run();
+
+        Glob glob = sqlConnection.getQueryBuilder(DummyObjectWithGlob.TYPE)
+                .selectAll().getQuery().executeUnique();
+        Assert.assertNotNull(glob.get(DummyObjectWithGlob.simple) );
+        Assert.assertNotNull(glob.get(DummyObjectWithGlob.arrayField) );
+        Assert.assertEquals(2, glob.get(DummyObjectWithGlob.simple).get(DummyObjectWithGlob.ID).intValue() );
+        Assert.assertEquals(3, glob.get(DummyObjectWithGlob.arrayField)[0].get(DummyObjectWithGlob.ID).intValue() );
+        Assert.assertEquals(4, glob.get(DummyObjectWithGlob.arrayField)[1].get(DummyObjectWithGlob.ID).intValue() );
     }
 }

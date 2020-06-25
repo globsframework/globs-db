@@ -78,6 +78,22 @@ public class SqlCreateBuilder implements CreateBuilder {
                 setObject(field, new ValueBooleanAccessor((Boolean) value));
             }
 
+            public void visitGlob(GlobField field) throws Exception {
+                setObject(field, new ValueGlobAccessor((Glob) value));
+            }
+
+            public void visitGlobArray(GlobArrayField field) throws Exception {
+                setObject(field, new ValueGlobsAccessor((Glob[]) value));
+            }
+
+            public void visitUnionGlob(GlobUnionField field) throws Exception {
+                setObject(field, new ValueGlobAccessor((Glob) value));
+            }
+
+            public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
+                setObject(field, new ValueGlobsAccessor((Glob[]) value));
+            }
+
             public void visitBlob(BlobField field) {
                 setObject(field, new ValueBlobAccessor((byte[]) value));
             }

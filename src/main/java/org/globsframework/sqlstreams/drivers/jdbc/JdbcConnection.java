@@ -127,6 +127,32 @@ public abstract class JdbcConnection implements SqlConnection {
         }
     }
 
+    public void addColumn(Field column) {
+        GlobTypeExtractor globTypeExtractor = extractType(sqlService.getTableName(column.getGlobType()));
+        if (globTypeExtractor.extract().hasField(sqlService.getColumnName(column))) {
+            return;
+        }
+        StringPrettyWriter writer = new StringPrettyWriter();
+        writer.append("ALTER TABLE ")
+                .append(sqlService.getTableName(column.getGlobType()))
+        .append(" ADD ");
+        SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
+        column.safeVisit(creationVisitor);
+        writer.append(";");
+        try {
+            PreparedStatement statament = connection.prepareStatement(writer.toString());
+            statament.executeUpdate();
+            statament.close();
+        } catch (SQLException e) {
+            GlobTypeExtractor typeExtractor = extractType(sqlService.getTableName(column.getGlobType()));
+            if (typeExtractor.extract().hasField(sqlService.getColumnName(column))) {
+                LOGGER.info("Column already added.");
+                return;
+            }
+            throw new UnexpectedApplicationState("add column " + column.getFullName() + " : " + writer.toString(), e);
+        }
+    }
+
     public void emptyTable(GlobType globType) {
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("DELETE FROM ")

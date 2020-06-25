@@ -9,7 +9,7 @@ import org.globsframework.utils.Strings;
 public abstract class AbstractSqlService implements SqlService {
 
     private static final String[] RESERVED_KEYWORDS = {
-          "COUNT", "WHERE", "FROM", "SELECT"
+          "COUNT", "WHERE", "FROM", "SELECT", "ORDER"
     };
 
 //    public String getTableName(GlobType globType) {

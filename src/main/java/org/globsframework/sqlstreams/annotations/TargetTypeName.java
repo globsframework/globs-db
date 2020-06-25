@@ -20,7 +20,7 @@ public class TargetTypeName {
     @InitUniqueKey
     public static Key UNIQUE_KEY;
 
-    static class PHYSICAL_TYPE{
+    static class PHYSICAL_TYPE {
     }
 
     static {
