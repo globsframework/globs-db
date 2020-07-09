@@ -21,6 +21,6 @@ public class DummyObjectWithGlob {
     public static GlobArrayField arrayField;
 
     static {
-        GlobTypeLoaderFactory.create(DummyObjectWithGlob.class).load();
+        GlobTypeLoaderFactory.create(DummyObjectWithGlob.class, true).load();
     }
 }

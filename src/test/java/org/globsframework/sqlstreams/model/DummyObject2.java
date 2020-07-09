@@ -21,6 +21,6 @@ public class DummyObject2 {
     public static DoubleField VALUE;
 
     static {
-        GlobTypeLoaderFactory.create(DummyObject2.class).load();
+        GlobTypeLoaderFactory.create(DummyObject2.class,true).load();
     }
 }

@@ -317,7 +317,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static DoubleField VALUE;
 
         static {
-            GlobTypeLoaderFactory.create(ValueType.class).load();
+            GlobTypeLoaderFactory.create(ValueType.class, true).load();
         }
     }
 
@@ -329,7 +329,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static IntegerField VALUE;
 
         static {
-            GlobTypeLoaderFactory.create(ValueType2.class).load();
+            GlobTypeLoaderFactory.create(ValueType2.class, true).load();
         }
     }
 
@@ -352,7 +352,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static GlobArrayUnionField ANY_TYPES;
 
         static {
-            GlobTypeLoaderFactory.create(GlobWithGlobType.class).load();
+            GlobTypeLoaderFactory.create(GlobWithGlobType.class, true).load();
         }
     }
 

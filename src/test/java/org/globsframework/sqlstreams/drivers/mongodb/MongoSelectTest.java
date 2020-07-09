@@ -288,7 +288,7 @@ public class MongoSelectTest {
         public static DoubleField VALUE;
 
         static {
-            GlobTypeLoaderFactory.create(ValueType.class).load();
+            GlobTypeLoaderFactory.create(ValueType.class, true).load();
         }
     }
 
@@ -305,7 +305,7 @@ public class MongoSelectTest {
         public static GlobArrayField VALUES;
 
         static {
-            GlobTypeLoaderFactory.create(GlobWithGlobType.class).load();
+            GlobTypeLoaderFactory.create(GlobWithGlobType.class, true).load();
         }
     }
 

@@ -97,6 +97,7 @@ public abstract class JdbcConnection implements SqlConnection {
         if (checker.tableExists(globType)) {
             return;
         }
+        LOGGER.info("Create table for " + globType.getName());
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("CREATE TABLE ")
                 .append(sqlService.getTableName(globType))
@@ -132,6 +133,7 @@ public abstract class JdbcConnection implements SqlConnection {
         if (globTypeExtractor.extract().hasField(sqlService.getColumnName(column))) {
             return;
         }
+        LOGGER.info("Add column " + column.getFullName());
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("ALTER TABLE ")
                 .append(sqlService.getTableName(column.getGlobType()))

@@ -20,6 +20,6 @@ public class DummyObjectWithString {
     public static DoubleField VALUE;
 
     static {
-        GlobTypeLoaderFactory.create(DummyObjectWithString.class).load();
+        GlobTypeLoaderFactory.create(DummyObjectWithString.class, true).load();
     }
 }
