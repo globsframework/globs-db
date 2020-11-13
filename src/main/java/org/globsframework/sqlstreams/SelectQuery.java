@@ -6,6 +6,7 @@ import org.globsframework.streams.DbStream;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.TooManyItems;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface SelectQuery extends AutoCloseable {
@@ -17,7 +18,20 @@ public interface SelectQuery extends AutoCloseable {
 
     GlobList executeAsGlobs();
 
-    Glob executeUnique() throws ItemNotFound, TooManyItems;
+    default Glob executeUnique() throws ItemNotFound, TooManyItems{
+        return executeOne().orElseThrow(() -> new ItemNotFound("For " + toString()));
+    }
+
+    default Optional<Glob> executeOne() throws TooManyItems {
+        GlobList globs = executeAsGlobs();
+        if (globs.size() == 1) {
+            return Optional.of(globs.get(0));
+        }
+        if (globs.isEmpty()) {
+            return Optional.empty();
+        }
+        throw new TooManyItems("Too many results for: " + toString());
+    }
 
 //    <T> CompletableFuture<T> executeAsFutureStream(Consumer<?> consumer, Consumer<?> onComplete);
 //

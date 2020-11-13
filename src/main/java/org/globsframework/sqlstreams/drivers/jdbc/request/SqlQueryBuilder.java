@@ -363,7 +363,11 @@ public class SqlQueryBuilder implements SelectBuilder {
         public String[] getString() {
             String value = accessor.getString();
             if (value != null) {
-                return value.split(",");
+                if (value.isEmpty()) {
+                    return new String[0];
+                } else {
+                    return value.split(",");
+                }
             } else {
                 return null;
             }

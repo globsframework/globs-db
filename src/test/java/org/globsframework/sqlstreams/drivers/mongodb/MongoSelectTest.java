@@ -335,15 +335,8 @@ public class MongoSelectTest {
         Assert.assertTrue(Arrays.equals(globsAccessor.getGlobs(), new Glob[]{val1, val2}));
 
         String s = GlobPrinter.toString(globs.get(0));
-        Assert.assertEquals("id=" + id + "\n" +
-                "value=[\n" +
-                "  date=1\n" +
-                "  value=3.14]\n" +
-                "values=[  [\n" +
-                "    date=1\n" +
-                "    value=3.14],\n" +
-                "  [\n" +
-                "    date=2\n" +
-                "    value=6.28]  ]\n", s);
+        Assert.assertEquals("\"id\":\"" + id + "\"" +
+                "\"value\":{ \"_kind\":\"valueType\",\"date\":1, \"value\":3.14}" +
+                "\"values\":[{ \"_kind\":\"valueType\",\"date\":1, \"value\":3.14}, { \"_kind\":\"valueType\",\"date\":2, \"value\":6.28}]", s);
     }
 }

@@ -212,15 +212,8 @@ public class SqlSelectQuery implements SelectQuery {
         return result;
     }
 
-    public Glob executeUnique() throws ItemNotFound, TooManyItems {
-        GlobList globs = executeAsGlobs();
-        if (globs.size() == 1) {
-            return globs.get(0);
-        }
-        if (globs.isEmpty()) {
-            throw new ItemNotFound("No result returned for: " + sql);
-        }
-        throw new TooManyItems("Too many results for: " + sql);
+    public String toString() {
+        return sql;
     }
 
     public void resultSetClose() {
