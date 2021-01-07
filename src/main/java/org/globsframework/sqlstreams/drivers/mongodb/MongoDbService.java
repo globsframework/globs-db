@@ -230,7 +230,7 @@ public class MongoDbService extends AbstractSqlService {
             return new GlobAccessor() {
                 public Glob getGlob() {
                     Document document = (Document) currentDoc.get().get(name);
-                    return document != null ? sqlService.fromDocument(field.getType(), document) : null;
+                    return document != null ? sqlService.fromDocument(field.getTargetType(), document) : null;
                 }
 
                 public Object getObjectValue() {
@@ -281,7 +281,7 @@ public class MongoDbService extends AbstractSqlService {
                     }
                     Glob[] globs = new Glob[documents.size()];
                     Inserter<Glob> inserter = new Inserter<>(globs);
-                    documents.forEach(document -> inserter.add(sqlService.fromDocument(field.getType(), document)));
+                    documents.forEach(document -> inserter.add(sqlService.fromDocument(field.getTargetType(), document)));
                     return globs;
                 }
 
@@ -382,7 +382,7 @@ public class MongoDbService extends AbstractSqlService {
             Object o = document.get(mongoDbService.getRootName(field));
             if (o != null) {
                 if (o instanceof Document) {
-                    mutableGlob.set(field, mongoDbService.fromDocument(field.getType(), (Document) o));
+                    mutableGlob.set(field, mongoDbService.fromDocument(field.getTargetType(), (Document) o));
                 } else {
                     throw new RuntimeException(field.getName() + " expect a Document but is a " + o.getClass());
                 }
@@ -397,7 +397,7 @@ public class MongoDbService extends AbstractSqlService {
                     Glob[] globs = new Glob[documents.length];
                     for (int i = 0; i < documents.length; i++) {
                         Document subDocument = documents[i];
-                        globs[i] = mongoDbService.fromDocument(field.getType(), subDocument);
+                        globs[i] = mongoDbService.fromDocument(field.getTargetType(), subDocument);
                     }
                     mutableGlob.set(field, globs);
                 } else {

@@ -288,14 +288,14 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public GlobAccessor retrieve(GlobField field) {
         StringSqlAccessor accessor = new StringSqlAccessor();
-        GlobSqlAccessor globSqlAccessor = new GlobSqlAccessor(accessor, field.getType());
+        GlobSqlAccessor globSqlAccessor = new GlobSqlAccessor(accessor, field.getTargetType());
         fieldToAccessorHolder.put(field, globSqlAccessor);
         return globSqlAccessor;
     }
 
     public GlobsAccessor retrieve(GlobArrayField field) {
         StringSqlAccessor accessor = new StringSqlAccessor();
-        GlobsSqlAccessor globSqlAccessor = new GlobsSqlAccessor(accessor, field.getType());
+        GlobsSqlAccessor globSqlAccessor = new GlobsSqlAccessor(accessor, field.getTargetType());
         fieldToAccessorHolder.put(field, globSqlAccessor);
         return globSqlAccessor;
     }

@@ -22,7 +22,7 @@ public class GlobMongoAccessor implements GlobAccessor {
         Document document = currentDoc.get();
         Object o = document.get(mongoDbService.getRootName(field));
         if (o instanceof Document) {
-            return mongoDbService.fromDocument(field.getType(), (Document) o);
+            return mongoDbService.fromDocument(field.getTargetType(), (Document) o);
         } else {
             if (o == null) {
                 return null;

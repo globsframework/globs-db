@@ -28,7 +28,7 @@ public class GlobsMongoAccessor implements GlobsAccessor {
             List<Document> documents = (List<Document>) docs;
             Glob[] globs = new Glob[documents.size()];
             Inserter<Glob> inserter = new Inserter<>(globs);
-            documents.forEach(document1 -> inserter.add(mongoDbService.fromDocument(field.getType(), document1)));
+            documents.forEach(document1 -> inserter.add(mongoDbService.fromDocument(field.getTargetType(), document1)));
             return globs;
         } else {
             if (docs == null) {
