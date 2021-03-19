@@ -16,19 +16,23 @@ import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.metadata.DbChecker;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
+import org.globsframework.utils.collections.MultiMap;
 import org.globsframework.utils.exceptions.GlobsException;
 import org.globsframework.utils.exceptions.OperationDenied;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
-
-    private Connection connection;
     protected JdbcSqlService sqlService;
+    private Connection connection;
     private BlobUpdater blobUpdater;
     private DbChecker checker;
 
@@ -58,10 +62,6 @@ public abstract class JdbcConnection implements SqlConnection {
         if (connection == null) {
             throw new UnexpectedApplicationState("connection was closed");
         }
-    }
-
-    interface DbFunctor {
-        void doIt() throws SQLException;
     }
 
     public void commit() throws RollbackFailed {
@@ -128,30 +128,51 @@ public abstract class JdbcConnection implements SqlConnection {
         }
     }
 
-    public void addColumn(Field column) {
-        GlobTypeExtractor globTypeExtractor = extractType(sqlService.getTableName(column.getGlobType()));
-        if (globTypeExtractor.extract().hasField(sqlService.getColumnName(column))) {
-            return;
+    public void addColumn(Field... column) {
+        MultiMap<GlobType, Field> fieldsToAdd = new MultiMap<>();
+        for (Field field : column) {
+            fieldsToAdd.put(field.getGlobType(), field);
         }
-        LOGGER.info("Add column " + column.getFullName());
-        StringPrettyWriter writer = new StringPrettyWriter();
-        writer.append("ALTER TABLE ")
-                .append(sqlService.getTableName(column.getGlobType()))
-        .append(" ADD ");
-        SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
-        column.safeVisit(creationVisitor);
-        writer.append(";");
-        try {
-            PreparedStatement statament = connection.prepareStatement(writer.toString());
-            statament.executeUpdate();
-            statament.close();
-        } catch (SQLException e) {
-            GlobTypeExtractor typeExtractor = extractType(sqlService.getTableName(column.getGlobType()));
-            if (typeExtractor.extract().hasField(sqlService.getColumnName(column))) {
-                LOGGER.info("Column already added.");
-                return;
+        for (Map.Entry<GlobType, List<Field>> entry : fieldsToAdd.entries()) {
+            GlobType type = entry.getKey();
+
+            GlobTypeExtractor globTypeExtractor = extractType(sqlService.getTableName(type));
+
+            GlobType tableType = globTypeExtractor.extract();
+
+            StringPrettyWriter writer = new StringPrettyWriter();
+            writer.append("ALTER TABLE ")
+                    .append(sqlService.getTableName(type))
+                    .append(" ADD ");
+            SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
+
+            Field[] fieldNotInDb = entry.getValue().stream().filter(f -> !tableType.hasField(sqlService.getColumnName(f)))
+                    .toArray(Field[]::new);
+
+            for (int i = 0; i < fieldNotInDb.length; i++) {
+                Field field = fieldNotInDb[i];
+                LOGGER.info("Add column " + field.getFullName());
+                field.safeVisit(creationVisitor);
+                if (i + 1 < fieldNotInDb.length) {
+                    writer.append(", ");
+                }
             }
-            throw new UnexpectedApplicationState("add column " + column.getFullName() + " : " + writer.toString(), e);
+            writer.append(";");
+            try {
+                PreparedStatement statement = connection.prepareStatement(writer.toString());
+                statement.executeUpdate();
+                statement.close();
+            } catch (SQLException e) {
+                GlobTypeExtractor typeExtractor = extractType(sqlService.getTableName(type));
+                GlobType newType = typeExtractor.extract();
+                if (entry.getValue().stream().allMatch(f -> newType.hasField(sqlService.getColumnName(f)))) {
+                    LOGGER.info("Column already added.");
+                    return;
+                }
+                String message = "fail to add column " + entry.getValue() + " : " + writer.toString();
+                LOGGER.error(message);
+                throw new UnexpectedApplicationState(message, e);
+            }
         }
     }
 
@@ -238,5 +259,9 @@ public abstract class JdbcConnection implements SqlConnection {
 
     public GlobTypeExtractor extractType(String tableName) {
         return new DefaultGlobTypeExtractor(sqlService, tableName);
+    }
+
+    interface DbFunctor {
+        void doIt() throws SQLException;
     }
 }

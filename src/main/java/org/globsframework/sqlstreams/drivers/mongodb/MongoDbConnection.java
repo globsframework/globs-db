@@ -61,7 +61,7 @@ public class MongoDbConnection implements SqlConnection {
         throw new RuntimeException("Not Implemented");
     }
 
-    public void addColumn(Field column) {
+    public void addColumn(Field... column) {
         throw new RuntimeException("Not Implemented");
     }
 

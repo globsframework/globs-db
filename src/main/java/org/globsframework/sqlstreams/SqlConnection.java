@@ -32,7 +32,7 @@ public interface SqlConnection {
 
     void createTable(GlobType globType);
 
-    void addColumn(Field column);
+    void addColumn(Field... column);
 
     void emptyTable(GlobType globType);
 

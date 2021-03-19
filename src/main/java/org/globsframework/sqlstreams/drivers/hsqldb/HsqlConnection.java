@@ -1,7 +1,7 @@
 package org.globsframework.sqlstreams.drivers.hsqldb;
 
+import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.fields.*;
-import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
@@ -49,6 +49,13 @@ public class HsqlConnection extends JdbcConnection {
                 add("LONGVARCHAR", field);
             }
         };
+    }
+
+    // hsql db do not support add of multiple column
+    public void addColumn(Field... column) {
+        for (Field field : column) {
+            super.addColumn(field);
+        }
     }
 
     public void showDb() {
