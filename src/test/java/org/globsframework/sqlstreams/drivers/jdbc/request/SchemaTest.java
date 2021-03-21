@@ -34,5 +34,8 @@ public class SchemaTest {
         GlobTypeExtractor globTypeExtractor = db.extractType(sqlService.getTableName(t2));
         GlobType inDbType = globTypeExtractor.extract();
         Assert.assertTrue(inDbType.hasField(sqlService.getColumnName(f2)));
+
+        db.addColumn(f2, f3);
+
     }
 }

@@ -149,6 +149,10 @@ public abstract class JdbcConnection implements SqlConnection {
             Field[] fieldNotInDb = entry.getValue().stream().filter(f -> !tableType.hasField(sqlService.getColumnName(f)))
                     .toArray(Field[]::new);
 
+            if (fieldNotInDb.length == 0) {
+                continue;
+            }
+
             for (int i = 0; i < fieldNotInDb.length; i++) {
                 Field field = fieldNotInDb[i];
                 LOGGER.info("Add column " + field.getFullName());
