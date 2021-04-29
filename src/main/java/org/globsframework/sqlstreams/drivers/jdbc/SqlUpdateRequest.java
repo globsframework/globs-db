@@ -13,6 +13,8 @@ import org.globsframework.sqlstreams.drivers.jdbc.impl.WhereClauseConstraintVisi
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +22,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class SqlUpdateRequest implements SqlRequest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(SqlUpdateRequest.class);
     private GlobType globType;
     private Constraint constraint;
     private BlobUpdater blobUpdater;
@@ -40,7 +43,9 @@ public class SqlUpdateRequest implements SqlRequest {
         try {
             preparedStatement = connection.prepareStatement(sqlRequest);
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState("For request : " + sqlRequest, e);
+            String message = "For request : " + sqlRequest;
+            LOGGER.error(message, e);
+            throw new UnexpectedApplicationState(message, e);
         }
         sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
     }
@@ -55,7 +60,9 @@ public class SqlUpdateRequest implements SqlRequest {
         try {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState("For request : " + sqlRequest, e);
+            String message = "For request : " + sqlRequest;
+            LOGGER.error(message, e);
+            throw new UnexpectedApplicationState(message, e);
         }
     }
 

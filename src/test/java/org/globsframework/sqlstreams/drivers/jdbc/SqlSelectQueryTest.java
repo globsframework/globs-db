@@ -55,12 +55,14 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         .select(DummyObject.ID, idAccessor)
                         .select(DummyObject.NAME, nameAccessor)
                         .select(DummyObject.PRESENT)
+                        .select(DummyObject.COUNT)
                         .select(DummyObject.VALUE).getQuery();
 
         DbStream requestStream = query.execute();
         assertTrue(requestStream.next());
         assertEquals(1, idAccessor.get().getValue(0));
         assertEquals("hello", nameAccessor.get().getString());
+        assertNull(requestStream.getAccessor(DummyObject.COUNT).getObjectValue());
         assertEquals(1.1, requestStream.getAccessor(DummyObject.VALUE).getObjectValue());
         assertEquals(true, requestStream.getAccessor(DummyObject.PRESENT).getObjectValue());
         assertFalse(requestStream.next());

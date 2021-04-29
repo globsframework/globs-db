@@ -14,6 +14,8 @@ import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.collections.Pair;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SqlCreateRequest implements SqlRequest {
+    static private final Logger LOGGER = LoggerFactory.getLogger(SqlCreateRequest.class);
     private PreparedStatement preparedStatement;
     private List<Pair<Field, Accessor>> fields;
     private SqlValueFieldVisitor sqlValueVisitor;
@@ -49,10 +52,6 @@ public class SqlCreateRequest implements SqlRequest {
             throw new UnexpectedApplicationState("In prepareStatement for request : " + sql, e);
         }
         this.sqlValueVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
-    }
-
-    interface Value {
-        String get(Pair<Field, Accessor> pair);
     }
 
     private String prepareRequest(List<Pair<Field, Accessor>> fields, GlobType globType, Value value) {
@@ -89,7 +88,9 @@ public class SqlCreateRequest implements SqlRequest {
                 generatedKeyAccessor.setResult(preparedStatement.getGeneratedKeys());
             }
         } catch (SQLException e) {
-            throw jdbcConnection.getTypedException(getDebugRequest(), e);
+            String debugRequest = getDebugRequest();
+            LOGGER.error("In run " + debugRequest, e);
+            throw jdbcConnection.getTypedException(debugRequest, e);
         }
     }
 
@@ -97,6 +98,7 @@ public class SqlCreateRequest implements SqlRequest {
         try {
             preparedStatement.close();
         } catch (SQLException e) {
+            LOGGER.error("In close", e);
             throw new UnexpectedApplicationState("In close", e);
         }
     }
@@ -105,7 +107,11 @@ public class SqlCreateRequest implements SqlRequest {
         return prepareRequest(fields, globType, new DebugValue());
     }
 
-    private static class DebugValue extends FieldVisitor.AbstractWithErrorVisitor implements Value{
+    interface Value {
+        String get(Pair<Field, Accessor> pair);
+    }
+
+    private static class DebugValue extends FieldVisitor.AbstractWithErrorVisitor implements Value {
         private Object value;
         private String convertValue;
 
@@ -157,6 +163,10 @@ public class SqlCreateRequest implements SqlRequest {
 
         public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
             convertValue = GSonUtils.encode((Glob[]) value, true);
+        }
+
+        public void visitStringArray(StringArrayField field) throws Exception {
+            convertValue = String.join(",", (String[]) value);
         }
     }
 }

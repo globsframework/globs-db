@@ -11,6 +11,7 @@ import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.*;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
+import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.*;
 import org.globsframework.streams.accessors.*;
@@ -248,6 +249,8 @@ public class SqlQueryBuilder implements SelectBuilder {
         if (field.hasAnnotation(IsDate.KEY)) {
             accessor = new DateLongSqlAccessor();
         } else if (field.hasAnnotation(IsDateTime.KEY)) {
+            accessor = new DateTimeLongSqlAccessor();
+        } else if (field.hasAnnotation(IsTimestamp.KEY)) {
             accessor = new DateTimeLongSqlAccessor();
         } else {
             accessor = new LongSqlAccessor();

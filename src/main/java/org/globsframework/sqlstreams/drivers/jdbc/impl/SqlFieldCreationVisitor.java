@@ -8,6 +8,7 @@ import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
+import org.globsframework.sqlstreams.annotations.DbFieldIsNullable;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 
@@ -60,12 +61,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     public void visitStringArray(StringArrayField field) throws Exception {
-        Glob annotation = field.findAnnotation(MaxSizeType.KEY);
-        int maxSize = 255;
-        if (annotation != null) {
-            maxSize = annotation.get(MaxSizeType.VALUE, 255);
-        }
-        add("VARCHAR(" + maxSize + ")", field);
+        add("TEXT", field);
     }
 
     public void visitBoolean(BooleanField field) throws Exception {
@@ -109,6 +105,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
                     .append(" ")
                     .append(param)
                     .append(isAutoIncrementField ? " " + getAutoIncrementKeyWord() : "")
+                    .append(field.hasAnnotation(DbFieldIsNullable.KEY) ? " NULL " : "")
                     .appendIf(", ", appendComma);
         }
     }

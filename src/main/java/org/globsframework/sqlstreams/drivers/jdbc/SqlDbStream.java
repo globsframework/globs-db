@@ -9,9 +9,11 @@ import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.Date;
@@ -26,7 +28,7 @@ public class SqlDbStream implements DbStream {
     private SqlSelectQuery query;
 
     public SqlDbStream(ResultSet resultSet, Map<Field, SqlAccessor> fieldToAccessorHolder,
-                       List<SqlAccessor>  additionalAccessor,
+                       List<SqlAccessor> additionalAccessor,
                        SqlSelectQuery query) {
         this.resultSet = resultSet;
         this.fieldToAccessorHolder = fieldToAccessorHolder;
@@ -167,7 +169,22 @@ public class SqlDbStream implements DbStream {
 
     public Long getLong(int index) {
         try {
-            return resultSet.getLong(index);
+            Object object = resultSet.getObject(index);
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof Number) {
+                return ((Number) object).longValue();
+            }
+            if (object instanceof java.sql.Date) {
+                LocalDateTime ldt = LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneOffset.UTC);
+                return ldt.getLong(ChronoField.EPOCH_DAY);
+            }
+            if (object instanceof java.sql.Timestamp) {
+                LocalDateTime ldt = LocalDateTime.ofInstant(((Timestamp) object).toInstant(), ZoneOffset.UTC);
+                return ldt.getLong(ChronoField.EPOCH_DAY);
+            }
+            throw new RuntimeException("Can not convert " + object + " to long");
         } catch (SQLException e) {
             throw new SqlException(e);
         }

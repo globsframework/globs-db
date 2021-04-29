@@ -123,6 +123,7 @@ public abstract class JdbcConnection implements SqlConnection {
             PreparedStatement statement = connection.prepareStatement(writer.toString());
             statement.executeUpdate();
             statement.close();
+            LOGGER.info("sql create request : " + writer.toString());
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("Invalid creation request: " + writer.toString(), e);
         }

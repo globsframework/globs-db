@@ -10,6 +10,7 @@ import org.globsframework.metamodel.index.NotUniqueIndex;
 import org.globsframework.metamodel.links.DirectLink;
 import org.globsframework.metamodel.annotations.TypedIsDate;
 import org.globsframework.metamodel.annotations.TypedIsDateTime;
+import org.globsframework.sqlstreams.annotations.typed.TypedIsNullable;
 
 public class DummyObject {
 
@@ -25,7 +26,10 @@ public class DummyObject {
     public static StringArrayField ALIAS;
 
     public static DoubleField VALUE;
+
+    @TypedIsNullable
     public static IntegerField COUNT;
+
     public static BooleanField PRESENT;
 
     @TypedIsDate
