@@ -41,6 +41,10 @@ public class HsqlConnection extends JdbcConnection {
                 add("LONGVARCHAR", field);
             }
 
+            public void visitStringArray(StringArrayField field) throws Exception {
+                add("LONGVARCHAR", field);
+            }
+
             public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
                 add("LONGVARCHAR", field);
             }
