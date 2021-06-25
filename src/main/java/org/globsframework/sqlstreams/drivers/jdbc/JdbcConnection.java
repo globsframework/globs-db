@@ -143,8 +143,7 @@ public abstract class JdbcConnection implements SqlConnection {
 
             StringPrettyWriter writer = new StringPrettyWriter();
             writer.append("ALTER TABLE ")
-                    .append(sqlService.getTableName(type))
-                    .append(" ADD ");
+                    .append(sqlService.getTableName(type));
             SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
 
             Field[] fieldNotInDb = entry.getValue().stream().filter(f -> !tableType.hasField(sqlService.getColumnName(f)))
@@ -157,6 +156,7 @@ public abstract class JdbcConnection implements SqlConnection {
             for (int i = 0; i < fieldNotInDb.length; i++) {
                 Field field = fieldNotInDb[i];
                 LOGGER.info("Add column " + field.getFullName());
+                writer.append(" ADD ");
                 field.safeVisit(creationVisitor);
                 if (i + 1 < fieldNotInDb.length) {
                     writer.append(", ");
