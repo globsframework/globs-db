@@ -34,7 +34,6 @@
         </snapshotRepository>
     </distributionManagement>
 
-
     <build>
         <plugins>
             <plugin>
@@ -163,8 +162,5 @@
             <version>2.12.1</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
-
 </project>
