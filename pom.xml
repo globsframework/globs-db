@@ -27,11 +27,11 @@
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/${env.GITHUB_ACTOR}/${project.artifactId}</url>
         </repository>
-        <snapshotRepository>
+        <!--<snapshotRepository>
             <id>github</id>
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/${env.GITHUB_ACTOR}/${project.artifactId}</url>
-        </snapshotRepository>
+        </snapshotRepository>-->
     </distributionManagement>
 
     <build>
