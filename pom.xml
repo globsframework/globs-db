@@ -2,7 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.globsframework</groupId>
     <packaging>jar</packaging>
-    <artifactId>globs-sql</artifactId>
+<!--    <artifactId>globs-sql</artifactId>-->
+    <artifactId>globs-db</artifactId>
     <name>db access</name>
     <version>3.0</version>
 
