@@ -4,7 +4,7 @@
     <packaging>jar</packaging>
     <artifactId>globs-sql</artifactId>
     <name>db access</name>
-    <version>3.0</version>
+    <version>3.0-RELEASE</version>
 
     <repositories>
         <repository>
