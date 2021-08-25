@@ -2,8 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.globsframework</groupId>
     <packaging>jar</packaging>
-<!--    <artifactId>globs-sql</artifactId>-->
-    <artifactId>globs-db</artifactId>
+    <artifactId>globs-sql</artifactId>
     <name>db access</name>
     <version>3.0</version>
 
@@ -26,7 +25,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/${env.GITHUB_ACTOR}/${project.artifactId}</url>
+            <url>https://maven.pkg.github.com/${env.GITHUB_ACTOR}/globs-db</url>
         </repository>
         <!--<snapshotRepository>
             <id>github</id>
