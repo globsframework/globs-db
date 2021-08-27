@@ -60,7 +60,7 @@ public class JdbcSqlService extends AbstractSqlService {
         try {
             if (dbName.contains("hsqldb")) {
                 if (!loadedDrivers.containsKey("hsqldb")) {
-                    driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").newInstance();
+                    driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
                 }
                 if (namingMapping == DefaultNamingMapping.INSTANCE) {
                     namingMapping = new NamingMapping() {
@@ -86,10 +86,11 @@ public class JdbcSqlService extends AbstractSqlService {
                 };
             } else if (dbName.contains("mysql")) {
                 if (!loadedDrivers.containsKey("mysdb")) {
-                    driver = (Driver) Class.forName("com.mysql.jdbc.Driver").newInstance();
+                    driver = (Driver) Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
                 }
 //    dbInfo.put("autoReconnect", Boolean.TRUE);
                 dbInfo.put("zeroDateTimeBehavior", "convertToNull");
+                dbInfo.put("useSSL", false);
                 dbFactory = new DbFactory() {
                     public JdbcConnection create() {
                         Connection connection = getConnection();
