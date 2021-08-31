@@ -90,7 +90,7 @@ public class JdbcSqlService extends AbstractSqlService {
                 }
 //    dbInfo.put("autoReconnect", Boolean.TRUE);
                 dbInfo.put("zeroDateTimeBehavior", "convertToNull");
-                dbInfo.put("useSSL", false);
+//                dbInfo.put("useSSL", false);
                 dbFactory = new DbFactory() {
                     public JdbcConnection create() {
                         Connection connection = getConnection();
