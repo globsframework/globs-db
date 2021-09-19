@@ -298,8 +298,28 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .executeAsGlobStream()) {
             assertTrue(globStream.findFirst().isPresent());
         }
-// check done with debugger : close is called thinks to the try block
+// check done with debugger : close is called thanks to the try block
     }
+
+    @Test
+    public void useStreamApi() {
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello 1' value='1.1' present='true'/>" +
+                                "<dummyObject id='2' name='hello 2' value='1.2' present='true'/>", directory.get(GlobModel.class)));
+        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+        StringAccessor nameAcessor = queryBuilder.retrieve(DummyObject.NAME);
+        try (Stream<?> globStream = queryBuilder
+                .selectAll()
+                .getQuery()
+                .executeAsStream()) {
+            String[] names = globStream.map(x -> nameAcessor.getString()).toArray(String[]::new);
+            assertEquals(2, names.length);
+            assertEquals("hello 1", names[0]);
+            assertEquals("hello 2", names[1]);
+        }
+    }
+
 
     private void checkEmpty(Constraint constraint) {
         assertTrue(sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint).withKeys().getQuery().executeAsGlobs().isEmpty());

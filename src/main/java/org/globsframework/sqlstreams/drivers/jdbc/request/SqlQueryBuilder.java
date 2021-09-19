@@ -197,15 +197,11 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public BooleanAccessor retrieve(BooleanField field) {
-        BooleanSqlAccessor accessor = new BooleanSqlAccessor();
-        fieldToAccessorHolder.put(field, accessor);
-        return accessor;
+        return (BooleanAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new BooleanSqlAccessor());
     }
 
     public IntegerAccessor retrieve(IntegerField field) {
-        IntegerAccessor accessor = createAccessor(field);
-        fieldToAccessorHolder.put(field, (SqlAccessor) accessor);
-        return accessor;
+        return (IntegerAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> (SqlAccessor) createAccessor(field));
     }
 
     private IntegerAccessor createAccessor(IntegerField field) {
@@ -227,21 +223,15 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public LongAccessor retrieve(LongField field) {
-        LongAccessor accessor = createAccessor(field);
-        fieldToAccessorHolder.put(field, (SqlAccessor) accessor);
-        return accessor;
+        return (LongAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> (SqlAccessor) createAccessor(field));
     }
 
     public DateAccessor retrieve(DateField field) {
-        DateAccessor accessor = createAccessor(field);
-        fieldToAccessorHolder.put(field, (SqlAccessor) accessor);
-        return accessor;
+        return (DateAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> (SqlAccessor) createAccessor(field));
     }
 
     public DateTimeAccessor retrieve(DateTimeField field) {
-        DateTimeAccessor accessor = createAccessor(field);
-        fieldToAccessorHolder.put(field, (SqlAccessor) accessor);
-        return accessor;
+        return (DateTimeAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> (SqlAccessor) createAccessor(field));
     }
 
     private LongAccessor createAccessor(LongField field) {
@@ -259,21 +249,15 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public StringAccessor retrieve(StringField field) {
-        StringSqlAccessor accessor = new StringSqlAccessor();
-        fieldToAccessorHolder.put(field, accessor);
-        return accessor;
+        return (StringAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new StringSqlAccessor());
     }
 
     public DoubleAccessor retrieve(DoubleField field) {
-        DoubleSqlAccessor accessor = new DoubleSqlAccessor();
-        fieldToAccessorHolder.put(field, accessor);
-        return accessor;
+        return (DoubleAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new DoubleSqlAccessor());
     }
 
     public BlobSqlAccessor retrieve(BlobField field) {
-        BlobSqlAccessor accessor = new BlobSqlAccessor();
-        fieldToAccessorHolder.put(field, accessor);
-        return accessor;
+        return (BlobSqlAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new BlobSqlAccessor());
     }
 
     public Accessor retrieveUnTyped(Field field) {
@@ -283,24 +267,15 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public StringArrayAccessor retrieve(StringArrayField field) {
-        StringSqlAccessor accessor = new StringSqlAccessor();
-        StringArraySqlAccessor stringArraySqlAccessor = new StringArraySqlAccessor(accessor);
-        fieldToAccessorHolder.put(field, stringArraySqlAccessor);
-        return stringArraySqlAccessor;
+        return (StringArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x-> new StringArraySqlAccessor(new StringSqlAccessor()));
     }
 
     public GlobAccessor retrieve(GlobField field) {
-        StringSqlAccessor accessor = new StringSqlAccessor();
-        GlobSqlAccessor globSqlAccessor = new GlobSqlAccessor(accessor, field.getTargetType());
-        fieldToAccessorHolder.put(field, globSqlAccessor);
-        return globSqlAccessor;
+        return (GlobAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new GlobSqlAccessor(new StringSqlAccessor(), field.getTargetType()));
     }
 
     public GlobsAccessor retrieve(GlobArrayField field) {
-        StringSqlAccessor accessor = new StringSqlAccessor();
-        GlobsSqlAccessor globSqlAccessor = new GlobsSqlAccessor(accessor, field.getTargetType());
-        fieldToAccessorHolder.put(field, globSqlAccessor);
-        return globSqlAccessor;
+        return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new GlobsSqlAccessor(new StringSqlAccessor(), field.getTargetType()));
     }
 
     public static class Order {

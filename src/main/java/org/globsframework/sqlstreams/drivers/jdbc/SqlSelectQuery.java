@@ -173,7 +173,25 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     public Stream<?> executeAsStream() {
-        throw new RuntimeException("Not implemented");
+        DbStream dbStream = execute();
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Object>() {
+                    private Boolean hasNext;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (hasNext == null) {
+                            hasNext = dbStream.next();
+                        }
+                        return hasNext;
+                    }
+
+                    @Override
+                    public Object next() {
+                        hasNext = null;
+                        return null;
+                    }
+                }, 0), false)
+                .onClose(dbStream::close);
     }
 
     public Stream<Glob> executeAsGlobStream() {
