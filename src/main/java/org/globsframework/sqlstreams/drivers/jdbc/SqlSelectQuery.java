@@ -191,13 +191,13 @@ public class SqlSelectQuery implements SelectQuery {
                         return null;
                     }
                 }, 0), false)
-                .onClose(dbStream::close);
+                .onClose(this::resultSetClose);
     }
 
     public Stream<Glob> executeAsGlobStream() {
         DbStream dbStream = execute();
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new GlobIterator(dbStream), 0), false)
-                .onClose(dbStream::close);
+                .onClose(this::resultSetClose);
     }
 
     public DbStream execute() {
