@@ -72,6 +72,14 @@ public class Constraints {
         return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
+    public static Constraint equal(StringArrayField field, StringArrayAccessor accessor) {
+        return new EqualConstraint(new FieldOperand(field), new AccessorOperand(field, accessor));
+    }
+
+    public static Constraint equal(StringArrayField field, String[] value) {
+        return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
     public static Constraint equal(IntegerField field, IntegerAccessor accessor) {
         return new EqualConstraint(new FieldOperand(field), new AccessorOperand(field, accessor));
     }
