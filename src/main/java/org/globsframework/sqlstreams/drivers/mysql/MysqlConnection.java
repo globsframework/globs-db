@@ -1,5 +1,8 @@
 package org.globsframework.sqlstreams.drivers.mysql;
 
+import org.globsframework.metamodel.annotations.MaxSizeType;
+import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
@@ -25,8 +28,11 @@ public class MysqlConnection extends JdbcConnection {
             public String getAutoIncrementKeyWord() {
                 return "AUTO_INCREMENT";
             }
-        };
 
+            public String getLongStringType(int maxSize) {
+                return "TEXT";
+            }
+        };
     }
 
     protected boolean isRollbackSQLState(SQLException e) {

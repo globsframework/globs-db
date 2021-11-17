@@ -57,7 +57,16 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         if (annotation != null) {
             maxSize = annotation.get(MaxSizeType.VALUE, 255);
         }
-        add("VARCHAR(" + maxSize + ")", field);
+        if (maxSize >= 30000) {
+            add(getLongStringType(maxSize), field);
+        }
+        else {
+            add("VARCHAR(" + maxSize + ")", field);
+        }
+    }
+
+    public String getLongStringType(int maxSize){
+        return "VARCHAR(" + maxSize + ")";
     }
 
     public void visitStringArray(StringArrayField field) throws Exception {
