@@ -13,12 +13,9 @@ import org.globsframework.sqlstreams.drivers.jdbc.impl.WhereClauseConstraintVisi
 import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.DbStream;
-import org.globsframework.utils.exceptions.ItemNotFound;
-import org.globsframework.utils.exceptions.TooManyItems;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,19 +23,19 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class SqlSelectQuery implements SelectQuery {
-    private static Logger LOGGER = LoggerFactory.getLogger(SqlSelectQuery.class);
-    private Set<GlobType> globTypes = new HashSet<GlobType>();
-    private Constraint constraint;
-    private BlobUpdater blobUpdater;
-    private boolean autoClose;
-    private Map<Field, SqlAccessor> fieldToAccessorHolder;
-    private SqlService sqlService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlSelectQuery.class);
+    private final Set<GlobType> globTypes = new HashSet<GlobType>();
+    private final Constraint constraint;
+    private final BlobUpdater blobUpdater;
+    private final boolean autoClose;
+    private final Map<Field, SqlAccessor> fieldToAccessorHolder;
+    private final SqlService sqlService;
     private final List<SqlQueryBuilder.Order> orders;
     private final int top;
-    private Set<Field> distinct;
-    private List<SqlOperation> sqlOperations;
+    private final Set<Field> distinct;
+    private final List<SqlOperation> sqlOperations;
     private PreparedStatement preparedStatement;
-    private String sql;
+    private final String sql;
     private boolean shouldInitAccessorWithMetadata;
 
     public SqlSelectQuery(Connection connection, Constraint constraint,
@@ -62,10 +59,6 @@ public class SqlSelectQuery implements SelectQuery {
         }
         try {
             this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            // ack => force mysql driver to not load all data
-            if (preparedStatement instanceof com.mysql.jdbc.PreparedStatement) {
-                ((com.mysql.jdbc.PreparedStatement) preparedStatement).enableStreamingResults();
-            }
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("for request " + sql, e);
         }
