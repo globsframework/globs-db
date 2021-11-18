@@ -4,7 +4,6 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
-import org.globsframework.sqlstreams.drivers.mongodb.MongoDbConnection;
 import org.globsframework.utils.exceptions.InvalidData;
 
 import java.sql.DatabaseMetaData;
@@ -34,7 +33,7 @@ public class DbChecker {
             ResultSet tableNames = metaData.getTables(null, null, "%", names);
             String tableName = sqlService.getTableName(globType);
             while (tableNames.next()) {
-                if (tableName.equals(tableNames.getString("TABLE_NAME"))) {
+                if (tableName.equalsIgnoreCase(tableNames.getString("TABLE_NAME"))) {
                     return true;
                 }
             }
