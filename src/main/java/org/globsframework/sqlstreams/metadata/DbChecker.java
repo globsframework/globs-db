@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DbChecker {
-    private DatabaseMetaData metaData;
-    private SqlService sqlService;
+    private final DatabaseMetaData metaData;
+    private final SqlService sqlService;
 
     public DbChecker(SqlService sqlService, SqlConnection sqlConnection) {
         this.sqlService = sqlService;

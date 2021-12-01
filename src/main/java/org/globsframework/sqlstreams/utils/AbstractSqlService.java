@@ -1,6 +1,5 @@
 package org.globsframework.sqlstreams.utils;
 
-import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.annotations.TargetTypeName;

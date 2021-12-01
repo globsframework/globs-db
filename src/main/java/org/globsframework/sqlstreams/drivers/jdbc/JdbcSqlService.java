@@ -16,9 +16,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JdbcSqlService extends AbstractSqlService {
-    private static Map<String, Driver>  loadedDrivers = new HashMap<String, Driver>();
+    private static Map<String, Driver>  loadedDrivers = new ConcurrentHashMap<>();
     private Driver driver;
     private String dbName;
     private Properties dbInfo;
@@ -59,8 +60,10 @@ public class JdbcSqlService extends AbstractSqlService {
     private void loadDriver() {
         try {
             if (dbName.contains("hsqldb")) {
-                if (!loadedDrivers.containsKey("hsqldb")) {
+                driver = loadedDrivers.get(dbName);
+                if (driver == null) {
                     driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
+                    loadedDrivers.put(dbName, driver);
                 }
                 if (namingMapping == DefaultNamingMapping.INSTANCE) {
                     namingMapping = new NamingMapping() {
@@ -85,12 +88,12 @@ public class JdbcSqlService extends AbstractSqlService {
                     }
                 };
             } else if (dbName.contains("mysql")) {
-                if (!loadedDrivers.containsKey("mysdb")) {
+                driver = loadedDrivers.get(dbName);
+                if (driver == null) {
                     driver = (Driver) Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
+                    loadedDrivers.put(dbName, driver);
                 }
-//    dbInfo.put("autoReconnect", Boolean.TRUE);
                 dbInfo.put("zeroDateTimeBehavior", "convertToNull");
-//                dbInfo.put("useSSL", false);
                 dbFactory = new DbFactory() {
                     public JdbcConnection create() {
                         Connection connection = getConnection();
@@ -103,6 +106,26 @@ public class JdbcSqlService extends AbstractSqlService {
                         return new MysqlConnection(connection, JdbcSqlService.this);
                     }
                 };
+            } else if (dbName.startsWith("jdbc:mariadb:")) {
+                driver = loadedDrivers.get(dbName);
+                if (driver == null) {
+                    driver = (Driver) Class.forName("org.mariadb.jdbc.Driver").getDeclaredConstructor().newInstance();
+                    loadedDrivers.put(dbName, driver);
+                }
+                dbInfo.put("zeroDateTimeBehavior", "convertToNull");
+                dbFactory = new DbFactory() {
+                    public JdbcConnection create() {
+                        Connection connection = getConnection();
+                        try {
+                            connection.setAutoCommit(false);
+                        } catch (SQLException e) {
+                            throw new UnexpectedApplicationState(e);
+                        }
+
+                        return new MysqlConnection(connection, JdbcSqlService.this);
+                    }
+                };
+
             }
         } catch (Exception e) {
             throw new ItemNotFound(e);
