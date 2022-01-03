@@ -421,4 +421,27 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         Assert.assertEquals(1, min.getInteger().intValue());
 
     }
+
+    @Test
+    public void checkMinMaxWithDistinct(){
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' count='1' present='true'/>" +
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+        Ref<StringAccessor> accessor = new Ref<>();
+        IntegerAccessor max = queryBuilder
+                .select(DummyObject.NAME, accessor)
+                .groupBy(DummyObject.NAME)
+                .max(DummyObject.COUNT);
+        DbStream execute = queryBuilder.getQuery().execute();
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getInteger().intValue());
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getInteger().intValue());
+    }
 }

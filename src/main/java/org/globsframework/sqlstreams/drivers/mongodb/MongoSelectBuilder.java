@@ -110,6 +110,10 @@ public class MongoSelectBuilder implements SelectBuilder {
         return this;
     }
 
+    public SelectBuilder groupBy(Field field) {
+        throw new RuntimeException("Group by not implemented.");
+    }
+
     public SelectBuilder orderAsc(Field field) {
         orders.add(new Order(field, true));
         return this;

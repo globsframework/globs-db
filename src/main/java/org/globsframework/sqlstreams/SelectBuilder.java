@@ -37,6 +37,9 @@ public interface SelectBuilder {
 
     SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor);
 
+
+    SelectBuilder groupBy(Field field);
+
     SelectBuilder orderAsc(Field field);
 
     SelectBuilder orderDesc(Field field);

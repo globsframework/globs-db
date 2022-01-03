@@ -31,6 +31,7 @@ public class SqlSelectQuery implements SelectQuery {
     private final Map<Field, SqlAccessor> fieldToAccessorHolder;
     private final SqlService sqlService;
     private final List<SqlQueryBuilder.Order> orders;
+    private final List<Field> groupBy;
     private final int top;
     private final Set<Field> distinct;
     private final List<SqlOperation> sqlOperations;
@@ -41,13 +42,14 @@ public class SqlSelectQuery implements SelectQuery {
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
                           BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
-                          int top, Set<Field> distinct, List<SqlOperation> sqlOperations) {
+                          List<Field> groupBy, int top, Set<Field> distinct, List<SqlOperation> sqlOperations) {
         this.constraint = constraint;
         this.blobUpdater = blobUpdater;
         this.autoClose = autoClose;
         this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
         this.sqlService = sqlService;
         this.orders = orders;
+        this.groupBy = groupBy;
         this.top = top;
         this.distinct = distinct;
         this.sqlOperations = sqlOperations;
@@ -143,6 +145,18 @@ public class SqlSelectQuery implements SelectQuery {
         }
         if (where != null) {
             prettyWriter.append(where.toString());
+        }
+
+        if (!groupBy.isEmpty()) {
+            prettyWriter.append(" GROUP BY ");
+            for (Field field : groupBy) {
+                String tableName = sqlService.getTableName(field.getGlobType());
+                prettyWriter.append(tableName)
+                        .append(".")
+                        .append(sqlService.getColumnName(field))
+                        .append(", ");
+            }
+            prettyWriter.removeLast().removeLast();
         }
 
         if (!orders.isEmpty()) {

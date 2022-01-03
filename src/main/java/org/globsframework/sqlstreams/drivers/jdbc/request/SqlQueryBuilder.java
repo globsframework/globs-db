@@ -33,6 +33,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     private int top = -1;
     private Set<Field> distinct = new HashSet<>();
     private List<SqlOperation> sqlOperations = new ArrayList<>();
+    private List<Field> groupBy = new ArrayList<>();
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;
@@ -44,7 +45,8 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectQuery getQuery() {
         try {
-            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, orders, top, distinct, sqlOperations);
+            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, 
+                    orders, groupBy, top, distinct, sqlOperations);
         } finally {
             fieldToAccessorHolder.clear();
         }
@@ -173,6 +175,11 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor) {
         accessor.set(retrieve(field));
+        return this;
+    }
+
+    public SelectBuilder groupBy(Field field) {
+        this.groupBy.add(field);
         return this;
     }
 
