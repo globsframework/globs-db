@@ -6,14 +6,15 @@ import org.globsframework.sqlstreams.annotations.DbFieldName;
 import org.globsframework.sqlstreams.annotations.TargetTypeName;
 import org.globsframework.sqlstreams.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sqlstreams.drivers.mysql.MysqlConnection;
+import org.globsframework.sqlstreams.drivers.postgresql.PostgresqlConnection;
 import org.globsframework.sqlstreams.utils.AbstractSqlService;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,76 +61,108 @@ public class JdbcSqlService extends AbstractSqlService {
     private void loadDriver() {
         try {
             if (dbName.contains("hsqldb")) {
-                driver = loadedDrivers.get(dbName);
-                if (driver == null) {
-                    driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
-                    loadedDrivers.put(dbName, driver);
-                }
-                if (namingMapping == DefaultNamingMapping.INSTANCE) {
-                    namingMapping = new NamingMapping() {
-                        public String getTableName(GlobType globType) {
-                            return TargetTypeName.getOptName(globType).orElse(toSqlName(globType.getName()));
-                        }
-
-                        public String getColumnName(Field field) {
-                            return DbFieldName.getOptName(field).orElse(toSqlName(field.getName()));
-                        }
-                    };
-                }
-                dbFactory = new DbFactory() {
-                    public JdbcConnection create() {
-                        Connection connection = getConnection();
-                        try {
-                            connection.setAutoCommit(false);
-                        } catch (SQLException e) {
-                            throw new UnexpectedApplicationState(e);
-                        }
-                        return new HsqlConnection(connection, JdbcSqlService.this);
-                    }
-                };
+                setupHsqldb();
             } else if (dbName.contains("mysql")) {
-                driver = loadedDrivers.get(dbName);
-                if (driver == null) {
-                    driver = (Driver) Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
-                    loadedDrivers.put(dbName, driver);
-                }
-                dbInfo.put("zeroDateTimeBehavior", "convertToNull");
-                dbFactory = new DbFactory() {
-                    public JdbcConnection create() {
-                        Connection connection = getConnection();
-                        try {
-                            connection.setAutoCommit(false);
-                        } catch (SQLException e) {
-                            throw new UnexpectedApplicationState(e);
-                        }
-
-                        return new MysqlConnection(connection, JdbcSqlService.this);
-                    }
-                };
+                setupMySql();
             } else if (dbName.startsWith("jdbc:mariadb:")) {
-                driver = loadedDrivers.get(dbName);
-                if (driver == null) {
-                    driver = (Driver) Class.forName("org.mariadb.jdbc.Driver").getDeclaredConstructor().newInstance();
-                    loadedDrivers.put(dbName, driver);
-                }
-                dbInfo.put("zeroDateTimeBehavior", "convertToNull");
-                dbFactory = new DbFactory() {
-                    public JdbcConnection create() {
-                        Connection connection = getConnection();
-                        try {
-                            connection.setAutoCommit(false);
-                        } catch (SQLException e) {
-                            throw new UnexpectedApplicationState(e);
-                        }
-
-                        return new MysqlConnection(connection, JdbcSqlService.this);
-                    }
-                };
-
+                setupMariaDb();
+            } else if (dbName.startsWith("jdbc:postgresql:")) {
+                setupPostgresql();
             }
         } catch (Exception e) {
             throw new ItemNotFound(e);
         }
+    }
+
+    private void setupPostgresql() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        driver = loadedDrivers.get(dbName);
+        if (driver == null) {
+            driver = (Driver) Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
+            loadedDrivers.put(dbName, driver);
+        }
+        dbFactory = new DbFactory() {
+            public JdbcConnection create() {
+                Connection connection = getConnection();
+                try {
+                    connection.setAutoCommit(false);
+                } catch (SQLException e) {
+                    throw new UnexpectedApplicationState(e);
+                }
+                return new PostgresqlConnection(connection, JdbcSqlService.this);
+            }
+        };
+    }
+
+    private void setupMariaDb() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        driver = loadedDrivers.get(dbName);
+        if (driver == null) {
+            driver = (Driver) Class.forName("org.mariadb.jdbc.Driver").getDeclaredConstructor().newInstance();
+            loadedDrivers.put(dbName, driver);
+        }
+        dbInfo.put("zeroDateTimeBehavior", "convertToNull");
+        dbFactory = new DbFactory() {
+            public JdbcConnection create() {
+                Connection connection = getConnection();
+                try {
+                    connection.setAutoCommit(false);
+                } catch (SQLException e) {
+                    throw new UnexpectedApplicationState(e);
+                }
+
+                return new MysqlConnection(connection, JdbcSqlService.this);
+            }
+        };
+    }
+
+    private void setupMySql() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        driver = loadedDrivers.get(dbName);
+        if (driver == null) {
+            driver = (Driver) Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
+            loadedDrivers.put(dbName, driver);
+        }
+        dbInfo.put("zeroDateTimeBehavior", "convertToNull");
+        dbFactory = new DbFactory() {
+            public JdbcConnection create() {
+                Connection connection = getConnection();
+                try {
+                    connection.setAutoCommit(false);
+                } catch (SQLException e) {
+                    throw new UnexpectedApplicationState(e);
+                }
+
+                return new MysqlConnection(connection, JdbcSqlService.this);
+            }
+        };
+    }
+
+    private void setupHsqldb() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        driver = loadedDrivers.get(dbName);
+        if (driver == null) {
+            driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
+            loadedDrivers.put(dbName, driver);
+        }
+        if (namingMapping == DefaultNamingMapping.INSTANCE) {
+            namingMapping = new NamingMapping() {
+                public String getTableName(GlobType globType) {
+                    return TargetTypeName.getOptName(globType).orElse(toSqlName(globType.getName()));
+                }
+
+                public String getColumnName(Field field) {
+                    return DbFieldName.getOptName(field).orElse(toSqlName(field.getName()));
+                }
+            };
+        }
+        dbFactory = new DbFactory() {
+            public JdbcConnection create() {
+                Connection connection = getConnection();
+                try {
+                    connection.setAutoCommit(false);
+                } catch (SQLException e) {
+                    throw new UnexpectedApplicationState(e);
+                }
+                return new HsqlConnection(connection, JdbcSqlService.this);
+            }
+        };
     }
 
     public JdbcConnection getDb() {

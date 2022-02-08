@@ -9,7 +9,6 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeBuilder;
 import org.globsframework.metamodel.annotations.AllAnnotations;
 import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.fields.DateTimeField;
 import org.globsframework.metamodel.fields.DoubleField;
 import org.globsframework.metamodel.fields.LongField;
 import org.globsframework.metamodel.fields.StringField;
@@ -28,19 +27,16 @@ import org.globsframework.utils.serialization.SerializedOutput;
 import org.junit.Test;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.sql.DatabaseMetaData;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class TheozReadFromDb {
+public class PostgresTesting {
 
     public static void main(String... args) throws IOException {
-        new TheozReadFromDb()
+        new PostgresTesting()
                 .read(args[0], args[1], args[2], args[3],
                         args.length <= 4 ? Collections.emptySet() :
                         new HashSet<String>(Arrays.asList(Arrays.copyOfRange(args, 4, args.length))),
@@ -98,23 +94,31 @@ public class TheozReadFromDb {
 
     @Test
     public void name() throws IOException {
-        SqlService sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
+        SqlService sqlService = new JdbcSqlService("jdbc:postgresql://localhost/glindaBackend", "glindaBackend", "glinda");
         SqlConnection db = sqlService.getDb();
         GlobTypeBuilder globTypeBuilder = DefaultGlobTypeBuilder.init("TEST");
         StringField f1 = globTypeBuilder.declareStringField("f1");
         DoubleField f2 = globTypeBuilder.declareDoubleField("f2");
+        Glob nullable = DbFieldIsNullable.create(true);
+        Glob idDateTime = IsDateTime.TYPE.instantiate();
+        LongField f3 = globTypeBuilder.declareLongField("f3", idDateTime);
 
         GlobType globType = globTypeBuilder.get();
 
-        MutableGlob data = globType.instantiate().set(f1, "ééé")
-                .set(f2, 3.3);
+        MutableGlob data = globType.instantiate()
+                .set(f1, "ééé")
+                .set(f2, 3.3)
+                .set(f3, ZonedDateTime.now().toInstant().toEpochMilli())
+                ;
 
         db.createTable(globType);
         db.populate(new GlobList(data));
 
-        Path theOz = Files.createTempFile("theOz", "");
-        System.out.println("TheozReadFromDb.name " + theOz.toAbsolutePath().toString());
-        main("jdbc:hsqldb:.", "sa", "", globType.getName(), theOz.toAbsolutePath().toString());
+        db.commitAndClose();
+
+//        Path theOz = Files.createTempFile("theOz", "");
+//        System.out.println("TheozReadFromDb.name " + theOz.toAbsolutePath().toString());
+//        main("jdbc:postgresql://localhost/glindaBackend", "glindaBackend", "glinda", globType.getName(), theOz.toAbsolutePath().toString());
 //        Path theOz1 = Paths.get(theOz.toUri(), ".ser");
 //        Assert.assertTrue(theOz1.toFile().exists());
 //        Assert.assertTrue(theOz.toFile().length() > 10);

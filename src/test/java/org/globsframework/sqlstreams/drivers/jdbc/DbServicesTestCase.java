@@ -18,7 +18,6 @@ import org.globsframework.streams.accessors.Accessor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
