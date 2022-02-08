@@ -24,6 +24,7 @@ import org.globsframework.sqlstreams.annotations.DbFieldIsNullable;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.utils.serialization.SerializedOutput;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
@@ -33,10 +34,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class PostgresTesting {
+public class PostgresTestCase {
 
     public static void main(String... args) throws IOException {
-        new PostgresTesting()
+        new PostgresTestCase()
                 .read(args[0], args[1], args[2], args[3],
                         args.length <= 4 ? Collections.emptySet() :
                         new HashSet<String>(Arrays.asList(Arrays.copyOfRange(args, 4, args.length))),
@@ -122,5 +123,8 @@ public class PostgresTesting {
 //        Path theOz1 = Paths.get(theOz.toUri(), ".ser");
 //        Assert.assertTrue(theOz1.toFile().exists());
 //        Assert.assertTrue(theOz.toFile().length() > 10);
+
+        Assert.assertTrue(true);
+
     }
 }
