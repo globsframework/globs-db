@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.annotations.Target;
@@ -20,13 +21,11 @@ import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.GlobAccessor;
-import org.globsframework.streams.accessors.GlobsAccessor;
-import org.globsframework.streams.accessors.IntegerAccessor;
-import org.globsframework.streams.accessors.StringAccessor;
+import org.globsframework.streams.accessors.*;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.Utils;
+import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
@@ -443,5 +442,66 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getInteger().intValue());
         Assert.assertTrue(execute.next());
         Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getInteger().intValue());
+    }
+
+    @Test
+    public void checkCount(){
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' count='1' present='true'/>" +
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+        Ref<StringAccessor> accessor = new Ref<>();
+        LongAccessor max = queryBuilder
+                .select(DummyObject.NAME, accessor)
+                .groupBy(DummyObject.NAME)
+                .count(DummyObject.COUNT);
+        DbStream execute = queryBuilder.getQuery().execute();
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getLong().intValue());
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 5, max.getLong().intValue());
+    }
+
+    @Test
+    public void checkSum(){
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' count='1' present='true'/>" +
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+        Ref<StringAccessor> accessor = new Ref<>();
+        LongAccessor max = queryBuilder
+                .select(DummyObject.NAME, accessor)
+                .groupBy(DummyObject.NAME)
+                .sum(DummyObject.COUNT);
+        DbStream execute = queryBuilder.getQuery().execute();
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 19, max.getLong().intValue());
+        Assert.assertTrue(execute.next());
+        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 19, max.getLong().intValue());
+    }
+
+
+    @Test
+    public void selectOnUnknownFieldThrowAnError() {
+        GlobType obj_1 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").addStringField("B").get();
+        GlobType obj_2 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").get();
+        sqlConnection.createTable(obj_2);
+        sqlConnection.populate(new GlobList(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
+        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(obj_1);
+        try {
+            DbStream execute = queryBuilder.selectAll().getQuery().execute();
+            Assert.fail("Should not be call!");
+        } catch (UnexpectedApplicationState e) {
+        }
     }
 }

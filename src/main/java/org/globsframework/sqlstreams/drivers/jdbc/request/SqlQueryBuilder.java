@@ -3,14 +3,14 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.annotations.IsDate;
+import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.*;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.*;
@@ -45,7 +45,7 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectQuery getQuery() {
         try {
-            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, 
+            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
                     orders, groupBy, top, distinct, sqlOperations);
         } finally {
             fieldToAccessorHolder.clear();
@@ -85,8 +85,39 @@ public class SqlQueryBuilder implements SelectBuilder {
         return singleOp(field, "MAX");
     }
 
+    public LongAccessor count(LongField field) {
+        return singleOp(field, "COUNT");
+    }
+
+    public LongAccessor count(IntegerField field) {
+        return singleLongOp(field, "COUNT");
+    }
+
+    public LongAccessor sum(IntegerField field) {
+        return singleLongOp(field, "SUM");
+    }
+
+    public LongAccessor sum(LongField field) {
+        return singleOp(field, "SUM");
+    }
+
     private LongAccessor singleOp(LongField field, String op) {
         LongAccessor accessor = createAccessor(field);
+        sqlOperations.add(new SqlOperation() {
+
+            public SqlAccessor getAccessor() {
+                return (SqlAccessor) accessor;
+            }
+
+            public String toSqlOpe(ToSqlName toSqlName) {
+                return op + "(" + toSqlName.toSqlName(field) + ")";
+            }
+        });
+        return accessor;
+    }
+
+    private LongAccessor singleLongOp(IntegerField field, String op) {
+        LongAccessor accessor = new LongSqlAccessor();
         sqlOperations.add(new SqlOperation() {
 
             public SqlAccessor getAccessor() {
@@ -274,7 +305,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public StringArrayAccessor retrieve(StringArrayField field) {
-        return (StringArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x-> new StringArraySqlAccessor(new StringSqlAccessor()));
+        return (StringArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new StringArraySqlAccessor(new StringSqlAccessor()));
     }
 
     public GlobAccessor retrieve(GlobField field) {

@@ -129,6 +129,14 @@ public class SqlCreateRequest implements SqlRequest {
             convertValue = value.toString();
         }
 
+        public void visitDate(DateField field) throws Exception {
+            super.visitDate(field);
+        }
+
+        public void visitDateTime(DateTimeField field) throws Exception {
+            super.visitDateTime(field);
+        }
+
         public void visitDouble(DoubleField field) {
             convertValue = value.toString();
         }

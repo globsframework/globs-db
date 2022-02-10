@@ -145,6 +145,26 @@ public class MongoSelectBuilder implements SelectBuilder {
     }
 
     @Override
+    public LongAccessor count(LongField field) {
+        return null;
+    }
+
+    @Override
+    public LongAccessor count(IntegerField field) {
+        return null;
+    }
+
+    @Override
+    public LongAccessor sum(IntegerField count) {
+        return null;
+    }
+
+    @Override
+    public LongAccessor sum(LongField field) {
+        return null;
+    }
+
+    @Override
     public IntegerAccessor min(IntegerField field) {
         return null;
     }

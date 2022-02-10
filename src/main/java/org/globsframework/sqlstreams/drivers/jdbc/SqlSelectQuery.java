@@ -221,7 +221,7 @@ public class SqlSelectQuery implements SelectQuery {
                 shouldInitAccessorWithMetadata = false;
             }
             return new SqlDbStream(resultSet, fieldToAccessorHolder,
-                    sqlOperations.stream().map(sqlOperation -> sqlOperation.getAccessor()).collect(Collectors.toList()), this);
+                    sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("for request : " + sql, e);
         }

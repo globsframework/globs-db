@@ -52,6 +52,14 @@ public interface SelectBuilder {
 
     LongAccessor max(LongField field);
 
+    LongAccessor count(LongField field);
+
+    LongAccessor count(IntegerField field);
+
+    LongAccessor sum(IntegerField count);
+
+    LongAccessor sum(LongField field);
+
     IntegerAccessor min(IntegerField field);
 
     LongAccessor min(LongField field);
