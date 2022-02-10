@@ -209,6 +209,11 @@ public class SqlQueryBuilder implements SelectBuilder {
         return this;
     }
 
+    public SelectBuilder select(LongArrayField field, Ref<LongArrayAccessor> accessor) {
+        accessor.set(retrieve(field));
+        return this;
+    }
+
     public SelectBuilder groupBy(Field field) {
         this.groupBy.add(field);
         return this;
@@ -316,6 +321,10 @@ public class SqlQueryBuilder implements SelectBuilder {
         return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new GlobsSqlAccessor(new StringSqlAccessor(), field.getTargetType()));
     }
 
+    public LongArrayAccessor retrieve(LongArrayField field) {
+        return (LongArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new LongArraySqlAccessor(new StringSqlAccessor()));
+    }
+
     public static class Order {
         public final Field field;
         public final boolean asc;
@@ -392,6 +401,42 @@ public class SqlQueryBuilder implements SelectBuilder {
         public Object getObjectValue() {
             return getString();
         }
+    }
+
+    private static class LongArraySqlAccessor extends SqlAccessor implements LongArrayAccessor {
+        private final StringSqlAccessor accessor;
+
+        public LongArraySqlAccessor(StringSqlAccessor accessor) {
+            this.accessor = accessor;
+        }
+
+        public void setMoStream(SqlDbStream sqlMoStream) {
+            super.setMoStream(sqlMoStream);
+            accessor.setMoStream(sqlMoStream);
+        }
+
+        public void setIndex(int index) {
+            super.setIndex(index);
+            accessor.setIndex(index);
+        }
+
+        public long[] getValues() {
+            String value = accessor.getString();
+            if (value != null) {
+                if (value.isEmpty()) {
+                    return new long[0];
+                } else {
+                    return Arrays.stream(value.split(",")).mapToLong(Long::parseLong).toArray();
+                }
+            } else {
+                return null;
+            }
+        }
+
+        public Object getObjectValue() {
+            return getValues();
+        }
+
     }
 
     private static class GlobsSqlAccessor extends SqlAccessor implements GlobsAccessor {

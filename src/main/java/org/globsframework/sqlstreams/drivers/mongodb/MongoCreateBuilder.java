@@ -73,6 +73,11 @@ public class MongoCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    @Override
+    public CreateBuilder set(LongArrayField field, long[] value) {
+        return null;
+    }
+
     public CreateBuilder set(IntegerField field, IntegerAccessor accessor) {
         fieldsValues.put(field, accessor);
         return this;

@@ -143,6 +143,16 @@ public class SqlUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
+    public UpdateBuilder update(LongArrayField field, LongArrayAccessor accessor) {
+        this.values.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(LongArrayField field, long[] values) {
+        this.values.put(field, new ValueLongArrayAccessor(values));
+        return this;
+    }
+
     public SqlRequest getRequest() {
         try {
             return new SqlUpdateRequest(globType, constraint, values, connection, sqlService, blobUpdater);

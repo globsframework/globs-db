@@ -16,6 +16,7 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
     private PreparedStatement preparedStatement;
@@ -114,6 +115,14 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
             preparedStatement.setString(index, String.join(",", (String[]) value));
+        }
+    }
+
+    public void visitLongArray(LongArrayField field) throws Exception {
+        if (value == null) {
+            preparedStatement.setNull(index, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(index, Arrays.stream((long[]) value).mapToObj(Long::toString).collect(Collectors.joining(",")));
         }
     }
 

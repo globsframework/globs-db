@@ -20,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SqlCreateRequest implements SqlRequest {
     static private final Logger LOGGER = LoggerFactory.getLogger(SqlCreateRequest.class);
@@ -176,5 +178,13 @@ public class SqlCreateRequest implements SqlRequest {
         public void visitStringArray(StringArrayField field) throws Exception {
             convertValue = String.join(",", (String[]) value);
         }
+
+        public void visitLongArray(LongArrayField field) throws Exception {
+            convertValue = Arrays.stream((long[]) value).mapToObj(Long::toString).collect(Collectors.joining(","));
+        }
+    }
+
+    public String toString() {
+        return getDebugRequest();
     }
 }

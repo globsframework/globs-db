@@ -73,6 +73,10 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         add("TEXT", field);
     }
 
+    public void visitLongArray(LongArrayField field) throws Exception {
+        add("TEXT", field);
+    }
+
     public void visitBoolean(BooleanField field) throws Exception {
         add("BOOLEAN", field);
     }

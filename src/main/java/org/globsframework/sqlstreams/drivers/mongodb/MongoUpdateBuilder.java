@@ -146,6 +146,16 @@ public class MongoUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
+    @Override
+    public UpdateBuilder update(LongArrayField field, LongArrayAccessor accessor) {
+        return null;
+    }
+
+    @Override
+    public UpdateBuilder update(LongArrayField field, long[] values) {
+        return null;
+    }
+
     public SqlRequest getRequest() {
         return new MongoUpdateSqlRequest(sqlService, mongoDatabase, globType, constraint, fieldsValues, false);
     }

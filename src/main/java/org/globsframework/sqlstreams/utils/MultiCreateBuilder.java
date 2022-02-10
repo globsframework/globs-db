@@ -53,6 +53,11 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    public CreateBuilder set(LongArrayField field, long[] value) {
+        createBuilders.get(field.getGlobType()).set(field, value);
+        return this;
+    }
+
     public CreateBuilder set(DoubleField field, Double value) {
         createBuilders.get(field.getGlobType()).set(field, value);
         return this;

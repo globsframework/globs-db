@@ -155,6 +155,16 @@ public class MongoSelectBuilder implements SelectBuilder {
     }
 
     @Override
+    public SelectBuilder select(LongArrayField field, Ref<LongArrayAccessor> accessor) {
+        return null;
+    }
+
+    @Override
+    public LongArrayAccessor retrieve(LongArrayField field) {
+        return null;
+    }
+
+    @Override
     public LongAccessor sum(IntegerField count) {
         return null;
     }

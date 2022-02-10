@@ -19,6 +19,8 @@ public interface CreateBuilder {
 
     CreateBuilder set(LongField field, Long value);
 
+    CreateBuilder set(LongArrayField field, long[] value);
+
     CreateBuilder set(DoubleField field, Double value);
 
     CreateBuilder set(BooleanField field, Boolean value);

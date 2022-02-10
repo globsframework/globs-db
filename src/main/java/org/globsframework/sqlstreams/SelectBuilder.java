@@ -38,6 +38,8 @@ public interface SelectBuilder {
     SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor);
 
 
+    SelectBuilder select(LongArrayField field, Ref<LongArrayAccessor> accessor);
+
     SelectBuilder groupBy(Field field);
 
     SelectBuilder orderAsc(Field field);
@@ -81,6 +83,8 @@ public interface SelectBuilder {
     BlobAccessor retrieve(BlobField field);
 
     StringArrayAccessor retrieve(StringArrayField field);
+
+    LongArrayAccessor retrieve(LongArrayField field);
 
     GlobAccessor retrieve(GlobField field);
 

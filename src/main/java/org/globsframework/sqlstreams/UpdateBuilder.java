@@ -2,6 +2,7 @@ package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.sqlstreams.accessors.LongSqlAccessor;
 import org.globsframework.streams.accessors.*;
 
 public interface UpdateBuilder {
@@ -41,6 +42,10 @@ public interface UpdateBuilder {
     UpdateBuilder update(GlobField field, GlobAccessor accessor);
 
     UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor);
+
+    UpdateBuilder update(LongArrayField field, LongArrayAccessor accessor);
+
+    UpdateBuilder update(LongArrayField field, long[] values);
 
     SqlRequest getRequest();
 

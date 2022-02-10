@@ -86,6 +86,10 @@ public class SqlCreateBuilder implements CreateBuilder {
                 setObject(field, new ValueGlobsAccessor((Glob[]) value));
             }
 
+            public void visitLongArray(LongArrayField field) throws Exception {
+                setObject(field, new ValueLongArrayAccessor((long[]) value));
+            }
+
             public void visitUnionGlob(GlobUnionField field) throws Exception {
                 setObject(field, new ValueGlobAccessor((Glob) value));
             }
@@ -144,6 +148,10 @@ public class SqlCreateBuilder implements CreateBuilder {
 
     public CreateBuilder set(LongField field, Long value) {
         return setObject(field, new ValueLongAccessor(value));
+    }
+
+    public CreateBuilder set(LongArrayField field, long[] value) {
+        return setObject(field, new ValueLongArrayAccessor(value));
     }
 
     public CreateBuilder set(DoubleField field, Double value) {
