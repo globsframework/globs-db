@@ -502,6 +502,10 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
+        public void visitLongArray(LongArrayField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
         public void visitDate(DateField field) throws Exception {
             accessor = retrieve(field);
         }
