@@ -155,14 +155,14 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
 
         assertEquals(1, execute(Constraints.lessUncheck(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
         assertEquals(1, execute(Constraints.lessUncheck(DummyObject.VALUE, 1.1)).get(DummyObject.ID).intValue());
-        assertEquals(1, execute(Constraints.LesserUnchecked(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
+        assertEquals(1, execute(Constraints.strictlyLessUnchecked(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
         assertEquals(2, execute(Constraints.greaterUnchecked(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
         assertEquals(2, execute(Constraints.greaterUnchecked(DummyObject.VALUE, 2.2)).get(DummyObject.ID).intValue());
         assertEquals(2, execute(Constraints.strictlyGreater(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
         checkEmpty(Constraints.strictlyGreater(DummyObject.VALUE, 2.2));
-        checkEmpty(Constraints.LesserUnchecked(DummyObject.VALUE, 1.1));
+        checkEmpty(Constraints.strictlyLessUnchecked(DummyObject.VALUE, 1.1));
         checkEmpty(Constraints.strictlyGreater(DummyObject.VALUE, 3.2));
-        checkEmpty(Constraints.LesserUnchecked(DummyObject.VALUE, 0.1));
+        checkEmpty(Constraints.strictlyLessUnchecked(DummyObject.VALUE, 0.1));
         checkEmpty(Constraints.greaterUnchecked(DummyObject.VALUE, 3.2));
         checkEmpty(Constraints.lessUncheck(DummyObject.VALUE, 0.1));
     }

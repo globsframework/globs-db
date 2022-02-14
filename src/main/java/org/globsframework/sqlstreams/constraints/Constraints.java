@@ -132,11 +132,15 @@ public class Constraints {
         return new StrictlyBiggerThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
+    public static Constraint strictlyGreater(LongField field, Long value) {
+        return new StrictlyBiggerThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
     public static Constraint strictlyBigger(Field field, Accessor accessor) {
         return new StrictlyBiggerThanConstraint(new FieldOperand(field), new AccessorOperand(field, accessor));
     }
 
-    public static Constraint LesserUnchecked(Field field, Object value) {
+    public static Constraint strictlyLessUnchecked(Field field, Object value) {
         return new StrictlyLesserThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
@@ -145,6 +149,10 @@ public class Constraints {
     }
 
     public static Constraint strictlyLess(IntegerField field, Integer value) {
+        return new StrictlyLesserThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
+    public static Constraint strictlyLess(LongField field, Long value) {
         return new StrictlyLesserThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
