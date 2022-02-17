@@ -3,7 +3,7 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.globsframework.json.GlobTypeResolver;
+import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
@@ -231,7 +231,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         JsonObject field = object.getAsJsonObject(FIELD);
         JsonElement type = field.get(TYPE);
         if (type != null) {
-            currentType = resolver.get(type.getAsString());
+            currentType = resolver.getType(type.getAsString());
         }
         else {
             throw new RuntimeException("A type is expected");
