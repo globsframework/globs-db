@@ -6,6 +6,8 @@ import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SqlDbStream implements DbStream {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDbStream.class);
     private ResultSet resultSet;
     private int rowId = 0;
     private Map<Field, SqlAccessor> fieldToAccessorHolder;
@@ -51,7 +54,8 @@ public class SqlDbStream implements DbStream {
             }
             return hasNext;
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState(e);
+            LOGGER.error("next fail", e);
+            throw new SqlException(e);
         }
     }
 
@@ -60,6 +64,7 @@ public class SqlDbStream implements DbStream {
             resultSet.close();
             query.resultSetClose();
         } catch (SQLException e) {
+            LOGGER.error("close fail", e);
             throw new UnexpectedApplicationState(e);
         }
     }
@@ -84,6 +89,7 @@ public class SqlDbStream implements DbStream {
             }
             return number.doubleValue();
         } catch (SQLException e) {
+            LOGGER.error("in getDouble at " + index, e);
             throw new UnexpectedApplicationState(e);
         }
     }
@@ -92,6 +98,7 @@ public class SqlDbStream implements DbStream {
         try {
             return resultSet.getDate(index);
         } catch (SQLException e) {
+            LOGGER.error("in getDate at " + index, e);
             throw new UnexpectedApplicationState(e);
         }
     }
@@ -100,6 +107,7 @@ public class SqlDbStream implements DbStream {
         try {
             return resultSet.getBoolean(index);
         } catch (SQLException e) {
+            LOGGER.error("in getBoolean at " + index, e);
             throw new UnexpectedApplicationState(e);
         }
     }
@@ -120,14 +128,18 @@ public class SqlDbStream implements DbStream {
                 LocalDateTime ldt = LocalDateTime.ofInstant(((Date) object).toInstant(), ZoneId.systemDefault());
                 return Math.toIntExact(ldt.getLong(ChronoField.EPOCH_DAY));
             }
-            throw new RuntimeException("Can not convert " + object);
+            String message = "Can not convert " + object;
+            LOGGER.error(message);
+            throw new RuntimeException(message);
         } catch (SQLException e) {
             String columnName = null;
             try {
                 columnName = resultSet.getMetaData().getColumnName(index);
             } catch (SQLException e1) {
             }
-            throw new SqlException("for " + columnName, e);
+            String message = "for " + columnName;
+            LOGGER.error(message);
+            throw new SqlException(message, e);
         }
     }
 
@@ -140,14 +152,18 @@ public class SqlDbStream implements DbStream {
                 columnName = resultSet.getMetaData().getColumnName(index);
             } catch (SQLException e1) {
             }
-            throw new SqlException("for " + columnName, e);
+            String message = "for " + columnName;
+            LOGGER.error(message);
+            throw new SqlException(message, e);
         } catch (Exception e) {
             String columnName = null;
             try {
                 columnName = resultSet.getMetaData().getColumnName(index);
             } catch (SQLException e1) {
             }
-            throw new RuntimeException("For " + columnName, e);
+            String m = "For " + columnName;
+            LOGGER.error(m);
+            throw new RuntimeException(m, e);
         }
     }
 
@@ -155,6 +171,7 @@ public class SqlDbStream implements DbStream {
         try {
             return resultSet.getTimestamp(index);
         } catch (SQLException e) {
+            LOGGER.error("in getTimeStamp at " + index, e);
             throw new SqlException(e);
         }
     }
@@ -163,6 +180,7 @@ public class SqlDbStream implements DbStream {
         try {
             return resultSet.getBytes(index);
         } catch (SQLException e) {
+            LOGGER.error("in getBytes at " + index, e);
             throw new SqlException(e);
         }
     }
@@ -184,8 +202,11 @@ public class SqlDbStream implements DbStream {
                 LocalDateTime ldt = LocalDateTime.ofInstant(((Timestamp) object).toInstant(), ZoneOffset.UTC);
                 return ldt.getLong(ChronoField.EPOCH_DAY);
             }
-            throw new RuntimeException("Can not convert " + object + " to long");
+            String message = "Can not convert " + object + " to long";
+            LOGGER.error(message);
+            throw new RuntimeException(message);
         } catch (SQLException e) {
+            LOGGER.error("in getLong at " + index, e);
             throw new SqlException(e);
         }
     }
@@ -194,6 +215,7 @@ public class SqlDbStream implements DbStream {
         try {
             return resultSet.wasNull();
         } catch (SQLException e) {
+            LOGGER.error("isNull", e);
             throw new SqlException(e);
         }
     }

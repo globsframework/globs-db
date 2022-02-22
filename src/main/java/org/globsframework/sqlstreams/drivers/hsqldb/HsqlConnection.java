@@ -13,12 +13,17 @@ import org.hsqldb.util.DatabaseManagerSwing;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class HsqlConnection extends JdbcConnection {
     public HsqlConnection(Connection connection, JdbcSqlService sqlService) {
         super(connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBlob(index, new jdbcBlob(bytes));
+            }
+
+            public int getBlobType() {
+                return Types.LONGNVARCHAR;
             }
         });
     }

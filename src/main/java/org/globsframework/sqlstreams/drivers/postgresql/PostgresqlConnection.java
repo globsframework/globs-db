@@ -1,5 +1,6 @@
 package org.globsframework.sqlstreams.drivers.postgresql;
 
+import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.metamodel.annotations.MaxSizeType;
@@ -11,6 +12,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
+import org.hsqldb.Types;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +24,11 @@ public class PostgresqlConnection extends JdbcConnection {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBytes(index, bytes);
             }
+
+            @Override
+            public int getBlobType() {
+                return Types.BINARY;
+            }
         });
     }
 
@@ -29,7 +36,7 @@ public class PostgresqlConnection extends JdbcConnection {
         return new SqlFieldCreationVisitor(sqlService, prettyWriter) {
 
             public String getAutoIncrementKeyWord() {
-                return "AUTO_INCREMENT";
+                return "";
             }
 
             @Override
@@ -39,8 +46,10 @@ public class PostgresqlConnection extends JdbcConnection {
 
             @Override
             public void visitLong(LongField field) throws Exception {
-                if (field.hasAnnotation(IsDate.KEY)) {
-                    add("DATE",field);
+                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
+                    add("BIGSERIAL", field);
+                } else if (field.hasAnnotation(IsDate.KEY)) {
+                    add("DATE", field);
                 } else if (field.hasAnnotation(IsDateTime.KEY)) {
                     add("TIMESTAMP WITH TIME ZONE", field);
                 } else if (field.hasAnnotation(IsTimestamp.KEY)) {
@@ -55,7 +64,14 @@ public class PostgresqlConnection extends JdbcConnection {
                 add("DOUBLE PRECISION", field);
             }
 
-            @Override
+            public void visitInteger(IntegerField field) throws Exception {
+                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
+                    add("SERIAL", field);
+                } else {
+                    super.visitInteger(field);
+                }
+            }
+
             public void visitString(StringField field) throws Exception {
                 Glob annotation = field.findAnnotation(MaxSizeType.KEY);
                 int maxSize = 255;
@@ -64,8 +80,7 @@ public class PostgresqlConnection extends JdbcConnection {
                 }
                 if (maxSize >= 30000) {
                     add(getLongStringType(maxSize), field);
-                }
-                else {
+                } else {
                     add("CHARACTER VARYING(" + maxSize + ")", field);
                 }
             }

@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +26,7 @@ public class JdbcSqlService extends AbstractSqlService {
     private String dbName;
     private Properties dbInfo;
     private DbFactory dbFactory;
-    NamingMapping namingMapping;
+    private NamingMapping namingMapping;
 
     public JdbcSqlService(String dbName, String user, String password, NamingMapping namingMapping) {
         this.dbName = dbName;
@@ -80,6 +81,7 @@ public class JdbcSqlService extends AbstractSqlService {
             driver = (Driver) Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
             loadedDrivers.put(dbName, driver);
         }
+        namingMapping = new ToLowerCaseNamingMapping(namingMapping);
         dbFactory = new DbFactory() {
             public JdbcConnection create() {
                 Connection connection = getConnection();
@@ -190,6 +192,22 @@ public class JdbcSqlService extends AbstractSqlService {
 
         public String getColumnName(Field field) {
             return DbFieldName.getOptName(field).orElse(field.getName());
+        }
+    }
+
+    private static class ToLowerCaseNamingMapping implements NamingMapping {
+        private NamingMapping namingMapping;
+
+        public ToLowerCaseNamingMapping(NamingMapping namingMapping) {
+            this.namingMapping = namingMapping;
+        }
+
+        public String getTableName(GlobType globType) {
+            return namingMapping.getTableName(globType).toLowerCase(Locale.ROOT);
+        }
+
+        public String getColumnName(Field field) {
+            return namingMapping.getColumnName(field).toLowerCase(Locale.ROOT);
         }
     }
 }

@@ -168,7 +168,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
 
     public void visitBlob(BlobField field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.BLOB);
+            preparedStatement.setNull(index, blobUpdater.getBlobType());
         } else {
             blobUpdater.setBlob(preparedStatement, index, ((byte[]) value));
         }

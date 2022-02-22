@@ -71,13 +71,16 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
 
     private boolean completeGlobTypeBuilder() {
         if (Strings.isNullOrEmpty(tableName)) {
-            throw new GlobsException("No table received");
+            String msg = "No table received";
+            LOGGER.error(msg);
+            throw new GlobsException(msg);
         }
         JdbcConnection db = sqlService.getAutoCommitDb();
         try {
             Connection connection = db.getConnection();
             return createFrom(connection, connection.getMetaData(), tableName);
         } catch (SQLException e) {
+            LOGGER.error("sql error", e);
             throw db.getTypedException(null, e);
         } finally {
             db.commitAndClose();
@@ -90,13 +93,16 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
             String sqlTableName = getEscapedTableName(databaseMetaData, tableName);
 
             if (!hasTableOrView(connection, databaseMetaData, sqlTableName)) {
+                LOGGER.warn("Table not found");
                 return false;
             }
             globTypeBuilder.addAnnotation(TargetTypeName.create(tableName));
             SortedMap<String, Integer> primaryKeys = fillPrimaryKeys(connection, tableName, databaseMetaData);
             initColumns(connection, sqlTableName, databaseMetaData, primaryKeys);
         } catch (SQLException e) {
-            throw new GlobsException("For " + tableName, e);
+            String message = "For " + tableName;
+            LOGGER.error(message, e);
+            throw new GlobsException(message, e);
         }
         LOGGER.info("extraction of metadata of " + tableName + " in " + chrono.getElapsedTimeInMS() + "ms.");
         return true;
@@ -133,20 +139,20 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                 int columnCount = metaData.getColumnCount();
                 for (int i = 1; i < columnCount + 1; i++) {
                     String currentColumn = metaData.getColumnName(i);
-                    if (currentColumn.equals("PKTABLE_NAME")) {
-                        foreignKey.pkTableName = resultSet.getString("PKTABLE_NAME");
-                    } else if (currentColumn.equals("PKCOLUMN_NAME")) {
-                        foreignKey.pkColumnName = resultSet.getString("PKCOLUMN_NAME");
-                    } else if (currentColumn.equals("FKTABLE_NAME")) {
-                        foreignKey.fkTableName = resultSet.getString("FKTABLE_NAME");
-                    } else if (currentColumn.equals("FKCOLUMN_NAME")) {
-                        foreignKey.fkColumnName = resultSet.getString("FKCOLUMN_NAME");
-                    } else if (currentColumn.equals("KEY_SEQ")) {
-                        foreignKey.keySeq = resultSet.getString("KEY_SEQ");
-                    } else if (currentColumn.equals("FK_NAME")) {
-                        foreignKey.fkName = resultSet.getString("FK_NAME");
-                    } else if (currentColumn.equals("PK_NAME")) {
-                        foreignKey.pkName = resultSet.getString("PK_NAME");
+                    if (currentColumn.equalsIgnoreCase("PKTABLE_NAME")) {
+                        foreignKey.pkTableName = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("PKCOLUMN_NAME")) {
+                        foreignKey.pkColumnName = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("FKTABLE_NAME")) {
+                        foreignKey.fkTableName = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("FKCOLUMN_NAME")) {
+                        foreignKey.fkColumnName = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("KEY_SEQ")) {
+                        foreignKey.keySeq = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("FK_NAME")) {
+                        foreignKey.fkName = resultSet.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("PK_NAME")) {
+                        foreignKey.pkName = resultSet.getString(currentColumn);
                     }
                 }
                 foreignKeys.add(foreignKey);
@@ -166,14 +172,16 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                 Integer key_seq = null;
                 for (int i = 1; i < columnCount + 1; i++) {
                     String currentColumn = metaData.getColumnName(i);
-                    if (currentColumn.equals("COLUMN_NAME")) {
-                        column_name = columns.getString("COLUMN_NAME");
-                    } else if (currentColumn.equals("KEY_SEQ")) {
-                        key_seq = columns.getInt("KEY_SEQ");
+                    if (currentColumn.equalsIgnoreCase("COLUMN_NAME")) {
+                        column_name = columns.getString(currentColumn);
+                    } else if (currentColumn.equalsIgnoreCase("KEY_SEQ")) {
+                        key_seq = columns.getInt(currentColumn);
                     }
                 }
                 if (column_name == null || key_seq == null) {
-                    throw new RuntimeException("At least one of column name " + column_name + " or key sequence " + key_seq + " is null.");
+                    String message = "At least one of column name " + column_name + " or key sequence " + key_seq + " is null.";
+                    LOGGER.error(message);
+                    throw new RuntimeException(message);
                 }
                 keyFieldByOrder.put(column_name, key_seq - 1); // key in glob start at 0
             }
@@ -309,7 +317,9 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                             } else if (wantedType == DataType.Date) {
                                 this.globTypeBuilder.declareDateField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
                             } else {
-                                throw new RuntimeException("Can not force date to " + wantedType.name());
+                                String message = "Can not force date to " + wantedType.name();
+                                LOGGER.error(message);
+                                throw new RuntimeException(message);
                             }
                         } else {
                             this.globTypeBuilder.declareDateField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
@@ -327,7 +337,9 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                             } else if (wantedType == DataType.DateTime) {
                                 this.globTypeBuilder.declareDateTimeField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
                             } else {
-                                throw new RuntimeException("Can not force timestamp to " + wantedType.name());
+                                String message = "Can not force timestamp to " + wantedType.name();
+                                LOGGER.error(message);
+                                throw new RuntimeException(message);
                             }
                         } else{
                             this.globTypeBuilder.declareDateTimeField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
@@ -338,7 +350,9 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
 //                        logger.warn(columnName + " is of type 'other' => ignored");
 //                        break;
                     default:
-                        throw new GlobsException("Type '" + dataType + "' not managed for column " + columnName);
+                        String message = "Type '" + dataType + "' not managed for column " + columnName;
+                        LOGGER.error(message);
+                        throw new GlobsException(message);
                 }
             }
         }
@@ -349,16 +363,16 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
         int metaDataColumnCount = metaData.getColumnCount();
         for (int i = 1; i < metaDataColumnCount + 1; i++) {
             String currentColumn = metaData.getColumnName(i);
-            if (currentColumn.equals("COLUMN_NAME")) {
+            if (currentColumn.equalsIgnoreCase("COLUMN_NAME")) {
                 columnInfo.columnName = columns.getString(i);
-            } else if (currentColumn.equals("DATA_TYPE")) {
+            } else if (currentColumn.equalsIgnoreCase("DATA_TYPE")) {
                 columnInfo.dataType = columns.getInt(i);
-            } else if (currentColumn.equals("NULLABLE")) {
+            } else if (currentColumn.equalsIgnoreCase("NULLABLE")) {
                 columnInfo.nullable = columns.getInt(i);
-            } else if (currentColumn.equals("COLUMN_SIZE")) {
+            } else if (currentColumn.equalsIgnoreCase("COLUMN_SIZE")) {
                 columnInfo.columnSize = columns.getInt(i);
                 columnInfo.columnSizeIsNull = columns.wasNull();
-            } else if (currentColumn.equals("DECIMAL_DIGITS")) {
+            } else if (currentColumn.equalsIgnoreCase("DECIMAL_DIGITS")) {
                 columnInfo.decimalDigits = columns.getInt(i);
                 columnInfo.decimalDigitsIsNull = columns.wasNull();
             }

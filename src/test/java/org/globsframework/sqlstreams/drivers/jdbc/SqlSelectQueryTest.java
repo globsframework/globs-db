@@ -454,7 +454,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         try {
             DbStream execute = queryBuilder.selectAll().getQuery().execute();
             Assert.fail("Should not be call!");
-        } catch (UnexpectedApplicationState e) {
+        } catch (SqlException e) {
         }
     }
 

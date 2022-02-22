@@ -1,4 +1,4 @@
-package org.globsframework.sqlstreams.postgresql;
+package org.globsframework.sqlstreams.drivers.postgresql;
 
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;

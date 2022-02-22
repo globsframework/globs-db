@@ -6,6 +6,8 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
+import org.globsframework.sqlstreams.exceptions.DbConstraintViolation;
+import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.model.Key;
@@ -33,13 +35,20 @@ public abstract class DbServicesTestCase {
         globModel = new DefaultGlobModel(DummyObject.TYPE, DummyObject2.TYPE);
         sqlConnection = initDb();
         sqlConnection.createTable(DummyObject.TYPE);
+        sqlConnection.addColumn(DummyObject.VALUE);
         sqlConnection.createTable(DummyObject2.TYPE);
         emptyTable();
     }
 
     @After
     public void tearDown() throws Exception {
+        try {
+            sqlConnection.commitAndClose();
+        } catch (Exception e) {
+        }
+        sqlConnection = sqlService.getDb();
         emptyTable();
+        sqlConnection.commitAndClose();
         sqlConnection = null;
     }
 
@@ -54,6 +63,7 @@ public abstract class DbServicesTestCase {
         directory.add(GlobModel.class, globModel);
 
         sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
+//        sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/glindaBackend", "glindaBackend", "glinda");
 //    sqlService = new JdbcDriverBasedSqlService("jdbc:mysql://Plone/test", "sa", "");
         directory.add(SqlService.class, sqlService);
         return sqlService.getDb();

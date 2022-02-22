@@ -11,6 +11,7 @@ import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
+import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.DbStream;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
@@ -62,7 +63,9 @@ public class SqlSelectQuery implements SelectQuery {
         try {
             this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState("for request " + sql, e);
+            String message = "for request " + sql;
+            LOGGER.error(message);
+            throw new SqlException(message, e);
         }
         shouldInitAccessorWithMetadata = externalRequest != null;
     }
@@ -209,7 +212,9 @@ public class SqlSelectQuery implements SelectQuery {
 
     public DbStream execute() {
         if (preparedStatement == null) {
-            throw new UnexpectedApplicationState("Query closed " + sql);
+            String message = "Query closed " + sql;
+            LOGGER.error(message);
+            throw new SqlException(message);
         }
         try {
             if (constraint != null) {
@@ -223,7 +228,9 @@ public class SqlSelectQuery implements SelectQuery {
             return new SqlDbStream(resultSet, fieldToAccessorHolder,
                     sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState("for request : " + sql, e);
+            String message = "for request : " + sql;
+            LOGGER.error(message);
+            throw new SqlException(message, e);
         }
     }
 
@@ -253,7 +260,8 @@ public class SqlSelectQuery implements SelectQuery {
                 preparedStatement.close();
                 preparedStatement = null;
             } catch (SQLException e) {
-                throw new UnexpectedApplicationState("PreparedStatement close fail", e);
+                String msg = "PreparedStatement close fail";
+                throw new SqlException(msg, e);
             }
         }
     }

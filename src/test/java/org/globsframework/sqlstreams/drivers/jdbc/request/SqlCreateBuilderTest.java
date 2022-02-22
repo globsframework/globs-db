@@ -57,6 +57,22 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
 
     }
 
+    public void setUp() throws Exception {
+        super.setUp();
+        try {
+            sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
+        } catch (Exception e) {
+        }
+    }
+
+    public void tearDown() throws Exception {
+        super.tearDown();
+        try {
+            sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
+        } catch (Exception e) {
+        }
+    }
+
     @Test
     public void createGlobInField() {
         sqlConnection.createTable(DummyObjectWithGlob.TYPE);
