@@ -32,10 +32,12 @@ public class PostgresqlConnection extends JdbcConnection {
                 return "AUTO_INCREMENT";
             }
 
+            @Override
             public String getLongStringType(int maxSize) {
                 return "TEXT";
             }
 
+            @Override
             public void visitLong(LongField field) throws Exception {
                 if (field.hasAnnotation(IsDate.KEY)) {
                     add("DATE",field);
@@ -48,10 +50,12 @@ public class PostgresqlConnection extends JdbcConnection {
                 }
             }
 
+            @Override
             public void visitDouble(DoubleField field) {
                 add("DOUBLE PRECISION", field);
             }
 
+            @Override
             public void visitString(StringField field) throws Exception {
                 Glob annotation = field.findAnnotation(MaxSizeType.KEY);
                 int maxSize = 255;
@@ -66,20 +70,34 @@ public class PostgresqlConnection extends JdbcConnection {
                 }
             }
 
+            @Override
             public void visitBlob(BlobField field) throws Exception {
                 add("BYTEA", field);
             }
 
+            @Override
             public void visitUnionGlob(GlobUnionField field) throws Exception {
                 add("TEXT", field);
             }
 
+            @Override
             public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
                 add("TEXT", field);
             }
 
+            @Override
             public void visitDateTime(DateTimeField field) throws Exception {
                 add("TIMESTAMP WITH TIME ZONE", field);
+            }
+
+            @Override
+            public void visitGlobArray(GlobArrayField field) throws Exception {
+                add("TEXT", field);
+            }
+
+            @Override
+            public void visitGlob(GlobField field) throws Exception {
+                add("TEXT", field);
             }
 
         };
