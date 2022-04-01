@@ -86,14 +86,18 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     public void visitValueOperand(ValueOperand value) {
         Object o = value.getValue();
         if (o == null) {
-            throw new UnexpectedApplicationState("null not supported, Should be explicit (is null) ");
+            throw new UnexpectedApplicationState("null not supported, Should be explicit (is null) for field " + value.getField().getFullName());
         }
         setValue(o, ++index);
         value.getField().safeVisit(this);
     }
 
     public void visitAccessorOperand(AccessorOperand accessorOperand) {
-        setValue(accessorOperand.getAccessor().getObjectValue(), ++index);
+        Object objectValue = accessorOperand.getAccessor().getObjectValue();
+        if (objectValue == null) {
+            throw new UnexpectedApplicationState("null not supported, Should be explicit (is null) for field " + accessorOperand.getField().getFullName());
+        }
+        setValue(objectValue, ++index);
         accessorOperand.getField().safeVisit(this);
     }
 
