@@ -48,7 +48,7 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     interface DbFactory {
-        JdbcConnection create();
+        JdbcConnection create(boolean autoCommit);
     }
 
     public String getTableName(GlobType globType) {
@@ -83,10 +83,10 @@ public class JdbcSqlService extends AbstractSqlService {
         }
         namingMapping = new ToLowerCaseNamingMapping(namingMapping);
         dbFactory = new DbFactory() {
-            public JdbcConnection create() {
+            public JdbcConnection create(boolean autoCommit) {
                 Connection connection = getConnection();
                 try {
-                    connection.setAutoCommit(false);
+                    connection.setAutoCommit(autoCommit);
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
@@ -103,10 +103,10 @@ public class JdbcSqlService extends AbstractSqlService {
         }
         dbInfo.put("zeroDateTimeBehavior", "convertToNull");
         dbFactory = new DbFactory() {
-            public JdbcConnection create() {
+            public JdbcConnection create(boolean autoCommit) {
                 Connection connection = getConnection();
                 try {
-                    connection.setAutoCommit(false);
+                    connection.setAutoCommit(autoCommit);
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
@@ -124,10 +124,10 @@ public class JdbcSqlService extends AbstractSqlService {
         }
         dbInfo.put("zeroDateTimeBehavior", "convertToNull");
         dbFactory = new DbFactory() {
-            public JdbcConnection create() {
+            public JdbcConnection create(boolean autoCommit) {
                 Connection connection = getConnection();
                 try {
-                    connection.setAutoCommit(false);
+                    connection.setAutoCommit(autoCommit);
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
@@ -155,10 +155,10 @@ public class JdbcSqlService extends AbstractSqlService {
             };
         }
         dbFactory = new DbFactory() {
-            public JdbcConnection create() {
+            public JdbcConnection create(boolean autoCommit) {
                 Connection connection = getConnection();
                 try {
-                    connection.setAutoCommit(false);
+                    connection.setAutoCommit(autoCommit);
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
@@ -168,11 +168,11 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public JdbcConnection getDb() {
-        return dbFactory.create();
+        return dbFactory.create(false);
     }
 
     public JdbcConnection getAutoCommitDb() {
-        return dbFactory.create();
+        return dbFactory.create(true);
     }
 
     synchronized public Connection getConnection() {
