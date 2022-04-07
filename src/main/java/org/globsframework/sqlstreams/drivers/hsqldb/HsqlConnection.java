@@ -16,8 +16,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class HsqlConnection extends JdbcConnection {
-    public HsqlConnection(Connection connection, JdbcSqlService sqlService) {
-        super(connection, sqlService, new BlobUpdater() {
+    public HsqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
+        super(autoCommit, connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBlob(index, new jdbcBlob(bytes));
             }

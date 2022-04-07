@@ -32,11 +32,13 @@ import java.util.Map;
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
     protected JdbcSqlService sqlService;
+    private final boolean autoCommit;
     private Connection connection;
     private BlobUpdater blobUpdater;
     private DbChecker checker;
 
-    public JdbcConnection(Connection connection, JdbcSqlService sqlService, BlobUpdater blobUpdater) {
+    public JdbcConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService, BlobUpdater blobUpdater) {
+        this.autoCommit = autoCommit;
         this.connection = connection;
         this.sqlService = sqlService;
         this.blobUpdater = blobUpdater;
@@ -67,7 +69,9 @@ public abstract class JdbcConnection implements SqlConnection {
     public void commit() throws RollbackFailed {
         checkConnectionIsNotClosed();
         try {
-            connection.commit();
+            if (!autoCommit) {
+                connection.commit();
+            }
         } catch (SQLException e) {
             throw getTypedException(null, e);
         }
@@ -76,7 +80,9 @@ public abstract class JdbcConnection implements SqlConnection {
     public void commitAndClose() {
         applyAndClose(new DbFunctor() {
             public void doIt() throws SQLException {
-                connection.commit();
+                if (!autoCommit) {
+                    connection.commit();
+                }
             }
         });
     }
@@ -84,7 +90,9 @@ public abstract class JdbcConnection implements SqlConnection {
     public void rollbackAndClose() {
         applyAndClose(new DbFunctor() {
             public void doIt() throws SQLException {
-                connection.rollback();
+                if (!autoCommit) {
+                    connection.rollback();
+                }
             }
         });
     }

@@ -90,7 +90,7 @@ public class JdbcSqlService extends AbstractSqlService {
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
-                return new PostgresqlConnection(connection, JdbcSqlService.this);
+                return new PostgresqlConnection(autoCommit, connection, JdbcSqlService.this);
             }
         };
     }
@@ -111,7 +111,7 @@ public class JdbcSqlService extends AbstractSqlService {
                     throw new UnexpectedApplicationState(e);
                 }
 
-                return new MysqlConnection(connection, JdbcSqlService.this);
+                return new MysqlConnection(autoCommit, connection, JdbcSqlService.this);
             }
         };
     }
@@ -132,7 +132,7 @@ public class JdbcSqlService extends AbstractSqlService {
                     throw new UnexpectedApplicationState(e);
                 }
 
-                return new MysqlConnection(connection, JdbcSqlService.this);
+                return new MysqlConnection(autoCommit, connection, JdbcSqlService.this);
             }
         };
     }
@@ -162,7 +162,7 @@ public class JdbcSqlService extends AbstractSqlService {
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }
-                return new HsqlConnection(connection, JdbcSqlService.this);
+                return new HsqlConnection(autoCommit, connection, JdbcSqlService.this);
             }
         };
     }

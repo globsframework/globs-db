@@ -19,8 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class PostgresqlConnection extends JdbcConnection {
-    public PostgresqlConnection(Connection connection, JdbcSqlService sqlService) {
-        super(connection, sqlService, new BlobUpdater() {
+    public PostgresqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
+        super(autoCommit, connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBytes(index, bytes);
             }
