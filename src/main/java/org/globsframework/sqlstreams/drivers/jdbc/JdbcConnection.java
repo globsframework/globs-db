@@ -2,6 +2,7 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
 import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.*;
@@ -31,8 +32,8 @@ import java.util.Map;
 
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
-    protected JdbcSqlService sqlService;
     private final boolean autoCommit;
+    protected JdbcSqlService sqlService;
     private Connection connection;
     private BlobUpdater blobUpdater;
     private DbChecker checker;
@@ -219,7 +220,11 @@ public abstract class JdbcConnection implements SqlConnection {
         for (Glob glob : all) {
             CreateBuilder createBuilder = getCreateBuilder(glob.getType());
             for (Field field : glob.getType().getFields()) {
-                createBuilder.setObject(field, glob.getValue(field));
+                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
+                    if(glob.isSet(field)) createBuilder.setObject(field, glob.getValue(field));
+                } else {
+                    createBuilder.setObject(field, glob.getValue(field));
+                }
             }
             createBuilder.getRequest().run();
         }
