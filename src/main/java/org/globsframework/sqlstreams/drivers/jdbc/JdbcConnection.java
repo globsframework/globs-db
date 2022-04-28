@@ -220,9 +220,7 @@ public abstract class JdbcConnection implements SqlConnection {
         for (Glob glob : all) {
             CreateBuilder createBuilder = getCreateBuilder(glob.getType());
             for (Field field : glob.getType().getFields()) {
-                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
-                    if(glob.isSet(field)) createBuilder.setObject(field, glob.getValue(field));
-                } else {
+                if (!field.hasAnnotation(AutoIncrementAnnotationType.KEY) || glob.isSet(field)) {
                     createBuilder.setObject(field, glob.getValue(field));
                 }
             }
