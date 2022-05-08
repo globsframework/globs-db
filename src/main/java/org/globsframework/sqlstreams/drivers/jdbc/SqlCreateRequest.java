@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -132,11 +136,11 @@ public class SqlCreateRequest implements SqlRequest {
         }
 
         public void visitDate(DateField field) throws Exception {
-            super.visitDate(field);
+            convertValue = DateTimeFormatter.ISO_DATE.format((LocalDate) value);
         }
 
         public void visitDateTime(DateTimeField field) throws Exception {
-            super.visitDateTime(field);
+            convertValue = DateTimeFormatter.ISO_DATE_TIME.format((ZonedDateTime) value);
         }
 
         public void visitDouble(DoubleField field) {
@@ -158,6 +162,7 @@ public class SqlCreateRequest implements SqlRequest {
         public void visitLong(LongField field) {
             convertValue = value.toString();
         }
+
 
         public void visitGlob(GlobField field) {
             convertValue = GSonUtils.encode((Glob) value, true);

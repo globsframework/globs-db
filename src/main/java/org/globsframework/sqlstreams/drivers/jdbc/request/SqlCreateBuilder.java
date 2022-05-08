@@ -8,6 +8,7 @@ import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.SqlService;
+import org.globsframework.sqlstreams.accessors.DateTimeSqlAccessor;
 import org.globsframework.sqlstreams.accessors.LongGeneratedKeyAccessor;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
@@ -68,6 +69,14 @@ public class SqlCreateBuilder implements CreateBuilder {
 
             public void visitString(StringField field) {
                 setObject(field, new ValueStringAccessor((String) value));
+            }
+
+            public void visitDate(DateField field) throws Exception {
+                set(field, new ValueDateAccessor((LocalDate) value));
+            }
+
+            public void visitDateTime(DateTimeField field) throws Exception {
+                set(field, new ValueDateTimeAccessor((ZonedDateTime) value));
             }
 
             public void visitStringArray(StringArrayField field) throws Exception {
