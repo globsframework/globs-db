@@ -60,6 +60,9 @@ public class SqlSelectQuery implements SelectQuery {
         } else {
             sql = externalRequest;
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Prepare sql request " + sql);
+        }
         try {
             this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         } catch (SQLException e) {
@@ -95,7 +98,6 @@ public class SqlSelectQuery implements SelectQuery {
         }
         return false;
     }
-
 
     private String prepareSqlRequest() {
         int index = 0;
@@ -220,6 +222,7 @@ public class SqlSelectQuery implements SelectQuery {
             if (constraint != null) {
                 constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
             }
+            LOGGER.debug("Execute sql request " + sql);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (shouldInitAccessorWithMetadata) {
                 initIndexFromMetadata(resultSet.getMetaData(), fieldToAccessorHolder, sqlService);
