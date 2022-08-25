@@ -5,8 +5,6 @@ import org.globsframework.metamodel.fields.*;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.Ref;
 
-import java.util.Collection;
-
 public interface SelectBuilder {
 
     SelectQuery getQuery();
@@ -84,11 +82,21 @@ public interface SelectBuilder {
 
     StringArrayAccessor retrieve(StringArrayField field);
 
+    IntegerArrayAccessor retrieve(IntegerArrayField field);
+
     LongArrayAccessor retrieve(LongArrayField field);
+
+    DoubleArrayAccessor retrieve(DoubleArrayField field);
+
+    BooleanArrayAccessor retrieve(BooleanArrayField field);
 
     GlobAccessor retrieve(GlobField field);
 
+    GlobAccessor retrieve(GlobUnionField field);
+
     GlobsAccessor retrieve(GlobArrayField field);
+
+    GlobsAccessor retrieve(GlobArrayUnionField field);
 
     Accessor retrieveUnTyped(Field field);
 

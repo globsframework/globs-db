@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.metamodel.fields.*;
@@ -314,15 +315,39 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     public GlobAccessor retrieve(GlobField field) {
-        return (GlobAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new GlobSqlAccessor(new StringSqlAccessor(), field.getTargetType()));
+        return (GlobAccessor) fieldToAccessorHolder.computeIfAbsent(field,
+                x -> new GlobSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetType())));
+    }
+
+    public GlobAccessor retrieve(GlobUnionField field) {
+        return (GlobAccessor) fieldToAccessorHolder.computeIfAbsent(field,
+                x -> new GlobSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetTypes())));
     }
 
     public GlobsAccessor retrieve(GlobArrayField field) {
-        return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new GlobsSqlAccessor(new StringSqlAccessor(), field.getTargetType()));
+        return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field,
+                x -> new GlobsSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetType())));
+    }
+
+    public GlobsAccessor retrieve(GlobArrayUnionField field) {
+        return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field,
+                x -> new GlobsSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetTypes())));
+    }
+
+    public IntegerArrayAccessor retrieve(IntegerArrayField field) {
+        return (IntegerArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new IntegerArraySqlAccessor(new StringSqlAccessor()));
     }
 
     public LongArrayAccessor retrieve(LongArrayField field) {
         return (LongArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new LongArraySqlAccessor(new StringSqlAccessor()));
+    }
+
+    public DoubleArrayAccessor retrieve(DoubleArrayField field) {
+        return (DoubleArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new DoubleArraySqlAccessor(new StringSqlAccessor()));
+    }
+
+    public BooleanArrayAccessor retrieve(BooleanArrayField field) {
+        return (BooleanArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new BooleanArraySqlAccessor(new StringSqlAccessor()));
     }
 
     public static class Order {
@@ -337,11 +362,11 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     private static class GlobSqlAccessor extends SqlAccessor implements GlobAccessor {
         private final StringSqlAccessor accessor;
-        private GlobType type;
+        private final GlobTypeResolver typeResolver;
 
-        public GlobSqlAccessor(StringSqlAccessor accessor, GlobType type) {
+        public GlobSqlAccessor(StringSqlAccessor accessor, GlobTypeResolver typeResolver) {
             this.accessor = accessor;
-            this.type = type;
+            this.typeResolver = typeResolver;
         }
 
         public void setMoStream(SqlDbStream sqlMoStream) {
@@ -357,7 +382,7 @@ public class SqlQueryBuilder implements SelectBuilder {
         public Glob getGlob() {
             String value = accessor.getString();
             if (value != null) {
-                return GSonUtils.decode(new StringReader(value), type);
+                return GSonUtils.decode(new StringReader(value), typeResolver);
             } else {
                 return null;
             }
@@ -403,10 +428,10 @@ public class SqlQueryBuilder implements SelectBuilder {
         }
     }
 
-    private static class LongArraySqlAccessor extends SqlAccessor implements LongArrayAccessor {
-        private final StringSqlAccessor accessor;
+    private abstract static class AbstractArraySqlAccessor extends SqlAccessor {
+        protected final StringSqlAccessor accessor;
 
-        public LongArraySqlAccessor(StringSqlAccessor accessor) {
+        public AbstractArraySqlAccessor(StringSqlAccessor accessor) {
             this.accessor = accessor;
         }
 
@@ -418,6 +443,39 @@ public class SqlQueryBuilder implements SelectBuilder {
         public void setIndex(int index) {
             super.setIndex(index);
             accessor.setIndex(index);
+        }
+    }
+
+    private static class IntegerArraySqlAccessor extends AbstractArraySqlAccessor implements IntegerArrayAccessor {
+        public IntegerArraySqlAccessor(StringSqlAccessor accessor) {
+            super(accessor);
+        }
+
+        public Object getObjectValue() {
+            return getValues();
+        }
+
+        public int[] getValues() {
+            String value = accessor.getString();
+            if (value != null) {
+                if (value.isEmpty()) {
+                    return new int[0];
+                } else {
+                    return Arrays.stream(value.split(",")).mapToInt(Integer::parseInt).toArray();
+                }
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class LongArraySqlAccessor extends AbstractArraySqlAccessor implements LongArrayAccessor {
+        public LongArraySqlAccessor(StringSqlAccessor accessor) {
+            super(accessor);
+        }
+
+        public Object getObjectValue() {
+            return getValues();
         }
 
         public long[] getValues() {
@@ -432,20 +490,66 @@ public class SqlQueryBuilder implements SelectBuilder {
                 return null;
             }
         }
+    }
+
+    private static class DoubleArraySqlAccessor extends AbstractArraySqlAccessor implements DoubleArrayAccessor {
+        public DoubleArraySqlAccessor(StringSqlAccessor accessor) {
+            super(accessor);
+        }
 
         public Object getObjectValue() {
             return getValues();
         }
 
+        public double[] getValues() {
+            String value = accessor.getString();
+            if (value != null) {
+                if (value.isEmpty()) {
+                    return new double[0];
+                } else {
+                    return Arrays.stream(value.split(",")).mapToDouble(Double::parseDouble).toArray();
+                }
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private static class BooleanArraySqlAccessor extends AbstractArraySqlAccessor implements BooleanArrayAccessor {
+        public BooleanArraySqlAccessor(StringSqlAccessor accessor) {
+            super(accessor);
+        }
+
+        public Object getObjectValue() {
+            return getValues();
+        }
+
+        public boolean[] getValues() {
+            String value = accessor.getString();
+            if (value != null) {
+                if (value.isEmpty()) {
+                    return new boolean[0];
+                } else {
+                    String[] split = value.split(",");
+                    boolean[] result = new boolean[split.length];
+                    for (int i = 0; i < split.length; i++) {
+                        result[i] = Boolean.parseBoolean(split[i]);
+                    }
+                    return result;
+                }
+            } else {
+                return null;
+            }
+        }
     }
 
     private static class GlobsSqlAccessor extends SqlAccessor implements GlobsAccessor {
         private final StringSqlAccessor accessor;
-        private GlobType type;
+        private GlobTypeResolver typeResolver;
 
-        public GlobsSqlAccessor(StringSqlAccessor accessor, GlobType type) {
+        public GlobsSqlAccessor(StringSqlAccessor accessor, GlobTypeResolver typeResolver) {
             this.accessor = accessor;
-            this.type = type;
+            this.typeResolver = typeResolver;
         }
 
         public void setMoStream(SqlDbStream sqlMoStream) {
@@ -461,7 +565,7 @@ public class SqlQueryBuilder implements SelectBuilder {
         public Glob[] getGlobs() {
             String value = accessor.getString();
             if (value != null) {
-                return GSonUtils.decodeArray(new StringReader(value), type);
+                return GSonUtils.decodeArray(new StringReader(value), typeResolver);
             } else {
                 return null;
             }
@@ -502,7 +606,19 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
+        public void visitIntegerArray(IntegerArrayField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
         public void visitLongArray(LongArrayField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
+        public void visitDoubleArray(DoubleArrayField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
+        public void visitBooleanArray(BooleanArrayField field) throws Exception {
             accessor = retrieve(field);
         }
 
@@ -522,7 +638,15 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
+        public void visitUnionGlob(GlobUnionField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
         public void visitGlobArray(GlobArrayField field) throws Exception {
+            accessor = retrieve(field);
+        }
+
+        public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
             accessor = retrieve(field);
         }
 
