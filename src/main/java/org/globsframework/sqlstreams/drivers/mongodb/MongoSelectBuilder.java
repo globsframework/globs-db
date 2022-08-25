@@ -160,7 +160,22 @@ public class MongoSelectBuilder implements SelectBuilder {
     }
 
     @Override
+    public IntegerArrayAccessor retrieve(IntegerArrayField field) {
+        return null;
+    }
+
+    @Override
     public LongArrayAccessor retrieve(LongArrayField field) {
+        return null;
+    }
+
+    @Override
+    public DoubleArrayAccessor retrieve(DoubleArrayField field) {
+        return null;
+    }
+
+    @Override
+    public BooleanArrayAccessor retrieve(BooleanArrayField field) {
         return null;
     }
 
@@ -257,8 +272,16 @@ public class MongoSelectBuilder implements SelectBuilder {
         return (GlobAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobMongoAccessor(field, currentDoc, sqlService));
     }
 
+    public GlobAccessor retrieve(GlobUnionField field) {
+        throw new RuntimeException("Not implemented");
+    }
+
     public GlobsAccessor retrieve(GlobArrayField field) {
         return (GlobsAccessor) fieldsAndAccessor.computeIfAbsent(field, (f) -> new GlobsMongoAccessor(field, currentDoc, sqlService));
+    }
+
+    public GlobsAccessor retrieve(GlobArrayUnionField field) {
+        return null;
     }
 
     static class Order {
