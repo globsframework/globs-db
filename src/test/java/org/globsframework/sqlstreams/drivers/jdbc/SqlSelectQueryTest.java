@@ -286,6 +286,22 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     }
 
     @Test
+    public void startWith() {
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+        GlobList list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWith(DummyObject.NAME, "world"))
+                .select(DummyObject.NAME))
+                .getQuery().executeAsGlobs();
+        assertEquals(3, list.size());
+    }
+
+    @Test
     public void closeIsCallOnStream() {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(

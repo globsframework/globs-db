@@ -79,7 +79,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
 
     }
 
-    public void visitContains(Field field, String value, boolean contains) {
+    public void visitContains(Field field, String value, boolean contains, boolean startWith) {
 
     }
 

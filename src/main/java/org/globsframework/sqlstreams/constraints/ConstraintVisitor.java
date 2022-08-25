@@ -26,5 +26,5 @@ public interface ConstraintVisitor {
 
     void visitNotIn(NotInConstraint constraint);
 
-    void visitContains(Field field, String value, boolean contains);
+    void visitContains(Field field, String value, boolean contains, boolean startWith);
 }

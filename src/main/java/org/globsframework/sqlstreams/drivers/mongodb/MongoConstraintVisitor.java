@@ -176,8 +176,9 @@ class MongoConstraintVisitor implements ConstraintVisitor {
 
     }
 
-    public void visitContains(Field field, String value, boolean contains) {
-        Bson regex = Filters.regex(sqlService.getColumnName(field), ".*" + value + ".*");
+    public void visitContains(Field field, String value, boolean contains, boolean startWith) {
+        Bson regex = Filters.regex(sqlService.getColumnName(field),
+                (startWith ? "^" : ".*") + value + ".*");
         if (contains) {
             filter = regex;
         } else {

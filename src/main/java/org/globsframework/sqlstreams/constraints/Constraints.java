@@ -7,9 +7,6 @@ import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class Constraints {
@@ -219,11 +216,19 @@ public class Constraints {
     }
 
     public static Constraint contains(StringField field, String value) {
-        return new ContainsConstraint(field, value, true);
+        return new ContainsConstraint(field, value, false, true);
     }
 
     public static Constraint notContains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false);
+        return new ContainsConstraint(field, value, false, false);
+    }
+
+    public static Constraint startWith(StringField field, String value) {
+        return new ContainsConstraint(field, value, true, true);
+    }
+
+    public static Constraint notStartWith(StringField field, String value) {
+        return new ContainsConstraint(field, value, true, false);
     }
 
     public static Constraint isNull(Field field) {
