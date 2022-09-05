@@ -97,6 +97,10 @@ public class Constraints {
         return new BiggerThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
+    public static Constraint greater(LongField field, Long value) {
+        return new BiggerThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
     public static Constraint greaterUnchecked(Field field, Accessor accessor) {
         return new BiggerThanConstraint(new FieldOperand(field), new AccessorOperand(field, accessor));
     }
@@ -110,6 +114,10 @@ public class Constraints {
     }
 
     public static Constraint less(IntegerField field, Integer value) {
+        return new LessThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
+    public static Constraint less(LongField field, Long value) {
         return new LessThanConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
