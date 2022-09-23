@@ -6,12 +6,15 @@ import org.globsframework.metamodel.fields.LongField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.model.Glob;
+import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.model.KeyBuilder;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.sqlstreams.model.DummyObjectWithGlob;
+import org.globsframework.streams.accessors.LongAccessor;
 import org.globsframework.streams.accessors.utils.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -54,7 +57,21 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
                 .getQuery().executeUnique();
         Assert.assertEquals(dateTime, glob.get(DummyObject.REAL_DATE_TIME));
         Assert.assertArrayEquals(new String[]{"hello", "world"}, glob.get(DummyObject.ALIAS));
+    }
 
+    @Ignore
+    @Test
+    public void checkAutoIncrementIsRetrieved() {
+        sqlConnection.createTable(DummyObject.TYPE);
+        CreateBuilder createBuilder = sqlConnection.getCreateBuilder(DummyObject.TYPE);
+        LongAccessor keyGeneratedAccessor = createBuilder.getKeyGeneratedAccessor();
+        createBuilder
+                .set(DummyObject.NAME, "val1")
+                .getRequest()
+                .run();
+
+        Long valId1 = keyGeneratedAccessor.getLong();
+        Assert.assertNotNull(valId1);
     }
 
     public void setUp() throws Exception {
