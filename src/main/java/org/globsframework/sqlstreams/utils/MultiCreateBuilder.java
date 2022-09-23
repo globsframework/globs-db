@@ -173,6 +173,10 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    public LongAccessor getKeyGeneratedAccessor() {
+        throw new RuntimeException("Not implemented");
+    }
+
     public SqlRequest getRequest() {
         return new MultiSqlRequest(createBuilders);
     }

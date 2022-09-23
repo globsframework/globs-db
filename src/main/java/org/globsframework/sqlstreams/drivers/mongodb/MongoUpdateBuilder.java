@@ -4,6 +4,7 @@ import com.mongodb.client.MongoDatabase;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.UpdateBuilder;
@@ -138,6 +139,16 @@ public class MongoUpdateBuilder implements UpdateBuilder {
 
     public UpdateBuilder update(GlobField field, GlobAccessor accessor) {
         fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(GlobField field, Glob value) {
+        fieldsValues.put(field, new ValueGlobAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(GlobArrayField field, Glob[] values) {
+        fieldsValues.put(field, new ValueGlobsAccessor(values));
         return this;
     }
 

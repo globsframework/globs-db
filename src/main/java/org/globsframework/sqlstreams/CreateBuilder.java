@@ -67,6 +67,8 @@ public interface CreateBuilder {
 
     CreateBuilder setObject(Field field, Object value);
 
+    LongAccessor getKeyGeneratedAccessor();
+
     SqlRequest getRequest();
 
     BulkDbRequest getBulkRequest();

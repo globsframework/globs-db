@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc.request;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.SqlService;
@@ -61,6 +62,13 @@ public class SqlUpdateBuilder implements UpdateBuilder {
                 update(field, (byte[]) value);
             }
 
+            public void visitGlob(GlobField field) {
+                update(field, (Glob) value);
+            }
+
+            public void visitGlobArray(GlobArrayField field) {
+                update(field, (Glob[]) value);
+            }
         });
         return this;
     }
@@ -140,6 +148,16 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor) {
         values.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(GlobField field, Glob value) {
+        values.put(field, new ValueGlobAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(GlobArrayField field, Glob[] values) {
+        this.values.put(field, new ValueGlobsAccessor(values));
         return this;
     }
 

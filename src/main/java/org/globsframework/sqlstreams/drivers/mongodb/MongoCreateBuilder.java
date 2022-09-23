@@ -196,6 +196,10 @@ public class MongoCreateBuilder implements CreateBuilder {
         return this;
     }
 
+    public LongAccessor getKeyGeneratedAccessor() {
+        throw new RuntimeException("Not implemented.");
+    }
+
     public SqlRequest getRequest() {
         return new MongoCreateSqlRequest(mongoDatabase.getCollection(sqlService.getTableName(globType)), fieldsValues, sqlService, false);
     }
