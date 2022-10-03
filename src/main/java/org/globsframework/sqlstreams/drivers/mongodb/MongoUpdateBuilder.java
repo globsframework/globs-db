@@ -14,6 +14,8 @@ import org.globsframework.streams.accessors.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +57,14 @@ public class MongoUpdateBuilder implements UpdateBuilder {
             }
 
             public void visitBlob(BlobField field, byte[] value) {
+                update(field, value);
+            }
+
+            public void visitDate(DateField field, LocalDate value) throws Exception {
+                update(field, value);
+            }
+
+            public void visitDateTime(DateTimeField field, ZonedDateTime value) throws Exception {
                 update(field, value);
             }
         }, value);
@@ -109,6 +119,26 @@ public class MongoUpdateBuilder implements UpdateBuilder {
 
     public UpdateBuilder update(StringField field, String value) {
         fieldsValues.put(field, new ValueStringAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(DateTimeField field, ZonedDateTime value) {
+        fieldsValues.put(field, new ValueDateTimeAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(DateField field, LocalDate value) {
+        fieldsValues.put(field, new ValueDateAccessor(value));
+        return this;
+    }
+
+    public UpdateBuilder update(DateTimeField field, DateTimeAccessor accessor) {
+        fieldsValues.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(DateField field, DateAccessor accessor) {
+        fieldsValues.put(field, accessor);
         return this;
     }
 

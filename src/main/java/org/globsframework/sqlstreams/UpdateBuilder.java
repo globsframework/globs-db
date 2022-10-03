@@ -6,6 +6,9 @@ import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.accessors.LongSqlAccessor;
 import org.globsframework.streams.accessors.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+
 public interface UpdateBuilder {
 
     UpdateBuilder updateUntyped(Field field, Object value);
@@ -29,6 +32,14 @@ public interface UpdateBuilder {
     UpdateBuilder update(StringArrayField field, StringArrayAccessor accessor);
 
     UpdateBuilder update(StringField field, String value);
+
+    UpdateBuilder update(DateTimeField field, ZonedDateTime value);
+
+    UpdateBuilder update(DateField field, LocalDate value);
+
+    UpdateBuilder update(DateTimeField field, DateTimeAccessor accessor);
+
+    UpdateBuilder update(DateField field, DateAccessor accessor);
 
     UpdateBuilder update(StringArrayField field, String[] value);
 

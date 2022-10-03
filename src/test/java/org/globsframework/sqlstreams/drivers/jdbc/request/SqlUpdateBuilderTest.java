@@ -1,6 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
 import org.globsframework.metamodel.GlobModel;
+import org.globsframework.model.Glob;
 import org.globsframework.model.Key;
 import org.globsframework.model.KeyBuilder;
 import org.globsframework.sqlstreams.model.DummyObject;
@@ -9,6 +10,7 @@ import org.globsframework.sqlstreams.UpdateBuilder;
 import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.sqlstreams.constraints.impl.KeyConstraint;
 import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
+import org.globsframework.sqlstreams.model.DummyWithDateTime;
 import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.utils.ValueDoubleAccessor;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
@@ -17,7 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
+import java.util.Optional;
 
 public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
@@ -59,6 +65,39 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         Key key2 = KeyBuilder.newKey(DummyObject.TYPE, 2);
         updateRequest.run();
         checkDb(key2, DummyObject.VALUE, 3.3, sqlConnection);
+    }
+
+
+    @Test
+    public void updateDateAndTime() {
+        sqlConnection.createTable(DummyWithDateTime.TYPE);
+        sqlConnection.getCreateBuilder(DummyWithDateTime.TYPE)
+                .set(DummyWithDateTime.uuid, "AAAAA")
+                .set(DummyWithDateTime.date, LocalDate.of(2022, 10, 3))
+                .set(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(2022, 10, 3),
+                        LocalTime.of(12, 0, 0), ZoneId.of(ZoneId.SHORT_IDS.get("ECT"))))
+                .getRequest()
+                .run();
+        sqlConnection.commit();
+
+        final LocalDate laure = LocalDate.of(1973, 10, 3);
+        sqlConnection.getUpdateBuilder(DummyWithDateTime.TYPE, Constraints.equal(DummyWithDateTime.uuid, "AAAAA"))
+                .update(DummyWithDateTime.date, laure)
+                .update(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(1973, 10, 3),
+                        LocalTime.of(8, 0, 0), ZoneId.of(ZoneId.SHORT_IDS.get("ECT"))))
+                .getRequest()
+                .run();
+        sqlConnection.commit();
+
+        final Optional<Glob> aaaaa = sqlConnection.getQueryBuilder(DummyWithDateTime.TYPE, Constraints.equal(DummyWithDateTime.uuid, "AAAAA"))
+                .selectAll()
+                .getQuery()
+                .executeOne();
+        sqlConnection.commit();
+
+        Assert.assertTrue(aaaaa.isPresent());
+        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00+01:00[Europe/Paris]\", \"date\":\"1973-10-03\"}",
+                aaaaa.get().toString());
     }
 
     @Test

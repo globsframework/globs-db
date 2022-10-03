@@ -16,6 +16,8 @@ import org.globsframework.streams.accessors.*;
 import org.globsframework.streams.accessors.utils.*;
 
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,6 +119,24 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public UpdateBuilder update(StringField field, String value) {
         return update(field, new ValueStringAccessor(value));
+    }
+
+    public UpdateBuilder update(DateTimeField field, ZonedDateTime value) {
+        return update(field, new ValueDateTimeAccessor(value));
+    }
+
+    public UpdateBuilder update(DateField field, LocalDate value) {
+        return update(field, new ValueDateAccessor(value));
+    }
+
+    public UpdateBuilder update(DateTimeField field, DateTimeAccessor accessor) {
+        values.put(field, accessor);
+        return this;
+    }
+
+    public UpdateBuilder update(DateField field, DateAccessor accessor) {
+        values.put(field, accessor);
+        return this;
     }
 
     public UpdateBuilder update(StringArrayField field, String[] value) {
