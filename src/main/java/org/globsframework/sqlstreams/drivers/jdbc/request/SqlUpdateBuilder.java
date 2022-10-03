@@ -71,6 +71,14 @@ public class SqlUpdateBuilder implements UpdateBuilder {
             public void visitGlobArray(GlobArrayField field) {
                 update(field, (Glob[]) value);
             }
+
+            public void visitDate(DateField field) throws Exception {
+                update(field, (LocalDate) value);
+            }
+
+            public void visitDateTime(DateTimeField field) throws Exception {
+                update(field, (ZonedDateTime) value);
+            }
         });
         return this;
     }
