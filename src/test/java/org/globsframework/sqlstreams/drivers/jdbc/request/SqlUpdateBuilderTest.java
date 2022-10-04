@@ -75,7 +75,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
                 .set(DummyWithDateTime.uuid, "AAAAA")
                 .set(DummyWithDateTime.date, LocalDate.of(2022, 10, 3))
                 .set(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(2022, 10, 3),
-                        LocalTime.of(12, 0, 0), ZoneId.of(ZoneId.SHORT_IDS.get("ECT"))))
+                        LocalTime.of(12, 0, 0), ZoneId.systemDefault()))
                 .getRequest()
                 .run();
         sqlConnection.commit();
@@ -84,7 +84,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         sqlConnection.getUpdateBuilder(DummyWithDateTime.TYPE, Constraints.equal(DummyWithDateTime.uuid, "AAAAA"))
                 .update(DummyWithDateTime.date, laure)
                 .update(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(1973, 10, 3),
-                        LocalTime.of(8, 0, 0), ZoneId.of(ZoneId.SHORT_IDS.get("ECT"))))
+                        LocalTime.of(8, 0, 0), ZoneId.systemDefault()))
                 .getRequest()
                 .run();
         sqlConnection.commit();
@@ -96,7 +96,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         sqlConnection.commit();
 
         Assert.assertTrue(aaaaa.isPresent());
-        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00+01:00[Europe/Paris]\", \"date\":\"1973-10-03\"}",
+        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00+01:00[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
                 aaaaa.get().toString());
     }
 
