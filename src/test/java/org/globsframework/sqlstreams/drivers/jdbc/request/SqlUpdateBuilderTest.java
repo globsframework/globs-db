@@ -18,11 +18,10 @@ import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
+import java.util.Locale;
 import java.util.Optional;
 
 public class SqlUpdateBuilderTest extends DbServicesTestCase {
@@ -96,7 +95,10 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         sqlConnection.commit();
 
         Assert.assertTrue(aaaaa.isPresent());
-        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00+01:00[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
+        String offsetId = ZoneId.systemDefault().getRules().getStandardOffset(Instant.now()).getId();
+
+        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00" +
+                        offsetId +"[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
                 aaaaa.get().toString());
     }
 
