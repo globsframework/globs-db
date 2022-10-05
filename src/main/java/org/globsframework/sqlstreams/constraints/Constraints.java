@@ -8,6 +8,7 @@ import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Constraints {
     private Constraints() {
@@ -233,6 +234,10 @@ public class Constraints {
 
     public static Constraint startWith(StringField field, String value) {
         return new ContainsConstraint(field, value, true, true);
+    }
+
+    public static Constraint startWith(StringArrayField field, String[] value) {
+        return new ContainsConstraint(field, String.join(",", value), true, true);
     }
 
     public static Constraint notStartWith(StringField field, String value) {
