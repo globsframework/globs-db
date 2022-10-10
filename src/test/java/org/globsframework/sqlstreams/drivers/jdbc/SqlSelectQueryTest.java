@@ -424,17 +424,29 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                                 "<dummyObject id='5' name='world' count='2' present='false'/>" +
                                 "<dummyObject id='6' name='world' count='4' present='false'/>" +
                                 "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
-        SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
-        Ref<StringAccessor> accessor = new Ref<>();
-        LongAccessor max = queryBuilder
-                .select(DummyObject.NAME, accessor)
-                .groupBy(DummyObject.NAME)
-                .count(DummyObject.COUNT);
-        DbStream execute = queryBuilder.getQuery().execute();
-        Assert.assertTrue(execute.next());
-        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getLong().intValue());
-        Assert.assertTrue(execute.next());
-        Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 5, max.getLong().intValue());
+        {
+            SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+            Ref<StringAccessor> accessor = new Ref<>();
+            LongAccessor max = queryBuilder
+                    .select(DummyObject.NAME, accessor)
+                    .groupBy(DummyObject.NAME)
+                    .count(DummyObject.COUNT);
+            DbStream execute = queryBuilder.getQuery().execute();
+            Assert.assertTrue(execute.next());
+            Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getLong().intValue());
+            Assert.assertTrue(execute.next());
+            Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 5, max.getLong().intValue());
+        }
+        {
+            SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+            LongAccessor max = queryBuilder
+                    .groupBy(DummyObject.NAME)
+                    .count(DummyObject.COUNT);
+            final long sum = queryBuilder.getQuery().executeAsStream()
+                    .mapToLong(v -> max.getValue(0))
+                    .sum();
+            Assert.assertEquals(6, sum);
+        }
     }
 
     @Test

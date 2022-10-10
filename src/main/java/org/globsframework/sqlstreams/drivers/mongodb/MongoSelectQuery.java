@@ -18,8 +18,6 @@ import org.globsframework.sqlstreams.drivers.jdbc.AccessorGlobBuilder;
 import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.Ref;
-import org.globsframework.utils.exceptions.ItemNotFound;
-import org.globsframework.utils.exceptions.TooManyItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +62,7 @@ public class MongoSelectQuery implements SelectQuery {
 
     public Stream<Glob> executeAsGlobStream() {
         DocumentsIterator iterator = getDocumentsIterator();
-        AccessorGlobBuilder globBuilder = AccessorGlobBuilder.init(fieldsAndAccessor.keySet(), fieldsAndAccessor::get);
+        AccessorGlobBuilder globBuilder = AccessorGlobBuilder.init(fieldsAndAccessor.keySet(), fieldsAndAccessor::get, globType);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Glob>() {
             public boolean hasNext() {
                 return iterator.hasNext();
@@ -144,7 +142,7 @@ public class MongoSelectQuery implements SelectQuery {
 
     public GlobList executeAsGlobs() {
         DbStream dbStream = execute();
-        AccessorGlobBuilder accessorGlobsBuilder = AccessorGlobBuilder.init(dbStream);
+        AccessorGlobBuilder accessorGlobsBuilder = AccessorGlobBuilder.init(dbStream, globType);
         GlobList result = new GlobList();
         while (dbStream.next()) {
             result.add(accessorGlobsBuilder.getGlob());

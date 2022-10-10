@@ -14,7 +14,6 @@ import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.DbStream;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.*;
@@ -36,6 +35,7 @@ public class SqlSelectQuery implements SelectQuery {
     private final int top;
     private final Set<Field> distinct;
     private final List<SqlOperation> sqlOperations;
+    private GlobType fallBackType;
     private PreparedStatement preparedStatement;
     private final String sql;
     private boolean shouldInitAccessorWithMetadata;
@@ -43,7 +43,7 @@ public class SqlSelectQuery implements SelectQuery {
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
                           BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
-                          List<Field> groupBy, int top, Set<Field> distinct, List<SqlOperation> sqlOperations) {
+                          List<Field> groupBy, int top, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
         this.constraint = constraint;
         this.blobUpdater = blobUpdater;
         this.autoClose = autoClose;
@@ -54,6 +54,7 @@ public class SqlSelectQuery implements SelectQuery {
         this.top = top;
         this.distinct = distinct;
         this.sqlOperations = sqlOperations;
+        this.fallBackType = fallBackType;
         String externalRequest = null;
         if (externalRequest == null) {
             sql = prepareSqlRequest();
@@ -187,20 +188,17 @@ public class SqlSelectQuery implements SelectQuery {
     public Stream<?> executeAsStream() {
         DbStream dbStream = execute();
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Object>() {
+                    private static final Object NULL = new Object();
                     private Boolean hasNext;
-
-                    @Override
                     public boolean hasNext() {
                         if (hasNext == null) {
                             hasNext = dbStream.next();
                         }
                         return hasNext;
                     }
-
-                    @Override
                     public Object next() {
                         hasNext = null;
-                        return null;
+                        return NULL;
                     }
                 }, 0), false)
                 .onClose(this::resultSetClose);
@@ -208,7 +206,7 @@ public class SqlSelectQuery implements SelectQuery {
 
     public Stream<Glob> executeAsGlobStream() {
         DbStream dbStream = execute();
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new GlobIterator(dbStream), 0), false)
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new GlobIterator(dbStream, fallBackType), 0), false)
                 .onClose(this::resultSetClose);
     }
 
@@ -239,7 +237,7 @@ public class SqlSelectQuery implements SelectQuery {
 
     public GlobList executeAsGlobs() {
         DbStream dbStream = execute();
-        AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(dbStream);
+        AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(dbStream, fallBackType);
         GlobList result = new GlobList();
         while (dbStream.next()) {
             result.add(accessorGlobBuilder.getGlob());
@@ -274,9 +272,9 @@ public class SqlSelectQuery implements SelectQuery {
         private DbStream dbStream;
         private Glob current;
 
-        public GlobIterator(DbStream dbStream) {
+        public GlobIterator(DbStream dbStream, GlobType fallBackType) {
             this.dbStream = dbStream;
-            globsBuilder = AccessorGlobBuilder.init(this.dbStream);
+            globsBuilder = AccessorGlobBuilder.init(this.dbStream, fallBackType);
             goToNext();
         }
 

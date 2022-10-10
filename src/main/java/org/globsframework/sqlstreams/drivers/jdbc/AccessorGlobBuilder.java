@@ -7,23 +7,19 @@ import org.globsframework.model.MutableGlob;
 import org.globsframework.streams.DbStream;
 import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.Check;
-import org.globsframework.utils.collections.Pair;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 
 public class AccessorGlobBuilder {
     private Field[] fields;
     private Accessor[] accessors;
     private GlobType globType = null;
 
-    private AccessorGlobBuilder(DbStream dbStream) {
-        this(dbStream.getFields(), dbStream::getAccessor);
+    private AccessorGlobBuilder(DbStream dbStream, GlobType fallBackType) {
+        this(dbStream.getFields(), dbStream::getAccessor, fallBackType);
     }
 
-    private AccessorGlobBuilder(Collection<Field> fields, FieldAccessor fieldAccessor) {
+    private AccessorGlobBuilder(Collection<Field> fields, FieldAccessor fieldAccessor, GlobType fallBackType) {
         this.fields = new Field[fields.size()];
         this.accessors = new Accessor[fields.size()];
         int i = 0;
@@ -37,18 +33,21 @@ public class AccessorGlobBuilder {
             this.accessors[i] = Check.requireNonNull(fieldAccessor.get(field), field);
             ++i;
         }
+        if (globType == null) {
+            globType = fallBackType;
+        }
     }
 
     public interface FieldAccessor {
         Accessor get(Field field);
     }
 
-    public static AccessorGlobBuilder init(Collection<Field> fields, FieldAccessor fieldAccessor) {
-        return new AccessorGlobBuilder(fields, fieldAccessor);
+    public static AccessorGlobBuilder init(Collection<Field> fields, FieldAccessor fieldAccessor, GlobType fallBackType) {
+        return new AccessorGlobBuilder(fields, fieldAccessor, fallBackType);
     }
 
-    public static AccessorGlobBuilder init(DbStream dbStream) {
-        return new AccessorGlobBuilder(dbStream);
+    public static AccessorGlobBuilder init(DbStream dbStream, GlobType fallBackType) {
+        return new AccessorGlobBuilder(dbStream, fallBackType);
     }
 
     public Glob getGlob() {

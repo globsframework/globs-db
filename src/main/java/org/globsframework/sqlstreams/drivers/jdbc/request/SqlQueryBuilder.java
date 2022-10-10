@@ -35,6 +35,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     private Set<Field> distinct = new HashSet<>();
     private List<SqlOperation> sqlOperations = new ArrayList<>();
     private List<Field> groupBy = new ArrayList<>();
+    private GlobType fallBackType = null;
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;
@@ -47,7 +48,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     public SelectQuery getQuery() {
         try {
             return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
-                    orders, groupBy, top, distinct, sqlOperations);
+                    orders, groupBy, top, distinct, sqlOperations, fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }
@@ -68,6 +69,9 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private IntegerAccessor singleOp(IntegerField field, String op) {
+        if (fallBackType == null) {
+            fallBackType = field.getGlobType();
+        }
         IntegerAccessor accessor = createAccessor(field);
         sqlOperations.add(new SqlOperation() {
 
@@ -99,6 +103,9 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private LongAccessor singleOp(LongField field, String op) {
+        if (fallBackType == null) {
+            fallBackType = field.getGlobType();
+        }
         LongAccessor accessor = createAccessor(field);
         sqlOperations.add(new SqlOperation() {
 
@@ -114,6 +121,9 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private LongAccessor singleLongOp(IntegerField field, String op) {
+        if (fallBackType == null) {
+            fallBackType = field.getGlobType();
+        }
         LongAccessor accessor = new LongSqlAccessor();
         sqlOperations.add(new SqlOperation() {
 
@@ -129,6 +139,9 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private LongAccessor singleCount(Field field, String op) {
+        if (fallBackType == null) {
+            fallBackType = field.getGlobType();
+        }
         LongAccessor accessor = new LongSqlAccessor();
         sqlOperations.add(new SqlOperation() {
 
