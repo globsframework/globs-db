@@ -146,11 +146,11 @@ public class JdbcSqlService extends AbstractSqlService {
         if (namingMapping == DefaultNamingMapping.INSTANCE) {
             namingMapping = new NamingMapping() {
                 public String getTableName(GlobType globType) {
-                    return TargetTypeName.getOptName(globType).orElse(toSqlName(globType.getName()));
+                    return TargetTypeName.getOptName(globType).map(AbstractSqlService::toSqlName).orElse(toSqlName(globType.getName()));
                 }
 
                 public String getColumnName(Field field) {
-                    return DbFieldName.getOptName(field).orElse(toSqlName(field.getName()));
+                    return DbFieldName.getOptName(field).map(AbstractSqlService::toSqlName).orElse(toSqlName(field.getName()));
                 }
             };
         }

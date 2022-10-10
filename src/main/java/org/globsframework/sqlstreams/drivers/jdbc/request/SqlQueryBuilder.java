@@ -86,12 +86,8 @@ public class SqlQueryBuilder implements SelectBuilder {
         return singleOp(field, "MAX");
     }
 
-    public LongAccessor count(LongField field) {
-        return singleOp(field, "COUNT");
-    }
-
-    public LongAccessor count(IntegerField field) {
-        return singleLongOp(field, "COUNT");
+    public LongAccessor count(Field field) {
+        return singleCount(field, "COUNT");
     }
 
     public LongAccessor sum(IntegerField field) {
@@ -118,6 +114,21 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private LongAccessor singleLongOp(IntegerField field, String op) {
+        LongAccessor accessor = new LongSqlAccessor();
+        sqlOperations.add(new SqlOperation() {
+
+            public SqlAccessor getAccessor() {
+                return (SqlAccessor) accessor;
+            }
+
+            public String toSqlOpe(ToSqlName toSqlName) {
+                return op + "(" + toSqlName.toSqlName(field) + ")";
+            }
+        });
+        return accessor;
+    }
+
+    private LongAccessor singleCount(Field field, String op) {
         LongAccessor accessor = new LongSqlAccessor();
         sqlOperations.add(new SqlOperation() {
 
