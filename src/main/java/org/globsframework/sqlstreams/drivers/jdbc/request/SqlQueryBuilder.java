@@ -32,6 +32,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     private boolean autoClose = true;
     private Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
     private int top = -1;
+    private int skip = -1;
     private Set<Field> distinct = new HashSet<>();
     private List<SqlOperation> sqlOperations = new ArrayList<>();
     private List<Field> groupBy = new ArrayList<>();
@@ -48,7 +49,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     public SelectQuery getQuery() {
         try {
             return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
-                    orders, groupBy, top, distinct, sqlOperations, fallBackType);
+                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }
@@ -256,6 +257,11 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectBuilder top(int n) {
         top = n;
+        return this;
+    }
+
+    public SelectBuilder skip(int n) {
+        skip = n;
         return this;
     }
 

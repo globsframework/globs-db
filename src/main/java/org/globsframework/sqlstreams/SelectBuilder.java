@@ -47,6 +47,8 @@ public interface SelectBuilder {
 
     SelectBuilder top(int n);
 
+    SelectBuilder skip(int n);
+
     SelectBuilder withKeys();
 
     IntegerAccessor max(IntegerField field);

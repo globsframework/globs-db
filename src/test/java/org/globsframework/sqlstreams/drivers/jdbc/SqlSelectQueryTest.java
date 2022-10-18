@@ -231,6 +231,15 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .getQuery().executeAsGlobs();
         assertEquals(1, list.size());
         assertEquals(5, list.get(0).get(DummyObject.ID).intValue());
+        GlobList skipList = sqlConnection.getQueryBuilder(DummyObject.TYPE,
+                        Constraints.in(DummyObject.ID, Utils.set(values)))
+                .withKeys()
+                .orderDesc(DummyObject.ID).orderAsc(DummyObject.VALUE)
+                .top(1)
+                .skip(1)
+                .getQuery().executeAsGlobs();
+        assertEquals(1, skipList.size());
+        assertEquals(4, skipList.get(0).get(DummyObject.ID).intValue());
     }
 
     @Test

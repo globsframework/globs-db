@@ -129,6 +129,10 @@ public class MongoSelectBuilder implements SelectBuilder {
         return this;
     }
 
+    public SelectBuilder skip(int n) {
+        throw new RuntimeException("Not implemented");
+    }
+
     public SelectBuilder withKeys() {
         completeWithKeys();
         return this;

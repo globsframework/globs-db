@@ -33,6 +33,7 @@ public class SqlSelectQuery implements SelectQuery {
     private final List<SqlQueryBuilder.Order> orders;
     private final List<Field> groupBy;
     private final int top;
+    private final int skip;
     private final Set<Field> distinct;
     private final List<SqlOperation> sqlOperations;
     private GlobType fallBackType;
@@ -43,7 +44,7 @@ public class SqlSelectQuery implements SelectQuery {
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
                           BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
-                          List<Field> groupBy, int top, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
+                          List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
         this.constraint = constraint;
         this.blobUpdater = blobUpdater;
         this.autoClose = autoClose;
@@ -52,6 +53,7 @@ public class SqlSelectQuery implements SelectQuery {
         this.orders = orders;
         this.groupBy = groupBy;
         this.top = top;
+        this.skip = skip;
         this.distinct = distinct;
         this.sqlOperations = sqlOperations;
         this.fallBackType = fallBackType;
@@ -181,6 +183,9 @@ public class SqlSelectQuery implements SelectQuery {
         }
         if (top != -1) {
             prettyWriter.append(" LIMIT " + top);
+        }
+        if (skip != -1) {
+            prettyWriter.append(" OFFSET " + skip);
         }
         return prettyWriter.toString();
     }
