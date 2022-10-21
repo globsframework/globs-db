@@ -23,7 +23,7 @@ public class JSonConstraintTypeAdapterTest {
               Constraints.equal(DummyObject.ID, 3)),
               Constraints.and(Constraints.in(DummyObject.VALUE, Utils.set(1.1, 2.2)),
                     Constraints.contains(DummyObject.NAME, "m")));
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\n" +
               "  \"or\": [\n" +
@@ -101,7 +101,7 @@ public class JSonConstraintTypeAdapterTest {
     public void containsOrNot() {
         Constraint constraint = Constraints.and(Constraints.contains(DummyObject.NAME, "a name"),
               Constraints.notContains(DummyObject.NAME, "aaa"));
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"and\":[{\"contains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"a name\"}},{\"notContains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"aaa\"}}]}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);

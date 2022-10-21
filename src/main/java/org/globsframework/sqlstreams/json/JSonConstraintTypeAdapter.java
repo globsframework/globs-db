@@ -3,16 +3,18 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.Field;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.constraints.*;
 import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.utils.Ref;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public static final String IN = "in";
@@ -38,29 +40,47 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public static final String FIELD = "field";
     public static final String TYPE = "type";
     public static final String FIELD_NAME = "name";
-    private GlobTypeResolver resolver;
-    private GlobType currentType;
+    private final FieldResolver resolver;
 
-    static public GsonBuilder createBuilder(GlobTypeResolver globTypeResolver, GlobType currentType) {
+    public interface FieldResolver {
+        Field getField(String type, String name);
+    }
+
+    public static class DefaultFieldResolver implements FieldResolver {
+        GlobTypeResolver globTypeResolver;
+
+        public DefaultFieldResolver(GlobTypeResolver globTypeResolver) {
+            this.globTypeResolver = globTypeResolver;
+        }
+
+        public Field getField(String type, String name) {
+            return globTypeResolver.getType(type).getField(name);
+        }
+    }
+
+    static public GsonBuilder createBuilder(FieldResolver globTypeResolver) {
         return new GsonBuilder()
-              .registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver, currentType));
+                .registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver));
     }
 
     static public GsonBuilder register(GsonBuilder gsonBuilder, GlobTypeResolver globTypeResolver) {
-        return gsonBuilder.registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(globTypeResolver, null));
+        return gsonBuilder.registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(new DefaultFieldResolver(globTypeResolver)));
+    }
+
+    static public GsonBuilder register(GsonBuilder gsonBuilder, FieldResolver fieldResolver) {
+        return gsonBuilder.registerTypeHierarchyAdapter(Constraint.class, new JSonConstraintTypeAdapter(fieldResolver));
     }
 
     public static Gson create(GlobTypeResolver globTypeResolver) {
-        return createBuilder(globTypeResolver, null).create();
+        return createBuilder(new DefaultFieldResolver(globTypeResolver)).create();
     }
 
-    public static Gson create(GlobTypeResolver globTypeResolver, GlobType currentType) {
-        return createBuilder(globTypeResolver, null).create();
+    public static Gson create(FieldResolver fieldResolver) {
+        return createBuilder(fieldResolver).create();
     }
 
-    public JSonConstraintTypeAdapter(GlobTypeResolver resolver, GlobType currentType) {
+    public JSonConstraintTypeAdapter(FieldResolver resolver) {
         this.resolver = resolver;
-        this.currentType = currentType;
     }
 
     public void write(JsonWriter out, Constraint constraint) throws IOException {
@@ -97,7 +117,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 findField((JsonObject) entry.getValue(), leftOp, rightOp);
                 return new EqualConstraint(leftOp.get(), rightOp.get());
             }
-            case CONTAINS:{
+            case CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
@@ -109,13 +129,13 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 JsonElement jsonElement = in.get(VALUE);
                 return new ContainsConstraint(field, jsonElement.getAsString(), true, true);
             }
-            case NOT_CONTAINS:{
+            case NOT_CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
                 return new ContainsConstraint(field, jsonElement.getAsString(), false, false);
             }
-            case START_NOT_CONTAINS:{
+            case START_NOT_CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
@@ -211,23 +231,20 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             leftOp.set(new FieldOperand(field));
             opposite = right;
             oppositeRef = rightOp;
-        }
-        else {
+        } else {
             fieldObj = right.get(FIELD);
             if (fieldObj != null) {
                 field = readField(right);
                 rightOp.set(new FieldOperand(field));
                 opposite = left;
                 oppositeRef = leftOp;
-            }
-            else {
+            } else {
                 throw new RuntimeException("At least one of left or right should be a field type");
             }
         }
         if (opposite.get(VALUE) != null) {
             oppositeRef.set(new ValueOperand(field, readValue(field, opposite)));
-        }
-        else {
+        } else {
             oppositeRef.set(new FieldOperand(readField(opposite)));
         }
     }
@@ -241,23 +258,19 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     }
 
     private Field readField(JsonObject object) {
-        GlobType currentType = null; //this.currentType;
         JsonObject field = object.getAsJsonObject(FIELD);
         JsonElement type = field.get(TYPE);
-        if (type != null) {
-            currentType = resolver.getType(type.getAsString());
-        }
-        else {
+        if (type == null) {
             throw new RuntimeException("A type is expected");
         }
         JsonElement name = field.get(FIELD_NAME);
         if (name != null) {
-            return currentType.getField(name.getAsString());
+            return resolver.getField(type.getAsString(), name.getAsString());
         }
         throw new RuntimeException("A field is expected ");
     }
 
-    private static class JSonConstraintVisitor extends FieldValueVisitor.AbstractWithErrorVisitor implements ConstraintVisitor, OperandVisitor{
+    private static class JSonConstraintVisitor extends FieldValueVisitor.AbstractWithErrorVisitor implements ConstraintVisitor, OperandVisitor {
         private JsonWriter jsonWriter;
 
         public JSonConstraintVisitor(JsonWriter jsonWriter) {
@@ -278,13 +291,13 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             jsonWriter.name(LEFT);
             jsonWriter.beginObject();
             constraint.getLeftOperand()
-                  .visitOperand(this);
+                    .visitOperand(this);
             jsonWriter.endObject();
 
             jsonWriter.name(RIGHT);
             jsonWriter.beginObject();
             constraint.getRightOperand()
-                  .visitOperand(this);
+                    .visitOperand(this);
             jsonWriter.endObject();
 
             jsonWriter.endObject();
@@ -303,12 +316,12 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             jsonWriter.beginArray();
             jsonWriter.beginObject();
             constraint.getLeftConstraint()
-                  .visit(this);
+                    .visit(this);
             jsonWriter.endObject();
 
             jsonWriter.beginObject();
             constraint.getRightConstraint()
-                  .visit(this);
+                    .visit(this);
             jsonWriter.endObject();
 
             jsonWriter.endArray();
@@ -374,7 +387,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 jsonWriter.beginObject();
                 visitFieldOperand(constraint.getField());
                 jsonWriter.name(VALUES)
-                      .beginArray();
+                        .beginArray();
                 for (Object o : constraint.getValues()) {
                     constraint.getField().safeVisit(this, o);
                 }
@@ -389,8 +402,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             try {
                 if (constraint.checkNull()) {
                     jsonWriter.name(IS_NULL);
-                }
-                else {
+                } else {
                     jsonWriter.name(IS_NOT_NULL);
                 }
                 visitFieldOperand(constraint.getField());
@@ -406,7 +418,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 jsonWriter.beginObject();
                 visitFieldOperand(constraint.getField());
                 jsonWriter.name(VALUES)
-                      .beginArray();
+                        .beginArray();
                 for (Object o : constraint.getValues()) {
                     constraint.getField().safeVisit(this, o);
                 }
@@ -421,8 +433,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             try {
                 if (startWith) {
                     jsonWriter.name(contains ? START_WITH : START_NOT_CONTAINS);
-                }
-                else {
+                } else {
                     jsonWriter.name(contains ? CONTAINS : NOT_CONTAINS);
                 }
                 jsonWriter.beginObject();
