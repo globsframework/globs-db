@@ -42,13 +42,25 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public interface NamingMapping {
-        String getTableName(GlobType globType);
+        default String getTableName(GlobType globType){
+            return getTableName(TargetTypeName.getOptName(globType).orElse(globType.getName()));
+        }
 
-        String getColumnName(Field field);
+        String getTableName(String typeName);
+
+        default String getColumnName(Field field){
+            return getColumnName(DbFieldName.getOptName(field).orElse(field.getName()));
+        }
+
+        String getColumnName(String fieldName);
     }
 
     interface DbFactory {
         JdbcConnection create(boolean autoCommit);
+    }
+
+    public NamingMapping getNamingMapping() {
+        return namingMapping;
     }
 
     public String getTableName(GlobType globType) {
@@ -145,12 +157,12 @@ public class JdbcSqlService extends AbstractSqlService {
         }
         if (namingMapping == DefaultNamingMapping.INSTANCE) {
             namingMapping = new NamingMapping() {
-                public String getTableName(GlobType globType) {
-                    return TargetTypeName.getOptName(globType).map(AbstractSqlService::toSqlName).orElse(toSqlName(globType.getName()));
+                public String getTableName(String typeName) {
+                    return toSqlName(typeName);
                 }
 
-                public String getColumnName(Field field) {
-                    return DbFieldName.getOptName(field).map(AbstractSqlService::toSqlName).orElse(toSqlName(field.getName()));
+                public String getColumnName(String fieldName) {
+                    return toSqlName(fieldName);
                 }
             };
         }
@@ -186,12 +198,12 @@ public class JdbcSqlService extends AbstractSqlService {
     private static class DefaultNamingMapping implements NamingMapping {
         public static NamingMapping INSTANCE = new DefaultNamingMapping();
 
-        public String getTableName(GlobType globType) {
-            return TargetTypeName.getOptName(globType).orElse(globType.getName());
+        public String getTableName(String typeName) {
+            return typeName;
         }
 
-        public String getColumnName(Field field) {
-            return DbFieldName.getOptName(field).orElse(field.getName());
+        public String getColumnName(String fieldName) {
+            return fieldName;
         }
     }
 
@@ -202,12 +214,12 @@ public class JdbcSqlService extends AbstractSqlService {
             this.namingMapping = namingMapping;
         }
 
-        public String getTableName(GlobType globType) {
-            return namingMapping.getTableName(globType).toLowerCase(Locale.ROOT);
+        public String getTableName(String typeName) {
+            return typeName.toLowerCase(Locale.ROOT);
         }
 
-        public String getColumnName(Field field) {
-            return namingMapping.getColumnName(field).toLowerCase(Locale.ROOT);
+        public String getColumnName(String fieldName) {
+            return fieldName.toLowerCase(Locale.ROOT);
         }
     }
 }

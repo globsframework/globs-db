@@ -285,7 +285,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public GlobTypeExtractor extractType(String tableName) {
-        return new DefaultGlobTypeExtractor(sqlService, tableName);
+        return new DefaultGlobTypeExtractor(sqlService, sqlService.getNamingMapping().getTableName(tableName));
     }
 
     interface DbFunctor {

@@ -12,6 +12,7 @@ import org.globsframework.model.Glob;
 import org.globsframework.model.MutableGlob;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.annotations.IsDbKey;
+import org.globsframework.sqlstreams.annotations.TargetTypeName;
 import org.globsframework.sqlstreams.drivers.mongodb.accessor.KeyStringMongoAccessor;
 import org.globsframework.sqlstreams.utils.AbstractSqlService;
 import org.globsframework.streams.accessors.Accessor;
@@ -54,6 +55,11 @@ public class MongoDbService extends AbstractSqlService {
 
     public SqlConnection getAutoCommitDb() {
         return new MongoDbConnection(database, this);
+    }
+
+    @Override
+    public String getTableName(GlobType globType) {
+        return TargetTypeName.getName(globType);
     }
 
     public String getColumnName(Field field) {
