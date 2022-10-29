@@ -11,5 +11,9 @@ public interface SqlService {
 
     String getTableName(GlobType globType);
 
+    String getTableName(String name);
+
     String getColumnName(Field field);
+
+    String getColumnName(String field);
 }

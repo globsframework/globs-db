@@ -62,8 +62,18 @@ public class MongoDbService extends AbstractSqlService {
         return TargetTypeName.getName(globType);
     }
 
+    @Override
+    public String getTableName(String name) {
+        throw new RuntimeException("NI " + name);
+    }
+
     public String getColumnName(Field field) {
         return updateAdapterFactory.getMongoFieldName(field);
+    }
+
+    @Override
+    public String getColumnName(String field) {
+        throw new RuntimeException("NI " + field);
     }
 
     public String getRootName(Field field) {

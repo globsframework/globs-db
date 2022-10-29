@@ -21,4 +21,5 @@ public abstract class AbstractSqlService implements SqlService {
         }
         return upper;
     }
+
 }

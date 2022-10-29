@@ -67,6 +67,14 @@ public class JdbcSqlService extends AbstractSqlService {
         return namingMapping.getTableName(globType);
     }
 
+    public String getTableName(String name) {
+        return namingMapping.getTableName(name);
+    }
+
+    public String getColumnName(String field) {
+        return namingMapping.getColumnName(field);
+    }
+
     public String getColumnName(Field field) {
         return namingMapping.getColumnName(field);
     }
