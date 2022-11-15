@@ -6,10 +6,13 @@ import org.globsframework.sqlstreams.constraints.OperandVisitor;
 import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 
 public class ValueConstraintVisitor extends SqlValueFieldVisitor implements ConstraintVisitor, OperandVisitor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValueConstraintVisitor.class);
     private int index = 0;
 
     public ValueConstraintVisitor(PreparedStatement preparedStatement, BlobUpdater blobUpdater) {
@@ -67,6 +70,9 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     public void visitIn(InConstraint inConstraint) {
         Field field = inConstraint.getField();
         for (Object value : inConstraint.getValues()) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("at " + index + " value : " + value);
+            }
             setValue(value, ++index);
             field.safeVisit(this);
         }
@@ -88,6 +94,9 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         if (o == null) {
             throw new UnexpectedApplicationState("null not supported, Should be explicit (is null) for field " + value.getField().getFullName());
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("at " + index + " value : " + o);
+        }
         setValue(o, ++index);
         value.getField().safeVisit(this);
     }
@@ -96,6 +105,9 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         Object objectValue = accessorOperand.getAccessor().getObjectValue();
         if (objectValue == null) {
             throw new UnexpectedApplicationState("null not supported, Should be explicit (is null) for field " + accessorOperand.getField().getFullName());
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("at " + index + " value : " + objectValue);
         }
         setValue(objectValue, ++index);
         accessorOperand.getField().safeVisit(this);
