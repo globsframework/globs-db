@@ -26,7 +26,6 @@ import org.globsframework.streams.accessors.*;
 import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.utils.Ref;
 import org.globsframework.utils.Utils;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
@@ -108,6 +107,20 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 sqlConnection.getQueryBuilder(DummyObject.TYPE,
                                 and(Constraints.equal(DummyObject.NAME, "hello"),
                                         Constraints.equal(DummyObject.ID, 1)))
+                        .selectAll()
+                        .getQuery()
+                        .executeAsGlobs();
+        assertEquals(1, list.size());
+        assertEquals(1, list.get(0).get(DummyObject.ID).intValue());
+    }
+
+    @Test
+    public void testLongArrayEquals() throws Exception {
+        SqlConnection sqlConnection = init();
+
+        GlobList list =
+                sqlConnection.getQueryBuilder(DummyObject.TYPE,
+                                Constraints.equal(DummyObject.IDS, new long[] { 25, 32 }))
                         .selectAll()
                         .getQuery()
                         .executeAsGlobs();
@@ -271,7 +284,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     private SqlConnection init() {
         DbStream streamToWrite =
                 XmlGlobStreamReader.parse(
-                        "<dummyObject id='1'  name='hello' value='1.1' present='true'/>" +
+                        "<dummyObject id='1'  name='hello' value='1.1' ids='25,32' present='true'/>" +
                                 "<dummyObject id='2'  name='world' value='2.2' present='false'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);
         return sqlConnection;

@@ -8,7 +8,6 @@ import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Constraints {
     private Constraints() {
@@ -75,6 +74,14 @@ public class Constraints {
     }
 
     public static Constraint equal(StringArrayField field, String[] value) {
+        return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
+    public static Constraint equal(LongArrayField field, LongArrayAccessor accessor) {
+        return new EqualConstraint(new FieldOperand(field), new AccessorOperand(field, accessor));
+    }
+
+    public static Constraint equal(LongArrayField field, long[] value) {
         return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 

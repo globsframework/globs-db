@@ -25,6 +25,8 @@ public class DummyObject {
 
     public static StringArrayField ALIAS;
 
+    public static LongArrayField IDS;
+
     public static DoubleField VALUE;
 
     @TypedIsNullable
