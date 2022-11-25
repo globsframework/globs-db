@@ -235,7 +235,7 @@ public class SqlSelectQuery implements SelectQuery {
                     sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
         } catch (SQLException e) {
             String message = "for request : " + sql;
-            LOGGER.error(message);
+            LOGGER.error(message, e);
             throw new SqlException(message, e);
         }
     }
