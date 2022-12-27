@@ -44,7 +44,8 @@ public class SqlSelectQuery implements SelectQuery {
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
                           BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
-                          List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
+                          List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations,
+                          GlobType fallBackType) {
         this.constraint = constraint;
         this.blobUpdater = blobUpdater;
         this.autoClose = autoClose;

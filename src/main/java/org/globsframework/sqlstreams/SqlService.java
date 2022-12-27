@@ -16,4 +16,6 @@ public interface SqlService {
     String getColumnName(Field field);
 
     String getColumnName(String field);
+
+    String getLikeIgnoreCase();
 }

@@ -232,23 +232,39 @@ public class Constraints {
     }
 
     public static Constraint contains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, true);
+        return new ContainsConstraint(field, value, false, true, false);
+    }
+
+    public static Constraint containsIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, false, true, true);
     }
 
     public static Constraint notContains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, false);
+        return new ContainsConstraint(field, value, false, false, false);
+    }
+
+    public static Constraint notContainsIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, false, false, true);
     }
 
     public static Constraint startWith(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, true);
+        return new ContainsConstraint(field, value, true, true, false);
+    }
+
+    public static Constraint startWithIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, true, true, true);
     }
 
     public static Constraint startWith(StringArrayField field, String[] value) {
-        return new ContainsConstraint(field, String.join(",", value), true, true);
+        return new ContainsConstraint(field, String.join(",", value), true, true, false);
     }
 
     public static Constraint notStartWith(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, false);
+        return new ContainsConstraint(field, value, true, false, false);
+    }
+
+    public static Constraint notStartWithIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, true, false, true);
     }
 
     public static Constraint isNull(Field field) {

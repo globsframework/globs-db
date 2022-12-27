@@ -53,6 +53,10 @@ public class JdbcSqlService extends AbstractSqlService {
         }
 
         String getColumnName(String fieldName);
+
+        default String getLikeIgnoreCase(){
+            return null;
+        }
     }
 
     interface DbFactory {
@@ -73,6 +77,10 @@ public class JdbcSqlService extends AbstractSqlService {
 
     public String getColumnName(String field) {
         return namingMapping.getColumnName(field);
+    }
+
+    public String getLikeIgnoreCase() {
+        return namingMapping.getLikeIgnoreCase();
     }
 
     public String getColumnName(Field field) {
@@ -101,7 +109,11 @@ public class JdbcSqlService extends AbstractSqlService {
             driver = (Driver) Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
             loadedDrivers.put(dbName, driver);
         }
-        namingMapping = new ToLowerCaseNamingMapping(namingMapping);
+        namingMapping = new ToLowerCaseNamingMapping(namingMapping){
+            public String getLikeIgnoreCase() {
+                return "iLike";
+            }
+        };
         dbFactory = new DbFactory() {
             public JdbcConnection create(boolean autoCommit) {
                 Connection connection = getConnection();

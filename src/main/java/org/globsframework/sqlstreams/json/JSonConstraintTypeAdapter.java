@@ -25,9 +25,13 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public static final String RIGHT = "right";
     public static final String EQUAL = "equal";
     public static final String CONTAINS = "contains";
+    public static final String CONTAINS_WITH_IGNORE_CASE = "containsIgnoreCase";
     public static final String START_WITH = "start";
+    public static final String START_WITH_IGNORE_CASE = "startIgnoreCase";
     public static final String NOT_CONTAINS = "notContains";
+    public static final String NOT_CONTAINS_WITH_IGNORE_CASE = "notContainsIgnoreCase";
     public static final String START_NOT_CONTAINS = "notStart";
+    public static final String START_NOT_CONTAINS_WITH_IGNORE_CASE = "notStartIgnoreCase";
     public static final String IS_NULL = "isNull";
     public static final String IS_NOT_NULL = "isNotNull";
     public static final String NOT_EQUAL = "notEqual";
@@ -121,25 +125,49 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
-                return new ContainsConstraint(field, jsonElement.getAsString(), false, true);
+                return new ContainsConstraint(field, jsonElement.getAsString(), false, true, false);
+            }
+            case CONTAINS_WITH_IGNORE_CASE: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new ContainsConstraint(field, jsonElement.getAsString(), false, true, true);
             }
             case START_WITH: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
-                return new ContainsConstraint(field, jsonElement.getAsString(), true, true);
+                return new ContainsConstraint(field, jsonElement.getAsString(), true, true, false);
+            }
+            case START_WITH_IGNORE_CASE: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new ContainsConstraint(field, jsonElement.getAsString(), true, true, true);
             }
             case NOT_CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
-                return new ContainsConstraint(field, jsonElement.getAsString(), false, false);
+                return new ContainsConstraint(field, jsonElement.getAsString(), false, false, false);
+            }
+            case NOT_CONTAINS_WITH_IGNORE_CASE: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new ContainsConstraint(field, jsonElement.getAsString(), false, false, true);
             }
             case START_NOT_CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
-                return new ContainsConstraint(field, jsonElement.getAsString(), true, false);
+                return new ContainsConstraint(field, jsonElement.getAsString(), true, false, false);
+            }
+            case START_NOT_CONTAINS_WITH_IGNORE_CASE: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new ContainsConstraint(field, jsonElement.getAsString(), true, false, true);
             }
             case NOT_EQUAL: {
                 Ref<Operand> leftOp = new Ref<>();
@@ -429,12 +457,22 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             }
         }
 
-        public void visitContains(Field field, String value, boolean contains, boolean startWith) {
+        public void visitContains(Field field, String value, boolean contains, boolean startWith, boolean ignoreCase) {
             try {
                 if (startWith) {
-                    jsonWriter.name(contains ? START_WITH : START_NOT_CONTAINS);
+                    if (ignoreCase) {
+                        jsonWriter.name(contains ? START_WITH_IGNORE_CASE : START_NOT_CONTAINS_WITH_IGNORE_CASE);
+                    }
+                    else {
+                        jsonWriter.name(contains ? START_WITH : START_NOT_CONTAINS);
+                    }
                 } else {
-                    jsonWriter.name(contains ? CONTAINS : NOT_CONTAINS);
+                    if (ignoreCase) {
+                        jsonWriter.name(contains ? CONTAINS_WITH_IGNORE_CASE : NOT_CONTAINS_WITH_IGNORE_CASE);
+                    }
+                    else {
+                        jsonWriter.name(contains ? CONTAINS : NOT_CONTAINS);
+                    }
                 }
                 jsonWriter.beginObject();
                 visitFieldOperand(field);
