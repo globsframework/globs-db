@@ -267,6 +267,22 @@ public class Constraints {
         return new ContainsConstraint(field, value, true, false, true);
     }
 
+    public static Constraint regularExpressionCaseSensitive(StringField field, String value) {
+        return new RegularExpressionConstraint(field, value, true, false);
+    }
+
+    public static Constraint regularExpressionCaseInsensitive(StringField field, String value) {
+        return new RegularExpressionConstraint(field, value, false, false);
+    }
+
+    public static Constraint notRegularExpressionCaseSensitive(StringField field, String value) {
+        return new RegularExpressionConstraint(field, value, true, true);
+    }
+
+    public static Constraint notRegularExpressionCaseInsensitive(StringField field, String value) {
+        return new RegularExpressionConstraint(field, value, false, true);
+    }
+
     public static Constraint isNull(Field field) {
         return new NullOrNotConstraint(field, true);
     }

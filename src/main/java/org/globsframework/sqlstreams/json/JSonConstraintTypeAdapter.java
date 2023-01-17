@@ -31,6 +31,10 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public static final String NOT_CONTAINS = "notContains";
     public static final String NOT_CONTAINS_WITH_IGNORE_CASE = "notContainsIgnoreCase";
     public static final String START_NOT_CONTAINS = "notStart";
+    public static final String CASE_SENSITIVE_REGEXP_MATCHES = "caseSensitiveRegex";
+    public static final String CASE_INSENSITIVE_REGEXP_MATCHES = "caseInsensitiveRegex";
+    public static final String NOT_CASE_SENSITIVE_REGEXP_MATCHES = "notCaseSensitiveRegex";
+    public static final String NOT_CASE_INSENSITIVE_REGEXP_MATCHES = "notCaseInsensitiveRegex";
     public static final String START_NOT_CONTAINS_WITH_IGNORE_CASE = "notStartIgnoreCase";
     public static final String IS_NULL = "isNull";
     public static final String IS_NOT_NULL = "isNotNull";
@@ -242,6 +246,30 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 Ref<Operand> rightOp = new Ref<>();
                 findField((JsonObject) entry.getValue(), leftOp, rightOp);
                 return new StrictlyBiggerThanConstraint(leftOp.get(), rightOp.get());
+            }
+            case CASE_SENSITIVE_REGEXP_MATCHES:{
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new RegularExpressionConstraint(field, jsonElement.getAsString(), false, false);
+            }
+            case CASE_INSENSITIVE_REGEXP_MATCHES: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new RegularExpressionConstraint(field, jsonElement.getAsString(), true, false);
+            }
+            case NOT_CASE_SENSITIVE_REGEXP_MATCHES:{
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new RegularExpressionConstraint(field, jsonElement.getAsString(), false, true);
+            }
+            case NOT_CASE_INSENSITIVE_REGEXP_MATCHES: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonElement jsonElement = in.get(VALUE);
+                return new RegularExpressionConstraint(field, jsonElement.getAsString(), true, true);
             }
         }
         throw new RuntimeException(entry.getKey() + " not managed");
@@ -484,6 +512,21 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         }
 
+        public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
+            try {
+                if(caseSensitive) {
+                    jsonWriter.name(not ? NOT_CASE_SENSITIVE_REGEXP_MATCHES : CASE_SENSITIVE_REGEXP_MATCHES);
+                } else {
+                    jsonWriter.name(not ? NOT_CASE_INSENSITIVE_REGEXP_MATCHES : CASE_INSENSITIVE_REGEXP_MATCHES);
+                }
+                jsonWriter.beginObject();
+                visitFieldOperand(field);
+                jsonWriter.name(VALUE).value(value);
+                jsonWriter.endObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         public void visitValueOperand(ValueOperand valueOperand) {
             try {
                 jsonWriter.name(VALUE);

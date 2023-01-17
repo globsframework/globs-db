@@ -1,9 +1,13 @@
 package org.globsframework.sqlstreams.drivers.mysql;
 
+import org.globsframework.metamodel.GlobType;
+import org.globsframework.sqlstreams.SelectBuilder;
+import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
+import org.globsframework.sqlstreams.drivers.mysql.request.MysqlQueryBuilder;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 
 import java.sql.Connection;
@@ -39,5 +43,14 @@ public class MysqlConnection extends JdbcConnection {
 
     protected boolean isRollbackSQLState(SQLException e) {
         return e.getErrorCode() == 1099 && "HY000".equals(e.getSQLState());
+    }
+    public SelectBuilder getQueryBuilder(GlobType globType) {
+        checkConnectionIsNotClosed();
+        return new MysqlQueryBuilder(getConnection(), globType, null, sqlService, blobUpdater);
+    }
+
+    public SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint) {
+        checkConnectionIsNotClosed();
+        return new MysqlQueryBuilder(getConnection(), globType, constraint, sqlService, blobUpdater);
     }
 }

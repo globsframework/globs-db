@@ -16,7 +16,10 @@ public abstract class AbstractSqlService implements SqlService {
     public static String replaceReserved(String upper) {
         for (String keyword : RESERVED_KEYWORDS) {
             if (upper.equals(keyword)) {
-                return "_" + upper + "_";
+                //return "_" + upper + "_";
+                // MB HSQLDB > 1.8 does no more support field starting with _
+                // >> The database setting, SET DATABASE SQL REGULAR NAMES FALSE can be used to relax the rules for regular identifier. With this setting, an underscore character can appear at the start of the regular identifier, and the dollar sign character can be used in the identifier.
+                return upper + "__";
             }
         }
         return upper;

@@ -24,12 +24,12 @@ import java.util.stream.StreamSupport;
 
 public class SqlSelectQuery implements SelectQuery {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSelectQuery.class);
-    private final Set<GlobType> globTypes = new HashSet<GlobType>();
+    protected final Set<GlobType> globTypes = new HashSet<GlobType>();
     private final Constraint constraint;
     private final BlobUpdater blobUpdater;
     private final boolean autoClose;
     private final Map<Field, SqlAccessor> fieldToAccessorHolder;
-    private final SqlService sqlService;
+    protected final SqlService sqlService;
     private final List<SqlQueryBuilder.Order> orders;
     private final List<Field> groupBy;
     private final int top;
@@ -103,6 +103,10 @@ public class SqlSelectQuery implements SelectQuery {
         return false;
     }
 
+    protected WhereClauseConstraintVisitor getWhereConstraintVisitor(StringPrettyWriter where) {
+        return new WhereClauseConstraintVisitor(where, sqlService, globTypes);
+    }
+
     private String prepareSqlRequest() {
         int index = 0;
         StringPrettyWriter prettyWriter = new StringPrettyWriter();
@@ -143,7 +147,7 @@ public class SqlSelectQuery implements SelectQuery {
         if (constraint != null) {
             where = new StringPrettyWriter();
             where.append(" WHERE ");
-            constraint.visit(new WhereClauseConstraintVisitor(where, sqlService, globTypes));
+            constraint.visit(getWhereConstraintVisitor(where));
         }
 
         prettyWriter.append(" from ");

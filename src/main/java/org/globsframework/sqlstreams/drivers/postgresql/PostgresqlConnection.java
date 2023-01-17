@@ -1,18 +1,22 @@
 package org.globsframework.sqlstreams.drivers.postgresql;
 
+import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.metamodel.annotations.MaxSizeType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
+import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
+import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
+import org.globsframework.sqlstreams.drivers.postgresql.request.PostgreSqlQueryBuilder;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
-import org.hsqldb.Types;
+import java.sql.Types;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -117,4 +121,14 @@ public class PostgresqlConnection extends JdbcConnection {
 
         };
     }
+    public SelectBuilder getQueryBuilder(GlobType globType) {
+        checkConnectionIsNotClosed();
+        return new PostgreSqlQueryBuilder(getConnection(), globType, null, sqlService, blobUpdater);
+    }
+
+    public SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint) {
+        checkConnectionIsNotClosed();
+        return new PostgreSqlQueryBuilder(getConnection(), globType, constraint, sqlService, blobUpdater);
+    }
+
 }

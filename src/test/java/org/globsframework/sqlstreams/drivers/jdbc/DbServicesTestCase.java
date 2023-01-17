@@ -6,8 +6,6 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.sqlstreams.exceptions.DbConstraintViolation;
-import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.model.Key;
@@ -65,6 +63,11 @@ public abstract class DbServicesTestCase {
         sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
 //        sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/glindaBackend", "glindaBackend", "glinda");
 //    sqlService = new JdbcDriverBasedSqlService("jdbc:mysql://Plone/test", "sa", "");
+// MB localtest postgree
+// sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/postgres", "admin", "DevTeam!");
+// MB localtest mysql
+// sqlService = new JdbcSqlService("jdbc:mysql://127.0.0.1:3306/sys", "root", "DevTeam!");
+
         directory.add(SqlService.class, sqlService);
         return sqlService.getDb();
     }
