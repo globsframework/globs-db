@@ -5,6 +5,7 @@ import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
+import org.globsframework.sqlstreams.drivers.jdbc.SqlSelectQuery;
 import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.drivers.mysql.MysqlSelectQuery;
 
@@ -18,7 +19,7 @@ public class MysqlQueryBuilder extends SqlQueryBuilder {
     public SelectQuery getQuery() {
         try {
             return new MysqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
-                    orders, groupBy, top, distinct, sqlOperations);
+                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }

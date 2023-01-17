@@ -32,11 +32,11 @@ public class SqlQueryBuilder implements SelectBuilder {
     protected boolean autoClose = true;
     protected Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
     protected int top = -1;
-    private int skip = -1;
+    protected int skip = -1;
     protected Set<Field> distinct = new HashSet<>();
     protected List<SqlOperation> sqlOperations = new ArrayList<>();
     protected List<Field> groupBy = new ArrayList<>();
-    private GlobType fallBackType = null;
+    protected GlobType fallBackType = null;
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;

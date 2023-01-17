@@ -34,8 +34,8 @@ public class SqlSelectQuery implements SelectQuery {
     private final List<Field> groupBy;
     private final int top;
     private final int skip;
-    private final Set<Field> distinct;
-    private final List<SqlOperation> sqlOperations;
+    protected final Set<Field> distinct;
+    protected final List<SqlOperation> sqlOperations;
     private GlobType fallBackType;
     private PreparedStatement preparedStatement;
     private final String sql;

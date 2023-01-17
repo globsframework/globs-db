@@ -110,7 +110,7 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void containsRegularExpressionCaseInsensitive() {
         Constraint constraint = Constraints.regularExpressionCaseInsensitive(DummyObject.NAME, "^h.*");
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"caseInsensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
@@ -120,7 +120,7 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void containsNotRegularExpressionCaseInsensitive() {
         Constraint constraint = Constraints.notRegularExpressionCaseInsensitive(DummyObject.NAME, "^h.*");
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"notCaseInsensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
@@ -129,7 +129,7 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void containsRegularExpressionCaseSensitive() {
         Constraint constraint = Constraints.regularExpressionCaseSensitive(DummyObject.NAME, "^h.*");
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"caseSensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
@@ -139,7 +139,7 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void containsNotRegularExpressionCaseSensitive() {
         Constraint constraint = Constraints.notRegularExpressionCaseSensitive(DummyObject.NAME, "^h.*");
-        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE, DummyObject.TYPE);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"notCaseSensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);

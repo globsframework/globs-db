@@ -1,6 +1,7 @@
 package org.globsframework.sqlstreams.drivers.hsqldb;
 
 import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.SqlAccessor;
 import org.globsframework.sqlstreams.constraints.Constraint;
@@ -18,8 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class HsqldbSqlSelectQuery extends SqlSelectQuery {
-    public HsqldbSqlSelectQuery(Connection connection, Constraint constraint, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService, BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders, List<Field> groupBy, int top, Set<Field> distinct, List<SqlOperation> sqlOperations) {
-        super(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, orders, groupBy, top, distinct, sqlOperations);
+
+    public HsqldbSqlSelectQuery(Connection connection, Constraint constraint, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService, BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders, List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
+        super(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose, orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
     }
 
     protected WhereClauseConstraintVisitor getWhereConstraintVisitor(StringPrettyWriter where) {
