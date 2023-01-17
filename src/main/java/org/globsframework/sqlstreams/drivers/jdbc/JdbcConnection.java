@@ -35,7 +35,7 @@ public abstract class JdbcConnection implements SqlConnection {
     private final boolean autoCommit;
     protected JdbcSqlService sqlService;
     private Connection connection;
-    private BlobUpdater blobUpdater;
+    protected BlobUpdater blobUpdater;
     private DbChecker checker;
 
     public JdbcConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService, BlobUpdater blobUpdater) {
@@ -61,7 +61,7 @@ public abstract class JdbcConnection implements SqlConnection {
         return new SqlUpdateBuilder(connection, globType, sqlService, constraint, blobUpdater);
     }
 
-    private void checkConnectionIsNotClosed() {
+    protected void checkConnectionIsNotClosed() {
         if (connection == null) {
             throw new UnexpectedApplicationState("connection was closed");
         }

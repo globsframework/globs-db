@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 
 public class SqlCreateBuilderTest extends DbServicesTestCase {
 
@@ -79,14 +78,20 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
         try {
             sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
         } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), true);
+        } finally {
+            sqlConnection.commit();
         }
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
-        try {
-            sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
-        } catch (Exception e) {
+        if(sqlConnection != null) {
+            try {
+                sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
+            } catch (Exception e) {
+                Assert.assertTrue(e.getMessage(), true);
+            }
         }
     }
 

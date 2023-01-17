@@ -3,13 +3,10 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
-import org.globsframework.sqlstreams.constraints.impl.AndConstraint;
-import org.globsframework.sqlstreams.constraints.impl.ContainsConstraint;
-import org.globsframework.sqlstreams.constraints.impl.InConstraint;
-import org.globsframework.sqlstreams.constraints.impl.OrConstraint;
 import org.globsframework.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -108,6 +105,45 @@ public class JSonConstraintTypeAdapterTest {
         Assert.assertTrue(constraint1 instanceof AndConstraint);
         Assert.assertTrue(((AndConstraint) constraint1).getLeftConstraint() instanceof ContainsConstraint);
         Assert.assertTrue(((AndConstraint) constraint1).getRightConstraint() instanceof ContainsConstraint);
+    }
+
+    @Test
+    public void containsRegularExpressionCaseInsensitive() {
+        Constraint constraint = Constraints.regularExpressionCaseInsensitive(DummyObject.NAME, "^h.*");
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"caseInsensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
+        Constraint constraint1 = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
+    }
+
+    @Test
+    public void containsNotRegularExpressionCaseInsensitive() {
+        Constraint constraint = Constraints.notRegularExpressionCaseInsensitive(DummyObject.NAME, "^h.*");
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"notCaseInsensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
+        Constraint constraint1 = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
+    }
+    @Test
+    public void containsRegularExpressionCaseSensitive() {
+        Constraint constraint = Constraints.regularExpressionCaseSensitive(DummyObject.NAME, "^h.*");
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"caseSensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
+        Constraint constraint1 = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
+    }
+
+    @Test
+    public void containsNotRegularExpressionCaseSensitive() {
+        Constraint constraint = Constraints.notRegularExpressionCaseSensitive(DummyObject.NAME, "^h.*");
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"notCaseSensitiveRegex\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"^h.*\"}}", s);
+        Constraint constraint1 = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
     }
 
     public static void assertEquivalent(String expected, String actual) {

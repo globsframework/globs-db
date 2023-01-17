@@ -11,7 +11,7 @@ import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import java.util.Set;
 
 public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandVisitor {
-    private StringPrettyWriter prettyWriter;
+    protected StringPrettyWriter prettyWriter;
     private SqlService sqlService;
     private Set<GlobType> globTypes;
 
@@ -115,6 +115,12 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
         }else {
             prettyWriter.append(" LIKE ? " );
         }
+    }
+
+    @Override
+    public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
+        // default fallback to prevent WHERE
+        prettyWriter.append(" 1=1");
     }
 
     public void visitValueOperand(ValueOperand value) {

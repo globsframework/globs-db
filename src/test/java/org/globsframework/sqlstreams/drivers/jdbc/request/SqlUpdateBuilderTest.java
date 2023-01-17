@@ -19,9 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.*;
-import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
-import java.util.Locale;
 import java.util.Optional;
 
 public class SqlUpdateBuilderTest extends DbServicesTestCase {
@@ -69,6 +67,12 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
     @Test
     public void updateDateAndTime() {
+        try {
+            sqlConnection.emptyTable(DummyWithDateTime.TYPE);
+        } catch(Exception e){
+            Assert.assertTrue(e.getMessage(), true);
+        }
+
         sqlConnection.createTable(DummyWithDateTime.TYPE);
         sqlConnection.getCreateBuilder(DummyWithDateTime.TYPE)
                 .set(DummyWithDateTime.uuid, "AAAAA")

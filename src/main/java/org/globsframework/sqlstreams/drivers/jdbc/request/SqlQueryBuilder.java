@@ -23,20 +23,20 @@ import java.sql.Connection;
 import java.util.*;
 
 public class SqlQueryBuilder implements SelectBuilder {
-    private final List<Order> orders = new ArrayList<>();
-    private Connection connection;
+    protected final List<Order> orders = new ArrayList<>();
+    protected Connection connection;
     private GlobType globType;
-    private Constraint constraint;
-    private SqlService sqlService;
-    private BlobUpdater blobUpdater;
-    private boolean autoClose = true;
-    private Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
-    private int top = -1;
-    private int skip = -1;
-    private Set<Field> distinct = new HashSet<>();
-    private List<SqlOperation> sqlOperations = new ArrayList<>();
-    private List<Field> groupBy = new ArrayList<>();
-    private GlobType fallBackType = null;
+    protected Constraint constraint;
+    protected SqlService sqlService;
+    protected BlobUpdater blobUpdater;
+    protected boolean autoClose = true;
+    protected Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
+    protected int top = -1;
+    protected int skip = -1;
+    protected Set<Field> distinct = new HashSet<>();
+    protected List<SqlOperation> sqlOperations = new ArrayList<>();
+    protected List<Field> groupBy = new ArrayList<>();
+    protected GlobType fallBackType = null;
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
         this.connection = connection;

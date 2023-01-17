@@ -28,6 +28,7 @@ import org.globsframework.utils.Ref;
 import org.globsframework.utils.Utils;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -280,6 +281,51 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         assertEquals(glob.get(DummyObject.ID).intValue(), 3);
     }
 
+    @Ignore // HSQLDB is always case sensitive
+    @Test
+    public void testRegularExpressionCaseInsensitive() throws Exception{
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+
+        Glob glob = execute(Constraints.regularExpressionCaseInsensitive(DummyObject.NAME, "^H.*"));
+        assertEquals(glob.get(DummyObject.ID).intValue(), 1);
+    }
+
+    @Ignore // HSQLDB is always case sensitive
+    @Test
+    public void testNotRegularExpressionCaseInsensitive() throws Exception{
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+
+        Glob glob = execute(Constraints.notRegularExpressionCaseInsensitive(DummyObject.NAME, "^h.*"));
+        assertEquals(glob.get(DummyObject.ID).intValue(), 3);
+     }
+
+    @Test
+    public void testRegularExpressionCaseSensitive() throws Exception{
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+
+        Glob glob = execute(Constraints.regularExpressionCaseSensitive(DummyObject.NAME, "^h.*"));
+        assertEquals(glob.get(DummyObject.ID).intValue(), 1);
+    }
+
+    @Test
+    public void testNotRegularExpressionCaseSensitive() throws Exception{
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+
+        Glob glob = execute(Constraints.notRegularExpressionCaseSensitive(DummyObject.NAME, "^b.*"));
+        assertEquals(glob.get(DummyObject.ID).intValue(), 1);
+    }
 
     private SqlConnection init() {
         DbStream streamToWrite =
