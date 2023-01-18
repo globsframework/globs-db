@@ -13,12 +13,12 @@ public class HsqldbWhereClauseConstraintVisitor extends WhereClauseConstraintVis
         super(prettyWriter, sqlService, GlobeTypeSetToUpdate);
     }
 
-    public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
+    public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
         if(not) {
-            prettyWriter.append("NOT ");
+            prettyWriter.append(" NOT ");
         }
         prettyWriter.append("REGEXP_MATCHES(");
         visitFieldOperand(field);
-        prettyWriter.append(",'" + value + "')");
+        prettyWriter.append(",?)");
     }
 }

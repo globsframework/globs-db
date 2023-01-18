@@ -70,7 +70,9 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         try {
             sqlConnection.emptyTable(DummyWithDateTime.TYPE);
         } catch(Exception e){
-            Assert.assertTrue(e.getMessage(), true);
+            //Assert.assertTrue(e.getMessage(), true);
+        } finally {
+            sqlConnection.commit();
         }
 
         sqlConnection.createTable(DummyWithDateTime.TYPE);

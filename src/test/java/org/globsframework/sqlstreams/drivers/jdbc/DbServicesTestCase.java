@@ -63,6 +63,8 @@ public abstract class DbServicesTestCase {
         sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
 //        sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/glindaBackend", "glindaBackend", "glinda");
 //    sqlService = new JdbcDriverBasedSqlService("jdbc:mysql://Plone/test", "sa", "");
+// MB localtest HSQLDB
+// sqlService = new JdbcSqlService("jdbc:hsqldb:http://localhost/", "SA", "");
 // MB localtest postgree
 // sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/postgres", "admin", "DevTeam!");
 // MB localtest mysql
