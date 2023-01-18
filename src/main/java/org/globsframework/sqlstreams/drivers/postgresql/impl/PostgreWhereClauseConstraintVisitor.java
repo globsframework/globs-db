@@ -13,13 +13,13 @@ public class PostgreWhereClauseConstraintVisitor extends WhereClauseConstraintVi
         super(prettyWriter, sqlService, GlobeTypeSetToUpdate);
     }
 
-    public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
+    public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
         visitFieldOperand(field);
-        if (caseInsensitive) {
-            prettyWriter.append(not ? " !~*" : "~*");
+        if (caseSensitive) {
+            prettyWriter.append(not ? " !~" : " ~");
         } else {
-            prettyWriter.append(not ? " !~" : "~");
+            prettyWriter.append(not ? " !~*" : " ~*");
         }
-        prettyWriter.append(" '" + value + "'");
+        prettyWriter.append(" ? ");
     }
 }

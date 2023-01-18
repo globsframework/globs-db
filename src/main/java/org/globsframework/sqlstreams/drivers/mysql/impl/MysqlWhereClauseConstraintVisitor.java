@@ -14,19 +14,18 @@ public class MysqlWhereClauseConstraintVisitor  extends WhereClauseConstraintVis
     }
 
     // CAST(name AS BINARY) REGEXP BINARY '^h.*$'
-    public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
-        if (!caseInsensitive) {
+    public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
+        if (caseSensitive) {
             prettyWriter.append(" CAST(");
         }
         visitFieldOperand(field);
-        if (!caseInsensitive) {
+        if (caseSensitive) {
             prettyWriter.append(" AS BINARY)");
         }
-        if (!caseInsensitive) {
-            prettyWriter.append(not ? " NOT REGEXP BINARY" : " REGEXP BINARY");
+        if (caseSensitive) {
+            prettyWriter.append(not ? " NOT REGEXP CAST(? AS BINARY)" : " REGEXP CAST(? AS BINARY)");
         } else {
-            prettyWriter.append(not ? " NOT REGEXP " : " REGEXP");
+            prettyWriter.append(not ? " NOT REGEXP ?" : " REGEXP ?");
         }
-        prettyWriter.append(" '" + value + "'");
     }
 }
