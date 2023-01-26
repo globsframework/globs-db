@@ -99,7 +99,8 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
 
     @Override
     public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
-
+        setValue(value, ++index);
+        field.safeVisit(this);
     }
 
     public void visitValueOperand(ValueOperand value) {
