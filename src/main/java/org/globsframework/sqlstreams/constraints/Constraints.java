@@ -49,6 +49,10 @@ public class Constraints {
         return new EqualConstraint(new FieldOperand(field1), new FieldOperand(field2));
     }
 
+    public static Constraint fieldNotEqual(Field field1, Field field2) {
+        return new NotEqualConstraint(new FieldOperand(field1), new FieldOperand(field2));
+    }
+
     public static Constraint equal(IntegerField field, Integer value) {
         return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
