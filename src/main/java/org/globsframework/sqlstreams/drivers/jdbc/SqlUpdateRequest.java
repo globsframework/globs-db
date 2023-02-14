@@ -50,7 +50,7 @@ public class SqlUpdateRequest implements SqlRequest {
         sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
     }
 
-    public void run() {
+    public int run() {
         int index = 0;
         for (Map.Entry<Field, Accessor> entry : values.entrySet()) {
             sqlValueFieldVisitor.setValue(entry.getValue().getObjectValue(), ++index);
@@ -58,7 +58,7 @@ public class SqlUpdateRequest implements SqlRequest {
         }
         constraint.visit(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
         try {
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             String message = "For request : " + sqlRequest;
             LOGGER.error(message, e);

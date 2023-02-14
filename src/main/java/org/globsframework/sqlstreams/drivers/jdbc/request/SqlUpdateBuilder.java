@@ -213,8 +213,8 @@ public class SqlUpdateBuilder implements UpdateBuilder {
             public void flush() {
             }
 
-            public void run() throws SqlException {
-                request.run();
+            public int run() throws SqlException {
+                return request.run();
             }
 
             public void close() {

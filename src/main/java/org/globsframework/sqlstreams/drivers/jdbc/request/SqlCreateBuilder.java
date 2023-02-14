@@ -8,7 +8,6 @@ import org.globsframework.sqlstreams.BulkDbRequest;
 import org.globsframework.sqlstreams.CreateBuilder;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.accessors.DateTimeSqlAccessor;
 import org.globsframework.sqlstreams.accessors.LongGeneratedKeyAccessor;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
@@ -241,8 +240,8 @@ public class SqlCreateBuilder implements CreateBuilder {
             public void flush() {
             }
 
-            public void run() throws SqlException {
-                request.run();
+            public int run() throws SqlException {
+                return request.run();
             }
 
             public void close() {

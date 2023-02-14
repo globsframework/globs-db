@@ -24,7 +24,6 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -88,7 +87,7 @@ public class SqlCreateRequest implements SqlRequest {
         return writer.toString();
     }
 
-    public void run() {
+    public int run() {
         try {
             int index = 0;
             for (Pair<Field, Accessor> pair : fields) {
@@ -96,10 +95,11 @@ public class SqlCreateRequest implements SqlRequest {
                 sqlValueVisitor.setValue(value, ++index);
                 pair.getFirst().safeVisit(sqlValueVisitor);
             }
-            preparedStatement.executeUpdate();
+            final int result = preparedStatement.executeUpdate();
             if (generatedKeyAccessor != null) {
                 generatedKeyAccessor.setResult(preparedStatement.getGeneratedKeys());
             }
+            return result;
         } catch (SQLException e) {
             String debugRequest = getDebugRequest();
             LOGGER.error("In run " + debugRequest, e);

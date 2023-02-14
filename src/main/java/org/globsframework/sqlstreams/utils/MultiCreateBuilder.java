@@ -195,10 +195,12 @@ public class MultiCreateBuilder implements CreateBuilder {
             }
         }
 
-        public void run() throws SqlException {
+        public int run() throws SqlException {
+            int result = 0;
             for (SqlRequest sqlRequest : sqlRequests) {
-                sqlRequest.run();
+                result += sqlRequest.run();
             }
+            return result;
         }
 
         public void close() {
@@ -218,10 +220,12 @@ public class MultiCreateBuilder implements CreateBuilder {
             }
         }
 
-        public void run() throws SqlException {
+        public int run() throws SqlException {
+            int result = 0;
             for (SqlRequest sqlRequest : sqlRequests) {
-                sqlRequest.run();
+                result += sqlRequest.run();
             }
+            return result;
         }
 
         public void close() {
