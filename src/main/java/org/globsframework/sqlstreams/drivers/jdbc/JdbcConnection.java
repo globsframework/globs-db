@@ -249,7 +249,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public SqlException getTypedException(String sql, SQLException e) {
-        if ("23000".equals(e.getSQLState())) {
+        if ("23000".equals(e.getSQLState()) || "23505".equals(e.getSQLState())) {
             if (sql == null) {
                 return new ConstraintViolation(e);
             } else {
