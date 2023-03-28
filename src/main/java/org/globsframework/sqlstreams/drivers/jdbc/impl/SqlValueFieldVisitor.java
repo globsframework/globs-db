@@ -138,7 +138,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, GSonUtils.encode((Glob) this.value, true));
+            preparedStatement.setString(index, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
         }
     }
 
@@ -146,7 +146,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, GSonUtils.encode((Glob[]) value, true));
+            preparedStatement.setString(index, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
         }
     }
 
@@ -154,7 +154,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, GSonUtils.encode((Glob) this.value, true));
+            preparedStatement.setString(index, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
         }
     }
 
@@ -162,7 +162,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, GSonUtils.encode((Glob[]) value, true));
+            preparedStatement.setString(index, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
         }
     }
 

@@ -1,10 +1,10 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.constraints.Constraints;
+import org.globsframework.sqlstreams.model.DummyObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,4 +65,5 @@ public abstract class SqlExceptionTest {
                 .select(DummyObject.NAME).getQuery().executeUnique();
         Assert.assertEquals("toto", newGlob.get(DummyObject.NAME));
     }
+
 }
