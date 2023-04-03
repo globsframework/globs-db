@@ -1,5 +1,6 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
+import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
@@ -197,26 +198,21 @@ public class SqlSelectQuery implements SelectQuery {
 
     public Stream<?> executeAsStream() {
         DbStream dbStream = execute();
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Object>() {
-                    private static final Object NULL = new Object();
-                    private Boolean hasNext;
-                    public boolean hasNext() {
-                        if (hasNext == null) {
-                            hasNext = dbStream.next();
-                        }
-                        return hasNext;
-                    }
-                    public Object next() {
-                        hasNext = null;
-                        return NULL;
-                    }
-                }, 0), false)
+        final DbStreamIterator iterator = new DbStreamIterator(dbStream);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
+                .onClose(() -> {
+                    LOGGER.info("read " + iterator.count() + " elements");
+                })
                 .onClose(this::resultSetClose);
     }
 
     public Stream<Glob> executeAsGlobStream() {
         DbStream dbStream = execute();
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new GlobIterator(dbStream, fallBackType), 0), false)
+        final GlobIterator iterator = new GlobIterator(dbStream, fallBackType);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
+                .onClose(() -> {
+                    LOGGER.info("read " + iterator.count + " elements.");
+                })
                 .onClose(this::resultSetClose);
     }
 
@@ -246,12 +242,8 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     public GlobList executeAsGlobs() {
-        DbStream dbStream = execute();
-        AccessorGlobBuilder accessorGlobBuilder = AccessorGlobBuilder.init(dbStream, fallBackType);
         GlobList result = new GlobList();
-        while (dbStream.next()) {
-            result.add(accessorGlobBuilder.getGlob());
-        }
+        executeAsGlobStream().forEach(result::add);
         return result;
     }
 
@@ -281,6 +273,7 @@ public class SqlSelectQuery implements SelectQuery {
         private AccessorGlobBuilder globsBuilder;
         private DbStream dbStream;
         private Glob current;
+        int count = 0;
 
         public GlobIterator(DbStream dbStream, GlobType fallBackType) {
             this.dbStream = dbStream;
@@ -294,6 +287,7 @@ public class SqlSelectQuery implements SelectQuery {
 
         public Glob next() {
             try {
+                count++;
                 return current;
             } finally {
                 goToNext();
@@ -303,10 +297,41 @@ public class SqlSelectQuery implements SelectQuery {
         private void goToNext() {
             if (dbStream.next()) {
                 current = globsBuilder.getGlob();
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("load " + GSonUtils.encode(current, true));
+                }
             }
             else {
                 current = null;
             }
+        }
+    }
+
+    private static class DbStreamIterator implements Iterator<Object> {
+        private static final Object NULL = new Object();
+        private final DbStream dbStream;
+        private int count = 0;
+        private Boolean hasNext;
+
+        public DbStreamIterator(DbStream dbStream) {
+            this.dbStream = dbStream;
+        }
+
+        public boolean hasNext() {
+            if (hasNext == null) {
+                hasNext = dbStream.next();
+            }
+            return hasNext;
+        }
+
+        public Object next() {
+            hasNext = null;
+            count++;
+            return NULL;
+        }
+
+        public int count() {
+            return count;
         }
     }
 }
