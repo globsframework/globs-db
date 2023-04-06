@@ -12,6 +12,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.accessors.Accessor;
+import org.globsframework.utils.NanoChrono;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,9 @@ public class SqlUpdateRequest implements SqlRequest {
         this.sqlService = sqlService;
         sqlRequest = createRequest();
         try {
+            NanoChrono nanoChrono = NanoChrono.start();
             preparedStatement = connection.prepareStatement(sqlRequest);
+            LOGGER.info("Update request " + sqlRequest + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
         } catch (SQLException e) {
             String message = "For request : " + sqlRequest;
             LOGGER.error(message, e);
@@ -58,7 +61,12 @@ public class SqlUpdateRequest implements SqlRequest {
         }
         constraint.visit(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
         try {
-            return preparedStatement.executeUpdate();
+            NanoChrono nanoChrono = NanoChrono.start();
+            final int count = preparedStatement.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Update request " + sqlRequest + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
+            }
+            return count;
         } catch (SQLException e) {
             String message = "For request : " + sqlRequest;
             LOGGER.error(message, e);

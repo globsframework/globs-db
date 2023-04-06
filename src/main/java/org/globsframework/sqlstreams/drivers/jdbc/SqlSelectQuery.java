@@ -15,6 +15,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.DbStream;
+import org.globsframework.utils.NanoChrono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.*;
@@ -65,11 +66,12 @@ public class SqlSelectQuery implements SelectQuery {
         } else {
             sql = externalRequest;
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Prepare sql request " + sql);
-        }
+        NanoChrono nanoChrono = NanoChrono.start();
         try {
             this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Preparing " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
+            }
         } catch (SQLException e) {
             String message = "for request " + sql;
             LOGGER.error(message);
@@ -226,11 +228,14 @@ public class SqlSelectQuery implements SelectQuery {
             if (constraint != null) {
                 constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
             }
-            LOGGER.debug("Execute sql request " + sql);
+            NanoChrono nanoChrono = NanoChrono.start();
             ResultSet resultSet = preparedStatement.executeQuery();
             if (shouldInitAccessorWithMetadata) {
                 initIndexFromMetadata(resultSet.getMetaData(), fieldToAccessorHolder, sqlService);
                 shouldInitAccessorWithMetadata = false;
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Execution of " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
             }
             return new SqlDbStream(resultSet, fieldToAccessorHolder,
                     sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
