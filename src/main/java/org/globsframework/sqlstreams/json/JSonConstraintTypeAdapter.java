@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.json;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.fields.*;
@@ -11,6 +12,9 @@ import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.utils.Ref;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,6 +67,35 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public Field getField(String type, String name) {
             return globTypeResolver.getType(type).getField(name);
+        }
+    }
+
+    public static Constraint decode(String str, FieldResolver fieldResolver) {
+        JSonConstraintTypeAdapter jSonConstraintTypeAdapter =
+                new JSonConstraintTypeAdapter(fieldResolver);
+        return jSonConstraintTypeAdapter.read(new JsonReader(new StringReader(str)));
+    }
+
+    public static Constraint decode(Reader reader, FieldResolver fieldResolver) {
+        JSonConstraintTypeAdapter jSonConstraintTypeAdapter =
+                new JSonConstraintTypeAdapter(fieldResolver);
+        return jSonConstraintTypeAdapter.read(new JsonReader(reader));
+    }
+
+    static public String encode(Constraint constraint) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Writer out = new GSonUtils.StringWriterToBuilder(stringBuilder);
+        encode(constraint, out);
+        return stringBuilder.toString();
+    }
+
+    private static void encode(Constraint constraint, Writer out) {
+        JSonConstraintTypeAdapter jSonConstraintTypeAdapter =
+                new JSonConstraintTypeAdapter(new DefaultFieldResolver(GlobTypeResolver.ERROR));
+        try {
+            jSonConstraintTypeAdapter.write(new JsonWriter(out), constraint);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -461,8 +494,9 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 } else {
                     jsonWriter.name(IS_NOT_NULL);
                 }
+                jsonWriter.beginObject();
                 visitFieldOperand(constraint.getField());
-
+                jsonWriter.endObject();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

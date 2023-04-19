@@ -137,6 +137,17 @@ public class JSonConstraintTypeAdapterTest {
     }
 
     @Test
+    public void isNull() {
+        Constraint constraint = Constraints.isNotNull(DummyObject.NAME);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"isNotNull\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"}}}", s);
+        Constraint constraint1 = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(constraint1 instanceof NullOrNotConstraint);
+        Assert.assertEquals("name", ((NullOrNotConstraint) constraint1).getField().getName());
+    }
+
+    @Test
     public void containsNotRegularExpressionCaseSensitive() {
         Constraint constraint = Constraints.notRegularExpressionCaseSensitive(DummyObject.NAME, "^h.*");
         Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
