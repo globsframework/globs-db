@@ -1,5 +1,8 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
@@ -18,6 +21,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.*;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.Ref;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.util.*;
@@ -424,6 +428,8 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private static class StringArraySqlAccessor extends SqlAccessor implements StringArrayAccessor {
+        private static final Gson gson = new Gson();
+        private static final TypeAdapter<?> adapter = gson.getAdapter(TypeToken.getArray(String.class));
         private final StringSqlAccessor accessor;
 
         public StringArraySqlAccessor(StringSqlAccessor accessor) {
@@ -446,7 +452,16 @@ public class SqlQueryBuilder implements SelectBuilder {
                 if (value.isEmpty()) {
                     return new String[0];
                 } else {
-                    return value.split(",");
+                    if (value.charAt(0) != '[') {
+                        return value.split(",");
+                    }
+                    else {
+                        try {
+                            return (String[]) adapter.fromJson(value);
+                        } catch (IOException e) {
+                            throw new RuntimeException("For " + value, e);
+                        }
+                    }
                 }
             } else {
                 return null;
@@ -491,6 +506,9 @@ public class SqlQueryBuilder implements SelectBuilder {
                 if (value.isEmpty()) {
                     return new int[0];
                 } else {
+                    if (value.charAt(0) == '[') {
+                        value = value.substring(1, value.length() - 1);
+                    }
                     return Arrays.stream(value.split(",")).mapToInt(Integer::parseInt).toArray();
                 }
             } else {
@@ -514,6 +532,9 @@ public class SqlQueryBuilder implements SelectBuilder {
                 if (value.isEmpty()) {
                     return new long[0];
                 } else {
+                    if (value.charAt(0) == '[') {
+                        value = value.substring(1, value.length() - 1);
+                    }
                     return Arrays.stream(value.split(",")).mapToLong(Long::parseLong).toArray();
                 }
             } else {
@@ -537,6 +558,9 @@ public class SqlQueryBuilder implements SelectBuilder {
                 if (value.isEmpty()) {
                     return new double[0];
                 } else {
+                    if (value.charAt(0) == '[') {
+                        value = value.substring(1, value.length() - 1);
+                    }
                     return Arrays.stream(value.split(",")).mapToDouble(Double::parseDouble).toArray();
                 }
             } else {
@@ -560,6 +584,9 @@ public class SqlQueryBuilder implements SelectBuilder {
                 if (value.isEmpty()) {
                     return new boolean[0];
                 } else {
+                    if (value.charAt(0) == '[') {
+                        value = value.substring(1, value.length() - 1);
+                    }
                     String[] split = value.split(",");
                     boolean[] result = new boolean[split.length];
                     for (int i = 0; i < split.length; i++) {

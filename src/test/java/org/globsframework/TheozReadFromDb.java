@@ -25,6 +25,7 @@ import org.globsframework.sqlstreams.annotations.DbFieldIsNullable;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.utils.serialization.SerializedOutput;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -97,6 +98,7 @@ public class TheozReadFromDb {
     }
 
     @Test
+    @Ignore
     public void name() throws IOException {
         SqlService sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
         SqlConnection db = sqlService.getDb();

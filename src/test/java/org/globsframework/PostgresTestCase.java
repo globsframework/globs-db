@@ -25,6 +25,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.utils.serialization.SerializedOutput;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -94,6 +95,7 @@ public class PostgresTestCase {
     }
 
     @Test
+    @Ignore
     public void name() throws IOException {
         SqlService sqlService = new JdbcSqlService("jdbc:postgresql://localhost/glindaBackend", "glindaBackend", "glinda");
         SqlConnection db = sqlService.getDb();

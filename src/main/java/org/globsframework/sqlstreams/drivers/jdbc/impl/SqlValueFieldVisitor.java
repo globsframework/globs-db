@@ -1,13 +1,15 @@
 package org.globsframework.sqlstreams.drivers.jdbc.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
 import org.globsframework.metamodel.annotations.IsDate;
 import org.globsframework.metamodel.annotations.IsDateTime;
+import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.annotations.IsTimestamp;
 import org.globsframework.sqlstreams.drivers.jdbc.BlobUpdater;
-import org.globsframework.utils.Strings;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -19,6 +21,8 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor {
+    private static Gson gson = new Gson();
+    private static final TypeAdapter adapter = gson.getAdapter(TypeToken.getArray(String.class));
     private PreparedStatement preparedStatement;
     private BlobUpdater blobUpdater;
     private Object value;
@@ -114,7 +118,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, String.join(",", (String[]) value));
+            preparedStatement.setString(index, adapter.toJson(value));
         }
     }
 
