@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.globsframework.json.GSonUtils;
+import org.globsframework.json.GSonVisitor;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.fields.*;
@@ -15,6 +16,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
@@ -626,6 +630,20 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 jsonWriter.value(Base64.getEncoder().encodeToString(value));
             }
         }
+
+        public void visitDate(DateField field, LocalDate value) throws Exception {
+            if (value != null) {
+                final DateTimeFormatter cachedDateFormatter = GSonUtils.getCachedDateFormatter(field);
+                jsonWriter.value(cachedDateFormatter.format(value));
+            }
+        }
+
+        public void visitDateTime(DateTimeField field, ZonedDateTime value) throws Exception {
+            if (value != null) {
+                final DateTimeFormatter cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
+                jsonWriter.value(cachedDateTimeFormatter.format(value));
+            }
+        }
     }
 
     static class JsonFieldValueReaderVisitor extends FieldVisitorWithContext.AbstractWithErrorVisitor<JsonElement> {
@@ -654,6 +672,17 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public void visitBlob(BlobField field, JsonElement context) throws Exception {
             value = Base64.getDecoder().decode(context.getAsString());
+        }
+
+        public void visitDate(DateField field, JsonElement context) throws Exception {
+            final DateTimeFormatter cachedDateFormatter = GSonUtils.getCachedDateFormatter(field);
+            value = cachedDateFormatter.parse(context.getAsString());
+        }
+
+        @Override
+        public void visitDateTime(DateTimeField field, JsonElement context) throws Exception {
+            final DateTimeFormatter cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
+            value = cachedDateTimeFormatter.parse(context.getAsString());
         }
     }
 }
