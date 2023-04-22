@@ -453,7 +453,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public void visitBiggerThan(BiggerThanConstraint constraint) {
             try {
-                jsonWriter.name(LESS_THAN);
+                jsonWriter.name(GREATER_THAN);
                 visitBinary(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
