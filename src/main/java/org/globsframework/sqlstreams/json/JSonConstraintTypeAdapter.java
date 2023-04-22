@@ -5,9 +5,11 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.json.GSonVisitor;
+import org.globsframework.json.JsonDateTimeFormatType;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobTypeResolver;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.constraints.*;
 import org.globsframework.sqlstreams.constraints.impl.*;
 import org.globsframework.utils.Ref;
@@ -17,6 +19,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -676,13 +680,20 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public void visitDate(DateField field, JsonElement context) throws Exception {
             final DateTimeFormatter cachedDateFormatter = GSonUtils.getCachedDateFormatter(field);
-            value = cachedDateFormatter.parse(context.getAsString());
+            value = LocalDate.from(cachedDateFormatter.parse(context.getAsString()));
         }
 
-        @Override
         public void visitDateTime(DateTimeField field, JsonElement context) throws Exception {
             final DateTimeFormatter cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
-            value = cachedDateTimeFormatter.parse(context.getAsString());
+            if (field.hasAnnotation(JsonDateTimeFormatType.UNIQUE_KEY)) {
+                Glob annotation = field.getAnnotation(JsonDateTimeFormatType.UNIQUE_KEY);
+                Boolean aBoolean = annotation.get(JsonDateTimeFormatType.AS_LOCAL);
+                if (aBoolean) {
+                    value = ZonedDateTime.of(LocalDateTime.from(cachedDateTimeFormatter.parse(context.getAsString())), ZoneId.systemDefault());
+                    return;
+                }
+            }
+            value = ZonedDateTime.from(cachedDateTimeFormatter.parse(context.getAsString()));
         }
     }
 }
