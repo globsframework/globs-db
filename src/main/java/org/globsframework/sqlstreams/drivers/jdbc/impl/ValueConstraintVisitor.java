@@ -1,6 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc.impl;
 
 import org.globsframework.metamodel.Field;
+import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.ConstraintVisitor;
 import org.globsframework.sqlstreams.constraints.OperandVisitor;
 import org.globsframework.sqlstreams.constraints.impl.*;
@@ -38,17 +39,19 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         operandConstraint.getRightOperand().visitOperand(this);
     }
 
-    private void visitBinary(BinaryConstraint constraint) {
-        constraint.getLeftConstraint().visit(this);
-        constraint.getRightConstraint().visit(this);
+    private void visitArray(ArrayConstraint constraint) {
+        final Constraint[] constraints = constraint.getConstraints();
+        for (Constraint c : constraints) {
+            c.visit(this);
+        }
     }
 
     public void visitAnd(AndConstraint constraint) {
-        visitBinary(constraint);
+        visitArray(constraint);
     }
 
     public void visitOr(OrConstraint constraint) {
-        visitBinary(constraint);
+        visitArray(constraint);
     }
 
     public void visitLessThan(LessThanConstraint constraint) {

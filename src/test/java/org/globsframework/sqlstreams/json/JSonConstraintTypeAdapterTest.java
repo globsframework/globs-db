@@ -84,13 +84,16 @@ public class JSonConstraintTypeAdapterTest {
 
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
         Assert.assertTrue(constraint1 instanceof OrConstraint);
-        Assert.assertTrue(((OrConstraint) constraint1).getLeftConstraint() instanceof AndConstraint);
-        Constraint andConstraint = ((OrConstraint) constraint1).getRightConstraint();
-        Constraint inConstraint = ((AndConstraint) andConstraint).getLeftConstraint();
+        final Constraint[] cOr = ((OrConstraint) constraint1).getConstraints();
+        Assert.assertTrue(cOr[0] instanceof AndConstraint);
+        Assert.assertTrue(cOr[1] instanceof AndConstraint);
+        Constraint andConstraint = cOr[1];
+        final Constraint[] cAnd = ((AndConstraint) andConstraint).getConstraints();
+        Constraint inConstraint = cAnd[0];
         Assert.assertTrue(inConstraint instanceof InConstraint);
         Assert.assertEquals(((InConstraint) inConstraint).getField(), DummyObject.VALUE);
         Assert.assertTrue(((InConstraint) inConstraint).getValues().contains(1.1));
-        Constraint containsConstraint = ((AndConstraint) andConstraint).getRightConstraint();
+        Constraint containsConstraint = cAnd[1];
         Assert.assertTrue(containsConstraint instanceof ContainsConstraint);
     }
 
@@ -103,8 +106,9 @@ public class JSonConstraintTypeAdapterTest {
         assertEquivalent("{\"and\":[{\"contains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"a name\"}},{\"notContains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"aaa\"}}]}", s);
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
         Assert.assertTrue(constraint1 instanceof AndConstraint);
-        Assert.assertTrue(((AndConstraint) constraint1).getLeftConstraint() instanceof ContainsConstraint);
-        Assert.assertTrue(((AndConstraint) constraint1).getRightConstraint() instanceof ContainsConstraint);
+        final Constraint[] c = ((AndConstraint) constraint1).getConstraints();
+        Assert.assertTrue(c[0] instanceof ContainsConstraint);
+        Assert.assertTrue(c[1] instanceof ContainsConstraint);
     }
 
     @Test

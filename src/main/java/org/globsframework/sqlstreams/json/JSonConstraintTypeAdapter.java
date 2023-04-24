@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.json.GSonVisitor;
 import org.globsframework.json.JsonDateTimeFormatType;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobTypeResolver;
@@ -377,13 +376,13 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitEqual(EqualConstraint constraint) {
             try {
                 jsonWriter.name(EQUAL);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private void visitBinary(BinaryOperandConstraint constraint) throws IOException {
+        private void visitLeftRight(BinaryOperandConstraint constraint) throws IOException {
             jsonWriter.beginObject();
             jsonWriter.name(LEFT);
             jsonWriter.beginObject();
@@ -403,31 +402,27 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitNotEqual(NotEqualConstraint constraint) {
             try {
                 jsonWriter.name(NOT_EQUAL);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private void visitBinary(BinaryConstraint constraint) throws IOException {
+        private void visitArray(ArrayConstraint constraint) throws IOException {
             jsonWriter.beginArray();
-            jsonWriter.beginObject();
-            constraint.getLeftConstraint()
-                    .visit(this);
-            jsonWriter.endObject();
-
-            jsonWriter.beginObject();
-            constraint.getRightConstraint()
-                    .visit(this);
-            jsonWriter.endObject();
-
+            final Constraint[] constraints = constraint.getConstraints();
+            for (Constraint c : constraints) {
+                jsonWriter.beginObject();
+                c.visit(this);
+                jsonWriter.endObject();
+            }
             jsonWriter.endArray();
         }
 
         public void visitAnd(AndConstraint constraint) {
             try {
                 jsonWriter.name(AND);
-                visitBinary(constraint);
+                visitArray(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -436,7 +431,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitOr(OrConstraint constraint) {
             try {
                 jsonWriter.name(OR);
-                visitBinary(constraint);
+                visitArray(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -445,7 +440,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitLessThan(LessThanConstraint constraint) {
             try {
                 jsonWriter.name(LESS_THAN);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -454,7 +449,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitBiggerThan(BiggerThanConstraint constraint) {
             try {
                 jsonWriter.name(GREATER_THAN);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -463,7 +458,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitStrictlyBiggerThan(StrictlyBiggerThanConstraint constraint) {
             try {
                 jsonWriter.name(STRICTLY_GREATER_THAN);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -472,7 +467,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitStrictlyLesserThan(StrictlyLesserThanConstraint constraint) {
             try {
                 jsonWriter.name(STRICTLY_LESS_THAN);
-                visitBinary(constraint);
+                visitLeftRight(constraint);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

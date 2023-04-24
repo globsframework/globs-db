@@ -27,4 +27,9 @@ public class StringPrettyWriter implements PrettyWriter {
         builder.delete(builder.length() - 1, builder.length());
         return this;
     }
+
+    public PrettyWriter removeLast(int len) {
+        builder.delete(builder.length() - len, builder.length());
+        return this;
+    }
 }

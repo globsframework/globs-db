@@ -3,6 +3,7 @@ package org.globsframework.sqlstreams.drivers.jdbc.impl;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.sqlstreams.SqlService;
+import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.ConstraintVisitor;
 import org.globsframework.sqlstreams.constraints.OperandVisitor;
 import org.globsframework.sqlstreams.constraints.impl.*;
@@ -31,11 +32,11 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitAnd(AndConstraint constraint) {
-        visitBinary(constraint, " AND ");
+        visitArray(constraint, " AND ");
     }
 
     public void visitOr(OrConstraint constraint) {
-        visitBinary(constraint, " OR ");
+        visitArray(constraint, " OR ");
     }
 
     public void visitLessThan(LessThanConstraint constraint) {
@@ -144,11 +145,13 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
         constraint.getRightOperand().visitOperand(this);
     }
 
-    private void visitBinary(BinaryConstraint constraint, String operator) {
+    private void visitArray(ArrayConstraint constraint, String operator) {
         prettyWriter.append("(");
-        constraint.getLeftConstraint().visit(this);
-        prettyWriter.append(operator);
-        constraint.getRightConstraint().visit(this);
+        for (Constraint constraintConstraint : constraint.getConstraints()) {
+            constraintConstraint.visit(this);
+            prettyWriter.append(operator);
+        }
+        prettyWriter.removeLast(operator.length());
         prettyWriter.append(")").newLine();
     }
 }

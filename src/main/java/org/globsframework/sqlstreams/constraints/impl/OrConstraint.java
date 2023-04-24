@@ -3,11 +3,47 @@ package org.globsframework.sqlstreams.constraints.impl;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.ConstraintVisitor;
 
-public class OrConstraint extends BinaryConstraint implements Constraint {
-    public OrConstraint(Constraint leftOperand, Constraint rightOperand) {
-        super(leftOperand, rightOperand);
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class OrConstraint extends ArrayConstraint implements Constraint {
+    public OrConstraint(Constraint[] constraints) {
+        super(constraints);
     }
 
+    public static Constraint build(Constraint l, Constraint r) {
+        if (l == null) {
+            return r;
+        }
+        if (r == null) {
+            return l;
+        }
+        return new OrConstraint(new Constraint[]{l, r});
+    }
+
+    public static Constraint build(Constraint[] constraints) {
+        if (constraints.length == 1) {
+            return constraints[0];
+        }
+
+        if (constraints.length == 2) {
+            return build(constraints[0], constraints[1]);
+        }
+
+        List<Constraint> c = new ArrayList<>();
+        for (Constraint constraint : constraints) {
+            if (constraint != null) {
+                if (constraint instanceof OrConstraint) {
+                    c.addAll(Arrays.asList(((OrConstraint) constraint).getConstraints()));
+                }
+                else {
+                    c.add(constraint);
+                }
+            }
+        }
+        return new OrConstraint(c.toArray(Constraint[]::new));
+    }
     public <T extends ConstraintVisitor> T visit(T visitor) {
         visitor.visitOr(this);
         return visitor;

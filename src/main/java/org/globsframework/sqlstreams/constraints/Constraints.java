@@ -178,13 +178,7 @@ public class Constraints {
     }
 
     public static Constraint and(Constraint arg1, Constraint arg2) {
-        if (arg1 == null) {
-            return arg2;
-        }
-        if (arg2 == null) {
-            return arg1;
-        }
-        return new AndConstraint(arg1, arg2);
+        return AndConstraint.build(arg1, arg2);
     }
 
     public static Constraint and(Constraint arg1, Constraint arg2, Constraint arg3) {
@@ -192,31 +186,15 @@ public class Constraints {
     }
 
     public static Constraint and(Constraint...args){
-        Constraint root = null;
-        for (int i = 0; i < args.length; i++) {
-            Constraint constraint = args[i];
-            root = Constraints.and(root, constraint);
-        }
-        return root;
+        return AndConstraint.build(args);
     }
 
     public static Constraint or(Constraint arg1, Constraint arg2) {
-        if (arg1 == null) {
-            return arg2;
-        }
-        if (arg2 == null) {
-            return arg1;
-        }
-        return new OrConstraint(arg1, arg2);
+        return OrConstraint.build(arg1, arg2);
     }
 
     public static Constraint or(Constraint...args) {
-        Constraint root = null;
-        for (int i = 0; i < args.length; i++) {
-            Constraint constraint = args[i];
-            root = Constraints.or(root, constraint);
-        }
-        return root;
+        return OrConstraint.build(args);
     }
 
     public static Constraint in(Field field, Set infos) {
