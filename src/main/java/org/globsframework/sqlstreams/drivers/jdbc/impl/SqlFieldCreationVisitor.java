@@ -56,6 +56,10 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         int maxSize = 255;
         if (annotation != null) {
             maxSize = annotation.get(MaxSizeType.VALUE, 255);
+            if (annotation.isTrue(MaxSizeType.USE_TEXT)) {
+                add("TEXT", field);
+                return;
+            }
         }
         if (maxSize >= 30000) {
             add(getLongStringType(maxSize), field);

@@ -16,11 +16,11 @@ import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sqlstreams.drivers.postgresql.request.PostgreSqlQueryBuilder;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
-import java.sql.Types;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class PostgresqlConnection extends JdbcConnection {
     public PostgresqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
@@ -81,6 +81,10 @@ public class PostgresqlConnection extends JdbcConnection {
                 int maxSize = 255;
                 if (annotation != null) {
                     maxSize = annotation.get(MaxSizeType.VALUE, 255);
+                    if (annotation.isTrue(MaxSizeType.USE_TEXT)) {
+                        add("TEXT", field);
+                        return;
+                    }
                 }
                 if (maxSize >= 30000) {
                     add(getLongStringType(maxSize), field);
@@ -121,6 +125,7 @@ public class PostgresqlConnection extends JdbcConnection {
 
         };
     }
+
     public SelectBuilder getQueryBuilder(GlobType globType) {
         checkConnectionIsNotClosed();
         return new PostgreSqlQueryBuilder(getConnection(), globType, null, sqlService, blobUpdater);
