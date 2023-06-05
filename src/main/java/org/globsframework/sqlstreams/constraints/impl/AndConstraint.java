@@ -41,6 +41,9 @@ public class AndConstraint extends ArrayConstraint implements Constraint {
                 }
             }
         }
+        if (c.isEmpty()) {
+            return null;
+        }
         return new AndConstraint(c.toArray(Constraint[]::new));
     }
 

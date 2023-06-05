@@ -42,6 +42,9 @@ public class OrConstraint extends ArrayConstraint implements Constraint {
                 }
             }
         }
+        if (c.isEmpty()) {
+            return null;
+        }
         return new OrConstraint(c.toArray(Constraint[]::new));
     }
     public <T extends ConstraintVisitor> T visit(T visitor) {
