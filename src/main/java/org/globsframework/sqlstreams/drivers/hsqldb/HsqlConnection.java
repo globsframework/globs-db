@@ -42,28 +42,8 @@ public class HsqlConnection extends JdbcConnection {
                 add("LONGVARBINARY", field);
             }
 
-            public void visitGlob(GlobField field) {
-                add("LONGVARCHAR", field);
-            }
-
-            public void visitGlobArray(GlobArrayField field) {
-                add("LONGVARCHAR", field);
-            }
-
-            public void visitStringArray(StringArrayField field) throws Exception {
-                add("LONGVARCHAR", field);
-            }
-
-            public void visitLongArray(LongArrayField field) throws Exception {
-                add("LONGVARCHAR", field);
-            }
-
-            public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
-                add("LONGVARCHAR", field);
-            }
-
-            public void visitUnionGlob(GlobUnionField field) throws Exception {
-                add("LONGVARCHAR", field);
+            public String getLongStringType() {
+                return "LONGVARCHAR";
             }
         };
     }

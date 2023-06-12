@@ -35,8 +35,8 @@ public class MysqlConnection extends JdbcConnection {
                 return "AUTO_INCREMENT";
             }
 
-            public String getLongStringType(int maxSize) {
-                return "TEXT";
+            public String getLongStringType() {
+                return "LONGTEXT";
             }
         };
     }

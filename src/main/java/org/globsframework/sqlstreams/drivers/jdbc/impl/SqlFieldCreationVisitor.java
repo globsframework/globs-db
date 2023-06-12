@@ -57,28 +57,28 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         if (annotation != null) {
             maxSize = annotation.get(MaxSizeType.VALUE, 255);
             if (maxSize == -1) {
-                add("TEXT", field);
+                add(getLongStringType(), field);
                 return;
             }
         }
         if (maxSize >= 30000) {
-            add(getLongStringType(maxSize), field);
+            add(getLongStringType(), field);
         }
         else {
             add("VARCHAR(" + maxSize + ")", field);
         }
     }
 
-    public String getLongStringType(int maxSize){
-        return "VARCHAR(" + maxSize + ")";
+    public String getLongStringType(){
+        return "TEXT";
     }
 
     public void visitStringArray(StringArrayField field) throws Exception {
-        add("TEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitLongArray(LongArrayField field) throws Exception {
-        add("TEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitBoolean(BooleanField field) throws Exception {
@@ -90,19 +90,19 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     public void visitGlob(GlobField field) throws Exception {
-        add("LONGTEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitGlobArray(GlobArrayField field) throws Exception {
-        add("LONGTEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitUnionGlob(GlobUnionField field) throws Exception {
-        add("LONGTEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
-        add("LONGTEXT", field);
+        add(getLongStringType(), field);
     }
 
     public void visitDate(DateField field) throws Exception {
