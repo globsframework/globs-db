@@ -201,6 +201,15 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public SqlRequest getRequest() {
         try {
+            if (this.values.isEmpty()) {
+                return new SqlRequest() {
+                    public int run() throws SqlException {
+                        return 0;
+                    }
+                    public void close() {
+                    }
+                };
+            }
             return new SqlUpdateRequest(globType, constraint, values, connection, sqlService, blobUpdater);
         } finally {
             values.clear();
