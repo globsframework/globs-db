@@ -32,10 +32,6 @@ public class SqlSelectQuery implements SelectQuery {
     private final boolean autoClose;
     private final Map<Field, SqlAccessor> fieldToAccessorHolder;
     protected final SqlService sqlService;
-    private final List<SqlQueryBuilder.Order> orders;
-    private final List<Field> groupBy;
-    private final int top;
-    private final int skip;
     protected final Set<Field> distinct;
     protected final List<SqlOperation> sqlOperations;
     private GlobType fallBackType;
@@ -43,29 +39,17 @@ public class SqlSelectQuery implements SelectQuery {
     private final String sql;
     private boolean shouldInitAccessorWithMetadata;
 
-    public SqlSelectQuery(Connection connection, Constraint constraint,
-                          Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
-                          BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
-                          List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations,
-                          GlobType fallBackType) {
-        this.constraint = constraint;
-        this.blobUpdater = blobUpdater;
-        this.autoClose = autoClose;
-        this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
+    public SqlSelectQuery(SqlService sqlService, Connection connection, String sql,
+                          Map<Field, SqlAccessor> fieldToAccessorHolder, GlobType fallBackType) {
         this.sqlService = sqlService;
-        this.orders = orders;
-        this.groupBy = groupBy;
-        this.top = top;
-        this.skip = skip;
-        this.distinct = distinct;
-        this.sqlOperations = sqlOperations;
+        this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
         this.fallBackType = fallBackType;
-        String externalRequest = null;
-        if (externalRequest == null) {
-            sql = prepareSqlRequest();
-        } else {
-            sql = externalRequest;
-        }
+        sqlOperations = List.of();
+        distinct = Set.of();
+        constraint = null;
+        blobUpdater = null;
+        autoClose = true;
+        this.sql = sql;
         NanoChrono nanoChrono = NanoChrono.start();
         try {
             this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -77,7 +61,35 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw new SqlException(message, e);
         }
-        shouldInitAccessorWithMetadata = externalRequest != null;
+        shouldInitAccessorWithMetadata = true;
+    }
+
+    public SqlSelectQuery(Connection connection, Constraint constraint,
+                          Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
+                          BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
+                          List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations,
+                          GlobType fallBackType) {
+        this.constraint = constraint;
+        this.blobUpdater = blobUpdater;
+        this.autoClose = autoClose;
+        this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
+        this.sqlService = sqlService;
+        this.distinct = distinct;
+        this.sqlOperations = sqlOperations;
+        this.fallBackType = fallBackType;
+        sql = prepareSqlRequest(top, skip, orders, groupBy);
+        NanoChrono nanoChrono = NanoChrono.start();
+        try {
+            this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Preparing " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
+            }
+        } catch (SQLException e) {
+            String message = "for request " + sql;
+            LOGGER.error(message);
+            throw new SqlException(message, e);
+        }
+        shouldInitAccessorWithMetadata = false;
     }
 
     private void initIndexFromMetadata(ResultSetMetaData metaData, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService) {
@@ -110,7 +122,7 @@ public class SqlSelectQuery implements SelectQuery {
         return new WhereClauseConstraintVisitor(where, sqlService, globTypes);
     }
 
-    private String prepareSqlRequest() {
+    private String prepareSqlRequest(int top, int skip, List<SqlQueryBuilder.Order> orders, List<Field> groupBy) {
         int index = 0;
         StringPrettyWriter prettyWriter = new StringPrettyWriter();
         prettyWriter.append("select ");

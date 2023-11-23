@@ -10,6 +10,8 @@ public interface SelectBuilder {
 
     SelectQuery getQuery();
 
+    SelectQuery getQuery(String sql);
+
     SelectQuery getNotAutoCloseQuery();
 
     SelectBuilder select(Field field);

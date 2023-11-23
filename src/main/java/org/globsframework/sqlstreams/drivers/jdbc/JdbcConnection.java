@@ -16,6 +16,7 @@ import org.globsframework.sqlstreams.exceptions.ConstraintViolation;
 import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.metadata.DbChecker;
+import org.globsframework.sqlstreams.utils.ExtractType;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.utils.collections.MultiMap;
 import org.globsframework.utils.exceptions.GlobsException;
@@ -24,9 +25,7 @@ import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -286,6 +285,18 @@ public abstract class JdbcConnection implements SqlConnection {
 
     public GlobTypeExtractor extractType(String tableName) {
         return new DefaultGlobTypeExtractor(sqlService, sqlService.getNamingMapping().getTableName(tableName));
+    }
+
+    public GlobType extractFromQuery(String query) {
+        try {
+            final Connection c = getConnection();
+            final Statement statement = c.createStatement();
+            statement.execute(query);
+            final ResultSetMetaData metaData = statement.getResultSet().getMetaData();
+            return ExtractType.createFromMetaData(metaData);
+        } catch (SQLException e) {
+            throw new RuntimeException(query, e);
+        }
     }
 
     interface DbFunctor {

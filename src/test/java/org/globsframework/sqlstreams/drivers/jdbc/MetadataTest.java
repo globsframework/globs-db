@@ -6,6 +6,7 @@ import org.globsframework.metamodel.fields.LongArrayField;
 import org.globsframework.metamodel.fields.StringArrayField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.type.DataType;
+import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.junit.Test;
 
@@ -32,7 +33,16 @@ public class MetadataTest extends DbServicesTestCase {
         }
     }
 
-//    public void testErrorOnNonExistingTable() throws Exception {
+    @Test
+    public void extractGlobTypeFromQuery() {
+        JdbcConnection db = sqlService.getDb();
+        final SqlService jdbcSqlService = db.getJdbcSqlService();
+        final GlobType globType = db.extractFromQuery("select * from " + jdbcSqlService.getTableName(DummyObject.TYPE) + " where 0=1");
+        assertEquals("fromResult", globType.getName());
+        assertEquals(13, globType.getFieldCount());
+    }
+
+    //    public void testErrorOnNonExistingTable() throws Exception {
 //      SqlConnection db = sqlService.getDb();
 //      GlobType globType = db.createFrom("toto", Collections.<String>emptySet());
 //      assertNull(globType);

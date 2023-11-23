@@ -38,6 +38,8 @@ public interface SqlConnection {
 
     GlobTypeExtractor extractType(String tableName);
 
+    GlobType extractFromQuery(String query);
+
     default GlobType extractType(String tableName, Set<String> columnToIgnore){
         return extractType(tableName).columnToIgnore(columnToIgnore).extract();
     }

@@ -53,7 +53,15 @@ public class SqlQueryBuilder implements SelectBuilder {
     public SelectQuery getQuery() {
         try {
             return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
+                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
+        } finally {
+            fieldToAccessorHolder.clear();
+        }
+    }
+
+    public SelectQuery getQuery(String sql) {
+        try {
+            return new SqlSelectQuery(sqlService, connection, sql, fieldToAccessorHolder, fallBackType == null ? globType : fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }
