@@ -3,8 +3,10 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
+import org.globsframework.model.utils.DefaultFieldValues;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.accessors.SqlAccessor;
@@ -15,6 +17,7 @@ import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.utils.StringPrettyWriter;
 import org.globsframework.streams.DbStream;
+import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.NanoChrono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,6 +233,16 @@ public class SqlSelectQuery implements SelectQuery {
                 .onClose(this::resultSetClose);
     }
 
+    public Stream<FieldValues> executeAsFieldValuesStream() {
+        DbStream dbStream = execute();
+        final FieldValuesIterator iterator = new FieldValuesIterator(dbStream);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
+                .onClose(() -> {
+                    LOGGER.info("read " + iterator.count + " elements.");
+                })
+                .onClose(this::resultSetClose);
+    }
+
     public DbStream execute() {
         if (preparedStatement == null) {
             String message = "Query closed " + sql;
@@ -317,6 +330,58 @@ public class SqlSelectQuery implements SelectQuery {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("load " + GSonUtils.encode(current, true));
                 }
+            }
+            else {
+                current = null;
+            }
+        }
+    }
+
+    private static class FieldValuesIterator implements Iterator<FieldValues> {
+        private DbStream dbStream;
+        private Acc[] accs;
+        private FieldValues current;
+        int count = 0;
+
+        record Acc(Field field, Accessor accessor) {
+
+        }
+
+        public FieldValuesIterator(DbStream dbStream) {
+            this.dbStream = dbStream;
+            accs = new Acc[dbStream.getFields().size()];
+            int i = 0;
+            for (Field field : dbStream.getFields()) {
+                final Accessor accessor = dbStream.getAccessor(field);
+                accs[i++] = new Acc(field, accessor);
+            }
+            goToNext();
+        }
+
+        FieldValues create() {
+            DefaultFieldValues defaultFieldValues = new DefaultFieldValues();
+            for (Acc acc : accs) {
+                defaultFieldValues.setValue(acc.field, acc.accessor.getObjectValue());
+            }
+            return defaultFieldValues;
+        }
+
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        public FieldValues next() {
+            try {
+                count++;
+                return current;
+            } finally {
+                goToNext();
+            }
+        }
+
+        private void goToNext() {
+            if (dbStream.next()) {
+                current = create();
             }
             else {
                 current = null;

@@ -1,5 +1,6 @@
 package org.globsframework.sqlstreams;
 
+import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.streams.DbStream;
@@ -14,6 +15,8 @@ public interface SelectQuery extends AutoCloseable {
     Stream<?> executeAsStream();
 
     Stream<Glob> executeAsGlobStream();
+
+    Stream<FieldValues> executeAsFieldValuesStream();
 
     DbStream execute();
 

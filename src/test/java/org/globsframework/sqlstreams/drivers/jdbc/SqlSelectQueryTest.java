@@ -9,6 +9,7 @@ import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.annotations.Target;
 import org.globsframework.metamodel.annotations.Targets;
 import org.globsframework.metamodel.fields.*;
+import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.SelectBuilder;
@@ -17,7 +18,6 @@ import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.SqlRequest;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.constraints.Constraints;
-import org.globsframework.sqlstreams.constraints.impl.AndConstraint;
 import org.globsframework.sqlstreams.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sqlstreams.exceptions.SqlException;
 import org.globsframework.sqlstreams.model.DummyObject;
@@ -588,6 +588,30 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         SelectQuery query = queryBuilder.getQuery();
         Assert.assertTrue(query.execute().next());
         Assert.assertArrayEquals(new long[]{1, 4, -2}, longArrayAccessor.getValues());
+    }
+
+
+    @Test
+    public void testSelectInTwoTables() {
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
+                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+        populate(sqlConnection,
+                XmlGlobStreamReader.parse(
+                        "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
+
+        Constraint constraint = Constraints.fieldEqual(DummyObject.NAME, DummyObject2.LABEL);
+        FieldValues glob = sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint)
+                .select(DummyObject.ID)
+                .select(DummyObject.NAME)
+                .select(DummyObject2.LABEL)
+                .getQuery()
+                .executeAsFieldValuesStream()
+                .findFirst().get();
+        assertEquals(3, glob.get(DummyObject.ID).intValue());
+        assertEquals("world", glob.get(DummyObject.NAME));
+        assertEquals("world", glob.get(DummyObject2.LABEL));
     }
 
     public static class ValueType {
