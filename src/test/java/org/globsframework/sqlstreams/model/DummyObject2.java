@@ -6,6 +6,7 @@ import org.globsframework.metamodel.annotations.DoublePrecision;
 import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.fields.DoubleField;
 import org.globsframework.metamodel.fields.IntegerField;
+import org.globsframework.metamodel.fields.LongField;
 import org.globsframework.metamodel.fields.StringField;
 
 public class DummyObject2 {
@@ -13,7 +14,7 @@ public class DummyObject2 {
     public static GlobType TYPE;
 
     @KeyField
-    public static IntegerField ID;
+    public static LongField ID;
 
     public static StringField LABEL;
 

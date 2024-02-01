@@ -414,7 +414,6 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
         StringAccessor nameAcessor = queryBuilder.retrieve(DummyObject.NAME);
         try (Stream<?> globStream = queryBuilder
-                .selectAll()
                 .getQuery()
                 .executeAsStream()) {
             String[] names = globStream.map(x -> nameAcessor.getString()).toArray(String[]::new);
