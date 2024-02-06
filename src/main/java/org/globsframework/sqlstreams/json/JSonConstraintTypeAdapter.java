@@ -639,7 +639,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public void visitDateTime(DateTimeField field, ZonedDateTime value) throws Exception {
             if (value != null) {
-                final DateTimeFormatter cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
+                final GSonUtils.FormaterForDateTime cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
                 jsonWriter.value(cachedDateTimeFormatter.format(value));
             }
         }
@@ -679,16 +679,16 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         }
 
         public void visitDateTime(DateTimeField field, JsonElement context) throws Exception {
-            final DateTimeFormatter cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
-            if (field.hasAnnotation(JsonDateTimeFormatType.UNIQUE_KEY)) {
-                Glob annotation = field.getAnnotation(JsonDateTimeFormatType.UNIQUE_KEY);
-                Boolean aBoolean = annotation.get(JsonDateTimeFormatType.AS_LOCAL);
-                if (aBoolean) {
-                    value = ZonedDateTime.of(LocalDateTime.from(cachedDateTimeFormatter.parse(context.getAsString())), ZoneId.systemDefault());
-                    return;
-                }
-            }
-            value = ZonedDateTime.from(cachedDateTimeFormatter.parse(context.getAsString()));
+            final GSonUtils.FormaterForDateTime cachedDateTimeFormatter = GSonUtils.getCachedDateTimeFormatter(field);
+//            if (field.hasAnnotation(JsonDateTimeFormatType.UNIQUE_KEY)) {
+//                Glob annotation = field.getAnnotation(JsonDateTimeFormatType.UNIQUE_KEY);
+//                Boolean aBoolean = annotation.get(JsonDateTimeFormatType.AS_LOCAL);
+//                if (aBoolean) {
+//                    value = ZonedDateTime.of(LocalDateTime.from(cachedDateTimeFormatter.parse(context.getAsString())), ZoneId.systemDefault());
+//                    return;
+//                }
+//            }
+            value = cachedDateTimeFormatter.parse(context.getAsString());
         }
     }
 }
