@@ -26,7 +26,7 @@ public class SqlGlobRepositoryBuilderTest extends DbServicesTestCase {
         repositoryBuilder.add(Constraints.equal(DummyObject.NAME, "name"),
                 DummyObject.VALUE, DummyObject.DATE);
         repositoryBuilder.add(Constraints.and(Constraints.equal(DummyObject2.LABEL, "label"),
-                Constraints.strictlyGreater(DummyObject2.ID, 3)),
+                Constraints.strictlyGreater(DummyObject2.ID, 3L)),
                 DummyObject2.ID, DummyObject2.LABEL);
         GlobRepository repository = repositoryBuilder.getGlobRepository();
 
