@@ -273,7 +273,9 @@ public class SqlSelectQuery implements SelectQuery {
 
     public GlobList executeAsGlobs() {
         GlobList result = new GlobList();
-        executeAsGlobStream().forEach(result::add);
+        try (Stream<Glob> globStream = executeAsGlobStream()) {
+            globStream.forEach(result::add);
+        }
         return result;
     }
 

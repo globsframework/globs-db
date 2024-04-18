@@ -601,13 +601,18 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
 
         Constraint constraint = Constraints.fieldEqual(DummyObject.NAME, DummyObject2.LABEL);
-        FieldValues glob = sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint)
+        FieldValues glob;
+        try (SelectQuery query = sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint)
                 .select(DummyObject.ID)
                 .select(DummyObject.NAME)
                 .select(DummyObject2.LABEL)
-                .getQuery()
-                .executeAsFieldValuesStream()
-                .findFirst().get();
+                .getQuery()) {
+            try (Stream<FieldValues> fieldValuesStream = query
+                    .executeAsFieldValuesStream()) {
+                glob = fieldValuesStream
+                        .findFirst().orElseThrow();
+            }
+        }
         assertEquals(3, glob.get(DummyObject.ID).intValue());
         assertEquals("world", glob.get(DummyObject.NAME));
         assertEquals("world", glob.get(DummyObject2.LABEL));

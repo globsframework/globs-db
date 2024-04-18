@@ -112,16 +112,17 @@ public class ExtractFromDb {
         SelectQuery query = db.getQueryBuilder(globType, constraint).selectAll()
                 .getQuery();
 
-        Stream<Glob> globStream = query.executeAsGlobStream();
-        writer.append("<globs>\n");
-        globStream.forEach(glob -> {
-            try {
-                writer.append(writeXml(globType, glob));
-                writer.append("\n");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try (Stream<Glob> globStream = query.executeAsGlobStream()) {
+            writer.append("<globs>\n");
+            globStream.forEach(glob -> {
+                try {
+                    writer.append(writeXml(globType, glob));
+                    writer.append("\n");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
         writer.append("</globs>");
         query.close();
     }
