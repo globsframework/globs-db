@@ -18,6 +18,7 @@ import org.globsframework.model.Glob;
 import org.globsframework.model.GlobList;
 import org.globsframework.model.MutableGlob;
 import org.globsframework.sqlstreams.GlobTypeExtractor;
+import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlConnection;
 import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.annotations.DbFieldIsNullable;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 public class PostgresTestCase {
 
@@ -80,10 +82,15 @@ public class PostgresTestCase {
             SerializedOutput serializedOutput = new CompressedSerializationOutput(fileInputStream);
 
 
-            long count = db.getQueryBuilder(type)
-                    .selectAll().getQuery().executeAsGlobStream()
-                    .peek(glob -> serializedOutput.writeGlob(glob))
-                    .count();
+            long count;
+            try (SelectQuery query = db.getQueryBuilder(type)
+                    .selectAll().getQuery()) {
+                try (Stream<Glob> globStream = query.executeAsGlobStream()) {
+                    count = globStream
+                            .peek(serializedOutput::writeGlob)
+                            .count();
+                }
+            }
 
             fileInputStream.close();
             System.out.println("TheozReadFromDb.read " + count + " lines read");
