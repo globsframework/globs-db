@@ -1,8 +1,7 @@
 package org.globsframework.sqlstreams;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.fields.*;
-import org.globsframework.metamodel.fields.impl.DefaultIntegerField;
 import org.globsframework.streams.accessors.*;
 import org.globsframework.utils.Ref;
 

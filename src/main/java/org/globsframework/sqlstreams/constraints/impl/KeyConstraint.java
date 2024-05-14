@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams.constraints.impl;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Key;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;

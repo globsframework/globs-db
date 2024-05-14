@@ -1,9 +1,8 @@
 package org.globsframework.sqlstreams;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.accessors.LongSqlAccessor;
 import org.globsframework.streams.accessors.*;
 
 import java.time.LocalDate;

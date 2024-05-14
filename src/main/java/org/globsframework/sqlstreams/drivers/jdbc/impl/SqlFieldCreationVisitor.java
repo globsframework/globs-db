@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams.drivers.jdbc.impl;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
 import org.globsframework.metamodel.annotations.MaxSizeType;
 import org.globsframework.metamodel.fields.*;

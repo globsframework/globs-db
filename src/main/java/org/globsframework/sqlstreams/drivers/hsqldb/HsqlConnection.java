@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams.drivers.hsqldb;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.SelectBuilder;

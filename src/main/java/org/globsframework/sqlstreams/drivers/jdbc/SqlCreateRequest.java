@@ -1,7 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;

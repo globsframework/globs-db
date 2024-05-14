@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams.annotations;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.FieldNameAnnotation;
@@ -16,8 +16,6 @@ import org.globsframework.metamodel.index.impl.DefaultUniqueIndex;
 import org.globsframework.model.Glob;
 import org.globsframework.model.Key;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DbIndex {
