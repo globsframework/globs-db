@@ -2,7 +2,7 @@ package org.globsframework.sqlstreams.drivers.jdbc;
 
 import org.globsframework.directory.DefaultDirectory;
 import org.globsframework.directory.Directory;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.impl.DefaultGlobModel;

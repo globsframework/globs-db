@@ -1,6 +1,6 @@
 package org.globsframework.sqlstreams;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.GlobRepository;
 import org.globsframework.model.repository.DefaultGlobRepository;

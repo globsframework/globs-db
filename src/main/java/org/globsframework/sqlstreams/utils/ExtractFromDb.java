@@ -2,7 +2,7 @@ package org.globsframework.sqlstreams.utils;
 
 import com.google.gson.Gson;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;

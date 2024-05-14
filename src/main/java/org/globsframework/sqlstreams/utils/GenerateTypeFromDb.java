@@ -1,8 +1,7 @@
 package org.globsframework.sqlstreams.utils;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.annotations.FieldNameAnnotation;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.slf4j.Logger;
