@@ -4,7 +4,6 @@ import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.*;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.drivers.jdbc.impl.SqlFieldCreationVisitor;
@@ -26,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -215,7 +215,7 @@ public abstract class JdbcConnection implements SqlConnection {
     public void showDb() {
     }
 
-    public void populate(GlobList all) {
+    public void populate(Collection<Glob> all) {
         for (Glob glob : all) {
             CreateBuilder createBuilder = getCreateBuilder(glob.getType());
             for (Field field : glob.getType().getFields()) {

@@ -5,7 +5,6 @@ import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.model.utils.DefaultFieldValues;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlService;
@@ -21,6 +20,7 @@ import org.globsframework.streams.accessors.Accessor;
 import org.globsframework.utils.NanoChrono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,14 +133,14 @@ public class SqlSelectQuery implements SelectQuery {
         for (SqlOperation sqlOperation : sqlOperations) {
             SqlAccessor sqlAccessor = sqlOperation.getAccessor();
             sqlAccessor.setIndex(++index);
-            prettyWriter.append(sqlOperation.toSqlOpe(new ToSqlName(){
-                public String toSqlName(Field field) {
-                    GlobType globType = field.getGlobType();
-                    globTypes.add(globType);
-                    String tableName = sqlService.getTableName(globType);
-                    return tableName + "." + sqlService.getColumnName(field);
-                }
-            })
+            prettyWriter.append(sqlOperation.toSqlOpe(new ToSqlName() {
+                        public String toSqlName(Field field) {
+                            GlobType globType = field.getGlobType();
+                            globTypes.add(globType);
+                            String tableName = sqlService.getTableName(globType);
+                            return tableName + "." + sqlService.getColumnName(field);
+                        }
+                    })
             );
             prettyWriter.append(", ");
         }
@@ -196,8 +196,7 @@ public class SqlSelectQuery implements SelectQuery {
                 prettyWriter.append(sqlService.getColumnName(order.field));
                 if (order.asc) {
                     prettyWriter.append(" ASC");
-                }
-                else {
+                } else {
                     prettyWriter.append(" DESC");
                 }
                 prettyWriter.append(", ");
@@ -271,8 +270,8 @@ public class SqlSelectQuery implements SelectQuery {
         }
     }
 
-    public GlobList executeAsGlobs() {
-        GlobList result = new GlobList();
+    public List<Glob> executeAsGlobs() {
+        List<Glob> result = new ArrayList<>();
         try (Stream<Glob> globStream = executeAsGlobStream()) {
             globStream.forEach(result::add);
         }
@@ -332,8 +331,7 @@ public class SqlSelectQuery implements SelectQuery {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("load " + GSonUtils.encode(current, true));
                 }
-            }
-            else {
+            } else {
                 current = null;
             }
         }
@@ -384,8 +382,7 @@ public class SqlSelectQuery implements SelectQuery {
         private void goToNext() {
             if (dbStream.next()) {
                 current = create();
-            }
-            else {
+            } else {
                 current = null;
             }
         }

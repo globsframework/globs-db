@@ -2,12 +2,13 @@ package org.globsframework.sqlstreams;
 
 import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.GlobList;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.constraints.Constraint;
 import org.globsframework.sqlstreams.exceptions.DbConstraintViolation;
 import org.globsframework.sqlstreams.exceptions.RollbackFailed;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 public interface SqlConnection {
@@ -40,19 +41,19 @@ public interface SqlConnection {
 
     GlobType extractFromQuery(String query);
 
-    default GlobType extractType(String tableName, Set<String> columnToIgnore){
+    default GlobType extractType(String tableName, Set<String> columnToIgnore) {
         return extractType(tableName).columnToIgnore(columnToIgnore).extract();
     }
 
-    void populate(GlobList all);
+    void populate(Collection<Glob> all);
 
     SqlService getJdbcSqlService();
 
-    default void createTable(GlobType ...types) {
+    default void createTable(GlobType... types) {
         Arrays.stream(types).forEach(this::createTable);
     }
 
-    default void emptyTable(GlobType ...types) {
+    default void emptyTable(GlobType... types) {
         Arrays.stream(types).forEach(this::createTable);
     }
 }

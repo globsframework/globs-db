@@ -3,10 +3,12 @@ package org.globsframework.sqlstreams.model;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.ChangeSet;
-import org.globsframework.model.GlobList;
+import org.globsframework.model.Glob;
 import org.globsframework.model.GlobRepository;
 import org.globsframework.model.GlobRepositoryBuilder;
 import org.globsframework.xml.tests.XmlComparisonMode;
+
+import java.util.List;
 
 public class GlobChecker {
     private GlobModel model;
@@ -26,7 +28,7 @@ public class GlobChecker {
         GlobTestUtils.parse(model, repository, xml);
     }
 
-    public GlobList loadGlobs(String xmlInput, GlobType type) {
+    public List<Glob> loadGlobs(String xmlInput, GlobType type) {
         GlobRepository tempGlobRepository = GlobRepositoryBuilder.createEmpty();
         parse(tempGlobRepository, xmlInput);
         return tempGlobRepository.getAll(type);

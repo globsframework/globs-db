@@ -138,8 +138,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     }
 
     public Constraint read(JsonReader in) {
-        JsonParser jsonParser = new JsonParser();
-        JsonElement element = jsonParser.parse(in);
+        JsonElement element = JsonParser.parseReader(in);
         if (element.isJsonNull()) {
             return null;
         }

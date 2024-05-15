@@ -11,7 +11,6 @@ import org.globsframework.metamodel.annotations.Targets;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.SqlConnection;
@@ -35,6 +34,7 @@ import org.junit.Test;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.globsframework.sqlstreams.constraints.Constraints.and;
@@ -107,7 +107,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     public void testAnd() throws Exception {
         SqlConnection sqlConnection = init();
 
-        GlobList list =
+        List<Glob> list =
                 sqlConnection.getQueryBuilder(DummyObject.TYPE,
                                 and(Constraints.equal(DummyObject.NAME, "hello"),
                                         Constraints.equal(DummyObject.ID, 1)))
@@ -122,7 +122,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     public void testLongArrayEquals() throws Exception {
         SqlConnection sqlConnection = init();
 
-        GlobList list =
+        List<Glob> list =
                 sqlConnection.getQueryBuilder(DummyObject.TYPE,
                                 Constraints.equal(DummyObject.IDS, new long[]{25, 32}))
                         .selectAll()
@@ -224,7 +224,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         Integer[] values = {1, 2, 3, 4, 5};
-        GlobList list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
+        List<Glob> list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                 Constraints.in(DummyObject.ID, Utils.set(values))).withKeys().getQuery().executeAsGlobs();
         assertEquals(4, list.size());
     }
@@ -240,7 +240,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         Integer[] values = {1, 2, 3, 4, 5};
-        GlobList list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
+        List<Glob> list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                         Constraints.in(DummyObject.ID, Utils.set(values)))
                 .withKeys()
                 .orderDesc(DummyObject.ID).orderAsc(DummyObject.VALUE)
@@ -248,7 +248,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .getQuery().executeAsGlobs();
         assertEquals(1, list.size());
         assertEquals(5, list.get(0).get(DummyObject.ID).intValue());
-        GlobList skipList = sqlConnection.getQueryBuilder(DummyObject.TYPE,
+        List<Glob> skipList = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                         Constraints.in(DummyObject.ID, Utils.set(values)))
                 .withKeys()
                 .orderDesc(DummyObject.ID).orderAsc(DummyObject.VALUE)
@@ -350,7 +350,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
-        GlobList list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE)
+        List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE)
                 .select(DummyObject.NAME))
                 .distinct(Collections.singletonList(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
@@ -367,7 +367,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
                         "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
-        GlobList list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWith(DummyObject.NAME, "world"))
+        List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWith(DummyObject.NAME, "world"))
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
         assertEquals(3, list.size());
@@ -383,7 +383,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
                         "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
                         "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
-        GlobList list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWithIgnoreCase(DummyObject.NAME, "world"))
+        List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWithIgnoreCase(DummyObject.NAME, "world"))
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
         assertEquals(3, list.size());
@@ -564,7 +564,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         GlobType obj_1 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").addStringField("B").get();
         GlobType obj_2 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").get();
         sqlConnection.createTable(obj_2);
-        sqlConnection.populate(new GlobList(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
+        sqlConnection.populate(List.of(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(obj_1);
         try {
             DbStream execute = queryBuilder.selectAll().getQuery().execute();

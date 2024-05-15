@@ -1,7 +1,7 @@
 package org.globsframework.sqlstreams.drivers.jdbc.request;
 
 import org.globsframework.metamodel.GlobModel;
-import org.globsframework.model.GlobList;
+import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.sqlstreams.constraints.Constraint;
@@ -10,6 +10,8 @@ import org.globsframework.sqlstreams.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.streams.DbStream;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,7 +36,7 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
                 "<dummyObject2 id='1' label='hello'/>", directory.get(GlobModel.class)));
         Constraint constraint = Constraints.equal(DummyObject.NAME, "hello");
         sqlConnection.getDeleteRequest(DummyObject.TYPE, constraint).run();
-        GlobList globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
+        List<Glob> globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
               .withKeys()
               .getQuery().executeAsGlobs();
         assertEquals(1, globs.size());

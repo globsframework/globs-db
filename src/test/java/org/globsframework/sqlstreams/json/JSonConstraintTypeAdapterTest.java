@@ -11,6 +11,8 @@ import org.globsframework.utils.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.StringReader;
+
 public class JSonConstraintTypeAdapterTest {
 
 
@@ -162,9 +164,8 @@ public class JSonConstraintTypeAdapterTest {
     }
 
     public static void assertEquivalent(String expected, String actual) {
-        JsonParser jsonParser = new JsonParser();
-        JsonElement expectedTree = jsonParser.parse(expected);
-        JsonElement actualTree = jsonParser.parse(actual);
+        JsonElement expectedTree = JsonParser.parseReader(new StringReader(expected));
+        JsonElement actualTree = JsonParser.parseReader(new StringReader(actual));
         Gson gson = new Gson();
         Assert.assertEquals(gson.toJson(expectedTree), gson.toJson(actualTree));
     }

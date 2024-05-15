@@ -2,12 +2,11 @@ package org.globsframework.sqlstreams;
 
 import org.globsframework.model.FieldValues;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.streams.DbStream;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.TooManyItems;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -20,16 +19,16 @@ public interface SelectQuery extends AutoCloseable {
 
     DbStream execute();
 
-    GlobList executeAsGlobs();
+    List<Glob> executeAsGlobs();
 
 //    Collection<Glob> executeAsGlob();
 
-    default Glob executeUnique() throws ItemNotFound, TooManyItems{
+    default Glob executeUnique() throws ItemNotFound, TooManyItems {
         return executeOne().orElseThrow(() -> new ItemNotFound("For " + toString()));
     }
 
     default Optional<Glob> executeOne() throws TooManyItems {
-        GlobList globs = executeAsGlobs();
+        List<Glob> globs = executeAsGlobs();
         if (globs.size() == 1) {
             return Optional.of(globs.get(0));
         }

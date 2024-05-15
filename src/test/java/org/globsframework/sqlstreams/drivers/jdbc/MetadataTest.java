@@ -10,7 +10,8 @@ import org.globsframework.sqlstreams.SqlService;
 import org.globsframework.sqlstreams.model.DummyObject;
 import org.junit.Test;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
+
 
 public class MetadataTest extends DbServicesTestCase {
 

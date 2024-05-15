@@ -15,7 +15,6 @@ import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.model.MutableGlob;
 import org.globsframework.sqlstreams.GlobTypeExtractor;
 import org.globsframework.sqlstreams.SelectQuery;
@@ -31,10 +30,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PostgresTestCase {
@@ -122,7 +118,7 @@ public class PostgresTestCase {
                 ;
 
         db.createTable(globType);
-        db.populate(new GlobList(data));
+        db.populate(List.of(data));
 
         db.commitAndClose();
 

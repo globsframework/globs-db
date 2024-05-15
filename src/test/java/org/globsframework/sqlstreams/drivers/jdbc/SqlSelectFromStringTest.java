@@ -4,7 +4,6 @@ import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;
 import org.globsframework.sqlstreams.model.DummyObject;
@@ -12,6 +11,8 @@ import org.globsframework.sqlstreams.model.DummyObject2;
 import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class SqlSelectFromStringTest extends DbServicesTestCase {
 
@@ -33,7 +34,7 @@ public class SqlSelectFromStringTest extends DbServicesTestCase {
         final SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(globType);
         queryBuilder.selectAll();
         final SelectQuery query = queryBuilder.getQuery(sql);
-        final GlobList globs = query.executeAsGlobs();
+        final List<Glob> globs = query.executeAsGlobs();
         Assert.assertEquals(1, globs.size());
         final Glob actual = globs.get(0);
         Assert.assertEquals("world", actual.get(actual.getType().getField("LABEL").asStringField()));

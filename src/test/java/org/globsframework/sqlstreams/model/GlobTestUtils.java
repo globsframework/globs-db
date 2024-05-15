@@ -35,13 +35,13 @@ public class GlobTestUtils {
                          XmlComparisonMode.EXPECTED_ATTRIBUTES_ONLY);
     }
 
-    public static void assertListEquals(GlobList globs,
+    public static void assertListEquals(List<Glob> globs,
                                         GlobRepository repository,
                                         String expectedOutput) {
         assertListEquals(globs, repository, expectedOutput, XmlComparisonMode.EXPECTED_ATTRIBUTES_ONLY);
     }
 
-    public static void assertListEquals(GlobList globs,
+    public static void assertListEquals(List<Glob> globs,
                                         GlobRepository repository,
                                         String expectedOutput,
                                         XmlComparisonMode comparisonMode) {
