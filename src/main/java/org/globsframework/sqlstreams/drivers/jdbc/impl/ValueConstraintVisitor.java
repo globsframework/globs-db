@@ -77,7 +77,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
                 LOGGER.debug("at " + index + " value : " + value);
             }
             setValue(value, ++index);
-            field.safeVisit(this);
+            field.safeAccept(this);
         }
     }
 
@@ -97,13 +97,13 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         else {
             setValue(value, ++index);
         }
-        field.safeVisit(this);
+        field.safeAccept(this);
     }
 
     @Override
     public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
         setValue(value, ++index);
-        field.safeVisit(this);
+        field.safeAccept(this);
     }
 
     public void visitValueOperand(ValueOperand value) {
@@ -115,7 +115,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
             LOGGER.debug("at " + index + " value : " + o);
         }
         setValue(o, ++index);
-        value.getField().safeVisit(this);
+        value.getField().safeAccept(this);
     }
 
     public void visitAccessorOperand(AccessorOperand accessorOperand) {
@@ -127,7 +127,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
             LOGGER.debug("at " + index + " value : " + objectValue);
         }
         setValue(objectValue, ++index);
-        accessorOperand.getField().safeVisit(this);
+        accessorOperand.getField().safeAccept(this);
     }
 
     public void visitFieldOperand(Field field) {

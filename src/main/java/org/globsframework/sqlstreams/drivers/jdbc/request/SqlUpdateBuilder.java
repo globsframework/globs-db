@@ -39,7 +39,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder updateUntyped(Field field, final Object value) {
-        field.safeVisit(new FieldVisitor.AbstractWithErrorVisitor() {
+        field.safeAccept(new FieldVisitor.AbstractWithErrorVisitor() {
             public void visitInteger(IntegerField field) {
                 update(field, (Integer) value);
             }

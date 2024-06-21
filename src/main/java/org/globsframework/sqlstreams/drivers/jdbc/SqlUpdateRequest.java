@@ -57,7 +57,7 @@ public class SqlUpdateRequest implements SqlRequest {
         int index = 0;
         for (Map.Entry<Field, Accessor> entry : values.entrySet()) {
             sqlValueFieldVisitor.setValue(entry.getValue().getObjectValue(), ++index);
-            entry.getKey().safeVisit(sqlValueFieldVisitor);
+            entry.getKey().safeAccept(sqlValueFieldVisitor);
         }
         constraint.visit(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
         try {

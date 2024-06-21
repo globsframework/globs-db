@@ -93,7 +93,7 @@ public class SqlCreateRequest implements SqlRequest {
             for (Pair<Field, Accessor> pair : fields) {
                 Object value = pair.getSecond().getObjectValue();
                 sqlValueVisitor.setValue(value, ++index);
-                pair.getFirst().safeVisit(sqlValueVisitor);
+                pair.getFirst().safeAccept(sqlValueVisitor);
             }
             final int result = preparedStatement.executeUpdate();
             if (generatedKeyAccessor != null) {
@@ -131,7 +131,7 @@ public class SqlCreateRequest implements SqlRequest {
         public String get(Pair<Field, Accessor> pair) {
             value = pair.getSecond().getObjectValue();
             if (value != null) {
-                pair.getFirst().safeVisit(this);
+                pair.getFirst().safeAccept(this);
             } else {
                 convertValue = "'NULL'";
             }

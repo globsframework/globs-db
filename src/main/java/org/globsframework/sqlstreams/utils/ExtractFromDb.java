@@ -133,7 +133,7 @@ public class ExtractFromDb {
         Field[] fields = type.getFields();
         for (Field field : fields) {
             if (!glob.isNull(field)) {
-                Object val = field.safeVisit(visitor, glob).val;
+                Object val = field.safeAccept(visitor, glob).val;
                 stringBuilder.append(" ");
                 stringBuilder.append(field.getName());
                 stringBuilder.append("=\"");

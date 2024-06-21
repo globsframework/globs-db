@@ -113,7 +113,7 @@ public class GenerateTypeFromDb {
     }
 
     private String getType(Field field) {
-        return field.safeVisit(new FieldVisitor() {
+        return field.safeAccept(new FieldVisitor() {
             String fieldType;
 
             public void visitInteger(IntegerField field) throws Exception {

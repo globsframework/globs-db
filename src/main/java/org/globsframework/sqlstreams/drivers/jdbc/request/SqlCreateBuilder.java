@@ -53,7 +53,7 @@ public class SqlCreateBuilder implements CreateBuilder {
     }
 
     public CreateBuilder setObject(Field field, final Object value) {
-        field.safeVisit(new FieldVisitor.AbstractWithErrorVisitor() {
+        field.safeAccept(new FieldVisitor.AbstractWithErrorVisitor() {
             public void visitInteger(IntegerField field) {
                 setObject(field, new ValueIntegerAccessor((Integer) value));
             }

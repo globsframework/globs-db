@@ -113,7 +113,7 @@ public abstract class JdbcConnection implements SqlConnection {
         SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
         int count = 1;
         for (Field field : globType.getFields()) {
-            field.safeVisit(creationVisitor.appendComma(count != globType.getFieldCount()));
+            field.safeAccept(creationVisitor.appendComma(count != globType.getFieldCount()));
             count++;
         }
         Field[] keyFields = globType.getKeyFields();
@@ -171,7 +171,7 @@ public abstract class JdbcConnection implements SqlConnection {
                     Field field = fieldNotInDb[i];
                     LOGGER.info("Add column " + field.getFullName());
                     writer.append(" ADD ");
-                    field.safeVisit(creationVisitor);
+                    field.safeAccept(creationVisitor);
                     if (i + 1 < fieldNotInDb.length) {
                         writer.append(", ");
                     }

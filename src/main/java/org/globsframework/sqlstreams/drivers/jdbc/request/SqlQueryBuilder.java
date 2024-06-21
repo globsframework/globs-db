@@ -348,7 +348,7 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public Accessor retrieveUnTyped(Field field) {
         AccessorToFieldVisitor visitor = new AccessorToFieldVisitor();
-        field.safeVisit(visitor);
+        field.safeAccept(visitor);
         return visitor.get();
     }
 
