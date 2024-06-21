@@ -13,10 +13,10 @@ import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.metamodel.type.DataType;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.sqlstreams.GlobTypeExtractor;
-import org.globsframework.sqlstreams.SqlConnection;
-import org.globsframework.sqlstreams.SqlService;
-import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
+import org.globsframework.sql.GlobTypeExtractor;
+import org.globsframework.sql.SqlConnection;
+import org.globsframework.sql.SqlService;
+import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.globsframework.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.utils.serialization.SerializedOutput;
 import org.junit.Ignore;
@@ -55,7 +55,7 @@ public class TheozReadFromDb {
                 throw new RuntimeException(tableName + " not found");
             }
             GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContentType.TYPE)
-                    .add(org.globsframework.sqlstreams.annotations.AllAnnotations.MODEL)
+                    .add(org.globsframework.sql.annotations.AllAnnotations.MODEL)
                     .get();
 
             Gson gson = GlobsGson.create(globTypes::getType);
