@@ -13,7 +13,7 @@ public class NullOrNotConstraint implements Constraint {
         this.checkNull = checkNull;
     }
 
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitIsOrNotNull(this);
         return visitor;
     }

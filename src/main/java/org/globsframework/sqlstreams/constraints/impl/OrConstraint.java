@@ -47,7 +47,7 @@ public class OrConstraint extends ArrayConstraint implements Constraint {
         }
         return new OrConstraint(c.toArray(Constraint[]::new));
     }
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitOr(this);
         return visitor;
     }

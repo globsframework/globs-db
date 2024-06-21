@@ -42,7 +42,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     private void visitArray(ArrayConstraint constraint) {
         final Constraint[] constraints = constraint.getConstraints();
         for (Constraint c : constraints) {
-            c.visit(this);
+            c.accept(this);
         }
     }
 

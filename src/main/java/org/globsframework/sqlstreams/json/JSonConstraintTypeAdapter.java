@@ -133,7 +133,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             return;
         }
         out.beginObject();
-        constraint.visit(new JSonConstraintVisitor(out));
+        constraint.accept(new JSonConstraintVisitor(out));
         out.endObject();
     }
 
@@ -408,7 +408,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             final Constraint[] constraints = constraint.getConstraints();
             for (Constraint c : constraints) {
                 jsonWriter.beginObject();
-                c.visit(this);
+                c.accept(this);
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();

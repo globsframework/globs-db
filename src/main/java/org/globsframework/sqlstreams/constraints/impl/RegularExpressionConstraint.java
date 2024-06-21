@@ -16,7 +16,7 @@ public class RegularExpressionConstraint implements Constraint {
         this.not = not;
     }
 
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitRegularExpression(field, value, caseSensitive, not);
         return visitor;
     }

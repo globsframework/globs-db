@@ -15,7 +15,7 @@ public class NotInConstraint implements Constraint {
         this.values = values;
     }
 
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitNotIn(this);
         return visitor;
     }

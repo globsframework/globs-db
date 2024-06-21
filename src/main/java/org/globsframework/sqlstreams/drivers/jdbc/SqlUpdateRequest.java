@@ -59,7 +59,7 @@ public class SqlUpdateRequest implements SqlRequest {
             sqlValueFieldVisitor.setValue(entry.getValue().getObjectValue(), ++index);
             entry.getKey().safeAccept(sqlValueFieldVisitor);
         }
-        constraint.visit(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
+        constraint.accept(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
         try {
             NanoChrono nanoChrono = NanoChrono.start();
             final int count = preparedStatement.executeUpdate();
@@ -108,7 +108,7 @@ public class SqlUpdateRequest implements SqlRequest {
         prettyWriter.append(" WHERE ");
         Set<GlobType> globTypes = new HashSet<GlobType>();
         globTypes.add(globType);
-        constraint.visit(new WhereClauseConstraintVisitor(prettyWriter, sqlService, globTypes));
+        constraint.accept(new WhereClauseConstraintVisitor(prettyWriter, sqlService, globTypes));
         if (globTypes.size() > 1) {
             throw new UnexpectedApplicationState("Only the updated table is valide in query " + prettyWriter.toString());
         }

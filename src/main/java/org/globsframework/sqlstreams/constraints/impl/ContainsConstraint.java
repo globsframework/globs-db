@@ -19,7 +19,7 @@ public class ContainsConstraint implements Constraint {
         this.ignoreCase = ignoreCase;
     }
 
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitContains(field, value, contains, startWith, ignoreCase);
         return visitor;
     }

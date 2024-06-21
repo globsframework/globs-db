@@ -148,7 +148,7 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     private void visitArray(ArrayConstraint constraint, String operator) {
         prettyWriter.append("(");
         for (Constraint constraintConstraint : constraint.getConstraints()) {
-            constraintConstraint.visit(this);
+            constraintConstraint.accept(this);
             prettyWriter.append(operator);
         }
         prettyWriter.removeLast(operator.length());

@@ -34,7 +34,7 @@ public class SqlDeleteBuilder implements SqlRequest {
         StringPrettyWriter whereWriter = null;
         if (constraint != null) {
             whereWriter = new StringPrettyWriter();
-            constraint.visit(new WhereClauseConstraintVisitor(whereWriter, sqlService, tables));
+            constraint.accept(new WhereClauseConstraintVisitor(whereWriter, sqlService, tables));
             if (tables.size() != 1) {
                 throw new UnexpectedApplicationState("Only one from clause allowed : jointures are not possible : " +
                         whereWriter.toString());
@@ -60,7 +60,7 @@ public class SqlDeleteBuilder implements SqlRequest {
 
     public int run() {
         if (constraint != null) {
-            constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
+            constraint.accept(new ValueConstraintVisitor(preparedStatement, blobUpdater));
         }
         try {
             return preparedStatement.executeUpdate();

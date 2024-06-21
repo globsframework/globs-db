@@ -165,7 +165,7 @@ public class SqlSelectQuery implements SelectQuery {
         if (constraint != null) {
             where = new StringPrettyWriter();
             where.append(" WHERE ");
-            constraint.visit(getWhereConstraintVisitor(where));
+            constraint.accept(getWhereConstraintVisitor(where));
         }
 
         prettyWriter.append(" from ");
@@ -250,7 +250,7 @@ public class SqlSelectQuery implements SelectQuery {
         }
         try {
             if (constraint != null) {
-                constraint.visit(new ValueConstraintVisitor(preparedStatement, blobUpdater));
+                constraint.accept(new ValueConstraintVisitor(preparedStatement, blobUpdater));
             }
             NanoChrono nanoChrono = NanoChrono.start();
             ResultSet resultSet = preparedStatement.executeQuery();

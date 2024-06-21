@@ -47,7 +47,7 @@ public class AndConstraint extends ArrayConstraint implements Constraint {
         return new AndConstraint(c.toArray(Constraint[]::new));
     }
 
-    public <T extends ConstraintVisitor> T visit(T visitor) {
+    public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitAnd(this);
         return visitor;
     }
