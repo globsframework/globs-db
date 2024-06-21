@@ -149,7 +149,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.25</version>
+            <version>8.0.28</version>
         </dependency>
 
         <dependency>
@@ -164,24 +164,24 @@
             <version>3.5.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.5.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mongodb</groupId>-->
+<!--            <artifactId>mongodb-driver</artifactId>-->
+<!--            <version>3.5.0</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>com.github.fakemongo</groupId>
-            <artifactId>fongo</artifactId>
-            <version>2.1.0</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.fakemongo</groupId>-->
+<!--            <artifactId>fongo</artifactId>-->
+<!--            <version>2.1.0</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.google.code.gson</groupId>-->
+<!--            <artifactId>gson</artifactId>-->
+<!--            <version>2.10.1</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -206,7 +206,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.4</version>
+            <version>42.6.1</version>
         </dependency>
     </dependencies>
 </project>
