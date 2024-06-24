@@ -103,7 +103,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         Assert.assertTrue(aaaaa.isPresent());
         String offsetId = ZoneId.systemDefault().getRules().getStandardOffset(Instant.now()).getId();
 
-        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\",\"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00" +
+        Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\", \"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00" +
                         offsetId +"[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
                 aaaaa.get().toString());
     }
