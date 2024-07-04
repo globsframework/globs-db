@@ -146,7 +146,7 @@ public class SqlDbStream implements DbStream {
 
     public String getString(int index) {
         try {
-            return (String) resultSet.getObject(index);
+            return resultSet.getString(index);
         } catch (SQLException e) {
             String columnName = null;
             try {

@@ -1,12 +1,13 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.sql.annotations.DbFieldName;
 import org.globsframework.sql.annotations.TargetTypeName;
 import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sql.drivers.mysql.MysqlConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
+import org.globsframework.sql.drivers.postgresql.ToPostgreCaseNamingMapping;
 import org.globsframework.sql.utils.AbstractSqlService;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
@@ -15,13 +16,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JdbcSqlService extends AbstractSqlService {
-    private static Map<String, Driver>  loadedDrivers = new ConcurrentHashMap<>();
+    private static Map<String, Driver> loadedDrivers = new ConcurrentHashMap<>();
     private Driver driver;
     private String dbName;
     private Properties dbInfo;
@@ -42,19 +42,19 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public interface NamingMapping {
-        default String getTableName(GlobType globType){
+        default String getTableName(GlobType globType) {
             return getTableName(TargetTypeName.getOptName(globType).orElse(globType.getName()));
         }
 
         String getTableName(String typeName);
 
-        default String getColumnName(Field field){
+        default String getColumnName(Field field) {
             return getColumnName(DbFieldName.getOptName(field).orElse(field.getName()));
         }
 
         String getColumnName(String fieldName);
 
-        default String getLikeIgnoreCase(){
+        default String getLikeIgnoreCase() {
             return null;
         }
     }
@@ -109,7 +109,7 @@ public class JdbcSqlService extends AbstractSqlService {
             driver = (Driver) Class.forName("org.postgresql.Driver").getDeclaredConstructor().newInstance();
             loadedDrivers.put(dbName, driver);
         }
-        namingMapping = new ToLowerCaseNamingMapping(namingMapping){
+        namingMapping = new ToPostgreCaseNamingMapping(namingMapping) {
             public String getLikeIgnoreCase() {
                 return "iLike";
             }
@@ -227,19 +227,4 @@ public class JdbcSqlService extends AbstractSqlService {
         }
     }
 
-    private static class ToLowerCaseNamingMapping implements NamingMapping {
-        private NamingMapping namingMapping;
-
-        public ToLowerCaseNamingMapping(NamingMapping namingMapping) {
-            this.namingMapping = namingMapping;
-        }
-
-        public String getTableName(String typeName) {
-            return typeName.toLowerCase(Locale.ROOT);
-        }
-
-        public String getColumnName(String fieldName) {
-            return fieldName.toLowerCase(Locale.ROOT);
-        }
-    }
 }
