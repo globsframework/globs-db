@@ -8,7 +8,6 @@ import org.globsframework.sql.BulkDbRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
-import org.globsframework.sql.accessors.LongGeneratedKeyAccessor;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.SqlCreateRequest;
@@ -18,6 +17,7 @@ import org.globsframework.streams.accessors.utils.*;
 import org.globsframework.utils.collections.Pair;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class SqlCreateBuilder implements CreateBuilder {
     private JdbcConnection jdbcConnection;
     private List<Pair<Field, Accessor>> fields = new ArrayList<Pair<Field, Accessor>>();
     private Set<Field> fieldSet = new HashSet<>();
-    protected LongGeneratedKeyAccessor longGeneratedKeyAccessor;
+    protected DelegateGeneratedKeyAccessor generatedKeyAccessor;
 
     public SqlCreateBuilder(Connection connection, GlobType globType, SqlService sqlService,
                             BlobUpdater blobUpdater, JdbcConnection jdbcConnection) {
@@ -223,15 +223,15 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, accessor);
     }
 
-    public LongAccessor getKeyGeneratedAccessor() {
-        if (longGeneratedKeyAccessor == null) {
-            longGeneratedKeyAccessor = new LongGeneratedKeyAccessor();
+    public Accessor getKeyGeneratedAccessor(Field field) {
+        if (generatedKeyAccessor == null) {
+            generatedKeyAccessor = new DelegateGeneratedKeyAccessor();
         }
-        return longGeneratedKeyAccessor;
+        return field.safeAccept(new AllocateKeyGeneratedAccessor(generatedKeyAccessor)).generatedKeyAccessor;
     }
 
     public SqlRequest getRequest() {
-        return new SqlCreateRequest(fields, longGeneratedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
     }
 
     public BulkDbRequest getBulkRequest() {
@@ -248,5 +248,51 @@ public class SqlCreateBuilder implements CreateBuilder {
                 request.close();
             }
         };
+    }
+
+    private static class DelegateGeneratedKeyAccessor implements GeneratedKeyAccessor {
+        List<GeneratedKeyAccessor> keyAccessors = new ArrayList<>();
+        public void setResult(ResultSet generatedKeys, SqlService sqlService) {
+            for (GeneratedKeyAccessor keyAccessor : keyAccessors) {
+                keyAccessor.setResult(generatedKeys, sqlService);
+            }
+        }
+
+        public void reset() {
+            for (GeneratedKeyAccessor keyAccessor : keyAccessors) {
+                keyAccessor.reset();
+            }
+        }
+
+        public void add(GeneratedKeyAccessor generatedKeyAccessor1) {
+            keyAccessors.add(generatedKeyAccessor1);
+        }
+    }
+
+    private static class AllocateKeyGeneratedAccessor extends FieldVisitor.AbstractWithErrorVisitor {
+        private final DelegateGeneratedKeyAccessor delegateGeneratedKeyAccessor;
+        private Accessor generatedKeyAccessor;
+
+        public AllocateKeyGeneratedAccessor(DelegateGeneratedKeyAccessor generatedKeyAccessor) {
+            delegateGeneratedKeyAccessor = generatedKeyAccessor;
+        }
+
+        public void visitInteger(IntegerField field) throws Exception {
+            IntegerGeneratedKeyAccessor generatedKeyAccessor1 = new IntegerGeneratedKeyAccessor(field);
+            delegateGeneratedKeyAccessor.add(generatedKeyAccessor1);
+            generatedKeyAccessor = generatedKeyAccessor1;
+        }
+
+        public void visitString(StringField field) throws Exception {
+            StringGeneratedKeyAccessor generatedKeyAccessor1 = new StringGeneratedKeyAccessor(field);
+            delegateGeneratedKeyAccessor.add(generatedKeyAccessor1);
+            generatedKeyAccessor = generatedKeyAccessor1;
+        }
+
+        public void visitLong(LongField field) throws Exception {
+            LongGeneratedKeyAccessor generatedKeyAccessor1 = new LongGeneratedKeyAccessor(field);
+            delegateGeneratedKeyAccessor.add(generatedKeyAccessor1);
+            generatedKeyAccessor = generatedKeyAccessor1;
+        }
     }
 }

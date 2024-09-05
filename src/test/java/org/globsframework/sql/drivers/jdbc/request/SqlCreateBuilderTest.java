@@ -11,7 +11,7 @@ import org.globsframework.sql.model.DummyObject;
 import org.globsframework.model.KeyBuilder;
 import org.globsframework.sql.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.sql.model.DummyObjectWithGlob;
-import org.globsframework.streams.accessors.LongAccessor;
+import org.globsframework.streams.accessors.IntegerAccessor;
 import org.globsframework.streams.accessors.utils.*;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -27,10 +27,10 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
     @Test
     public void testSimpleCreate() throws Exception {
         sqlConnection.createTable(DummyObject.TYPE);
-        GlobType globType = sqlConnection.extractType(sqlService.getTableName(DummyObject.TYPE))
-                .forceType(sqlService.getColumnName(DummyObject.CREATED_AT), DataType.Long).extract();
+        GlobType globType = sqlConnection.extractType(sqlService.getTableName(DummyObject.TYPE, false))
+                .forceType(sqlService.getColumnName(DummyObject.CREATED_AT, false), DataType.Long).extract();
 
-        Field timestampField = globType.getField(sqlService.getColumnName(DummyObject.CREATED_AT));
+        Field timestampField = globType.getField(sqlService.getColumnName(DummyObject.CREATED_AT, false));
 
         Assert.assertTrue(timestampField.getDataType().name(), timestampField instanceof LongField);
 
@@ -63,13 +63,13 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
     public void checkAutoIncrementIsRetrieved() {
         sqlConnection.createTable(DummyObject.TYPE);
         CreateBuilder createBuilder = sqlConnection.getCreateBuilder(DummyObject.TYPE);
-        LongAccessor keyGeneratedAccessor = createBuilder.getKeyGeneratedAccessor();
+        IntegerAccessor keyGeneratedAccessor = createBuilder.getKeyGeneratedAccessor(DummyObject.ID);
         createBuilder
                 .set(DummyObject.NAME, "val1")
                 .getRequest()
                 .run();
 
-        Long valId1 = keyGeneratedAccessor.getLong();
+        Integer valId1 = keyGeneratedAccessor.getInteger();
         Assert.assertNotNull(valId1);
     }
 
@@ -98,12 +98,12 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
     @Test
     public void createGlobInField() {
         sqlConnection.createTable(DummyObjectWithGlob.TYPE);
-        GlobType globType = sqlConnection.extractType(sqlService.getTableName(DummyObjectWithGlob.TYPE))
-                .forceType(sqlService.getColumnName(DummyObjectWithGlob.arrayField), DataType.String)
-                .forceType(sqlService.getColumnName(DummyObjectWithGlob.simple), DataType.String)
+        GlobType globType = sqlConnection.extractType(sqlService.getTableName(DummyObjectWithGlob.TYPE, false))
+                .forceType(sqlService.getColumnName(DummyObjectWithGlob.arrayField, false), DataType.String)
+                .forceType(sqlService.getColumnName(DummyObjectWithGlob.simple, false), DataType.String)
                 .extract();
 
-        Field arrayField = globType.getField(sqlService.getColumnName(DummyObjectWithGlob.arrayField));
+        Field arrayField = globType.getField(sqlService.getColumnName(DummyObjectWithGlob.arrayField, false));
 
         Assert.assertTrue(arrayField.getDataType().name(), arrayField instanceof StringField);
 

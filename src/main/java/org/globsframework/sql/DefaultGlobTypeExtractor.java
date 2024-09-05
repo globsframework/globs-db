@@ -90,7 +90,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
     private boolean createFrom(Connection connection, DatabaseMetaData databaseMetaData, String tableName) {
         NanoChrono chrono = NanoChrono.start();
         try {
-            String sqlTableName = getEscapedTableName(databaseMetaData, tableName);
+            String sqlTableName = tableName; //sqlService.getTableName(tableName, false);
 
             if (!hasTableOrView(connection, databaseMetaData, sqlTableName)) {
                 LOGGER.warn("Table not found");
@@ -112,10 +112,12 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
         return tableName;
     }
 
-    private boolean hasTableOrView(Connection connection, DatabaseMetaData databaseMetaData, String tableName) throws SQLException {
-        ResultSet tables = databaseMetaData.getTables(connection.getCatalog(), getSchemaName(connection), tableName, new String[]{"TABLE", "VIEW"});
-        boolean result = tables.next();
-        tables.close();
+    private boolean hasTableOrView(Connection connection, DatabaseMetaData databaseMetaData, String sqlTableName) throws SQLException {
+        boolean result;
+        try (ResultSet tables = databaseMetaData.getTables(connection.getCatalog(), getSchemaName(connection), sqlTableName,
+                new String[]{"TABLE", "VIEW"})) {
+            result = tables.next();
+        }
         return result;
     }
 
@@ -207,9 +209,9 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
     }
 
 
-    private void initColumns(Connection connection, String tableName, DatabaseMetaData databaseMetaData, SortedMap<String, Integer> keys) throws SQLException {
+    private void initColumns(Connection connection, String sqlTableName, DatabaseMetaData databaseMetaData, SortedMap<String, Integer> keys) throws SQLException {
 
-        try (ResultSet columns = databaseMetaData.getColumns(connection.getCatalog(), getSchemaName(connection), tableName, "%")) {
+        try (ResultSet columns = databaseMetaData.getColumns(connection.getCatalog(), getSchemaName(connection), sqlTableName, "%")) {
             int index = -1;
             int keyIndex = 0;
             KeyInfo keyInfo = new KeyInfo(keys);

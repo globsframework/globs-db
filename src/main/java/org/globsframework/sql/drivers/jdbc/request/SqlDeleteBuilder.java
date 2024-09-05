@@ -41,7 +41,7 @@ public class SqlDeleteBuilder implements SqlRequest {
             }
         }
         for (Iterator<GlobType> it = tables.iterator(); it.hasNext(); ) {
-            prettyWriter.append(sqlService.getTableName(it.next()))
+            prettyWriter.append(sqlService.getTableName(it.next(), true))
                     .appendIf(", ", it.hasNext());
         }
         if (whereWriter != null) {

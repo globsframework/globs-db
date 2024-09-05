@@ -67,7 +67,19 @@ public interface CreateBuilder {
 
     CreateBuilder setObject(Field field, Object value);
 
-    LongAccessor getKeyGeneratedAccessor();
+    Accessor getKeyGeneratedAccessor(Field field);
+
+    default LongAccessor getKeyGeneratedAccessor(LongField field){
+        return (LongAccessor) getKeyGeneratedAccessor((Field)field);
+    }
+
+    default StringAccessor getKeyGeneratedAccessor(StringField field){
+        return (StringAccessor) getKeyGeneratedAccessor((Field)field);
+    }
+    default IntegerAccessor getKeyGeneratedAccessor(IntegerField field){
+        return (IntegerAccessor) getKeyGeneratedAccessor((Field)field);
+
+    }
 
     SqlRequest getRequest();
 

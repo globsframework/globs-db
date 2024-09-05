@@ -31,9 +31,9 @@ public class SchemaTest {
         GlobType t2 = typeBuilderF2.get();
         db.addColumn(f2, f3);
 
-        GlobTypeExtractor globTypeExtractor = db.extractType(sqlService.getTableName(t2));
+        GlobTypeExtractor globTypeExtractor = db.extractType(sqlService.getTableName(t2, true));
         GlobType inDbType = globTypeExtractor.extract();
-        Assert.assertTrue(inDbType.hasField(sqlService.getColumnName(f2)));
+        Assert.assertTrue(inDbType.hasField(sqlService.getColumnName(f2, true)));
 
         db.addColumn(f2, f3);
 

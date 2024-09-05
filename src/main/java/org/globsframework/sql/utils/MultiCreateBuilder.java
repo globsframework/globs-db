@@ -173,7 +173,8 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
-    public LongAccessor getKeyGeneratedAccessor() {
+    @Override
+    public Accessor getKeyGeneratedAccessor(Field field) {
         throw new RuntimeException("Not implemented");
     }
 

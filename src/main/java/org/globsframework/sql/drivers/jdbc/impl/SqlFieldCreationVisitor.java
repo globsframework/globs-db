@@ -115,7 +115,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     protected void add(String param, Field field) {
         boolean isAutoIncrementField = field.hasAnnotation(AutoIncrementAnnotationType.KEY);
-        String columnName = sqlService.getColumnName(field);
+        String columnName = sqlService.getColumnName(field, true);
         if (columnName != null) {
             prettyWriter
                     .append(columnName)

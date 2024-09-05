@@ -1,4 +1,4 @@
-package org.globsframework.sql.utils;
+package org.globsframework.sql;
 
 import com.google.gson.Gson;
 import org.globsframework.json.GlobsGson;
@@ -7,7 +7,6 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.saxstack.utils.XmlUtils;
-import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;

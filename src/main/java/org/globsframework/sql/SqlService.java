@@ -9,13 +9,13 @@ public interface SqlService {
 
     SqlConnection getAutoCommitDb();
 
-    String getTableName(GlobType globType);
+    String getTableName(GlobType globType, boolean escaped);
 
-    String getTableName(String name);
+    String getTableName(String name, boolean escaped);
 
-    String getColumnName(Field field);
+    String getColumnName(Field field, boolean escaped);
 
-    String getColumnName(String field);
+    String getColumnName(String field, boolean escaped);
 
     String getLikeIgnoreCase();
 }

@@ -108,7 +108,7 @@ public abstract class JdbcConnection implements SqlConnection {
         LOGGER.info("Create table for " + globType.getName());
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("CREATE TABLE ")
-                .append(sqlService.getTableName(globType))
+                .append(sqlService.getTableName(globType, true))
                 .append(" ( ");
         SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
         int count = 1;
@@ -121,7 +121,7 @@ public abstract class JdbcConnection implements SqlConnection {
             Field last = keyFields[keyFields.length - 1];
             writer.append(", PRIMARY KEY (");
             for (Field field : keyFields) {
-                writer.append(sqlService.getColumnName(field))
+                writer.append(sqlService.getColumnName(field, true))
                         .appendIf(", ", last != field);
             }
             writer.append(") ");
@@ -147,7 +147,7 @@ public abstract class JdbcConnection implements SqlConnection {
         for (Map.Entry<GlobType, List<Field>> entry : fieldsToAdd.entries()) {
             GlobType type = entry.getKey();
 
-            String tableName = sqlService.getTableName(type);
+            String tableName = sqlService.getTableName(type, true);
             GlobTypeExtractor globTypeExtractor = extractType(tableName);
 
             GlobType tableType = globTypeExtractor.extract();
@@ -160,7 +160,7 @@ public abstract class JdbcConnection implements SqlConnection {
                         .append(tableName);
                 SqlFieldCreationVisitor creationVisitor = getFieldVisitorCreator(writer);
 
-                Field[] fieldNotInDb = entry.getValue().stream().filter(f -> !tableType.hasField(sqlService.getColumnName(f)))
+                Field[] fieldNotInDb = entry.getValue().stream().filter(f -> !tableType.hasField(sqlService.getColumnName(f, true)))
                         .toArray(Field[]::new);
 
                 if (fieldNotInDb.length == 0) {
@@ -184,7 +184,7 @@ public abstract class JdbcConnection implements SqlConnection {
                 } catch (SQLException e) {
                     GlobTypeExtractor typeExtractor = extractType(tableName);
                     GlobType newType = typeExtractor.extract();
-                    if (entry.getValue().stream().allMatch(f -> newType.hasField(sqlService.getColumnName(f)))) {
+                    if (entry.getValue().stream().allMatch(f -> newType.hasField(sqlService.getColumnName(f, true)))) {
                         LOGGER.info("Column already added.");
                         return;
                     }
@@ -199,7 +199,7 @@ public abstract class JdbcConnection implements SqlConnection {
     public void emptyTable(GlobType globType) {
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("DELETE FROM ")
-                .append(sqlService.getTableName(globType))
+                .append(sqlService.getTableName(globType, true))
                 .append(";");
         try {
             PreparedStatement statament = connection.prepareStatement(writer.toString());
@@ -284,7 +284,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public GlobTypeExtractor extractType(String tableName) {
-        return new DefaultGlobTypeExtractor(sqlService, sqlService.getNamingMapping().getTableName(tableName));
+        return new DefaultGlobTypeExtractor(sqlService, sqlService.getNamingMapping().getTableName(tableName, false));
     }
 
     public GlobType extractFromQuery(String query) {

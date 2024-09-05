@@ -31,9 +31,10 @@ public class DbChecker {
         try {
             String[] names = {"TABLE"};
             ResultSet tableNames = metaData.getTables(null, null, "%", names);
-            String tableName = sqlService.getTableName(globType);
+            String tableName = sqlService.getTableName(globType, true);
             while (tableNames.next()) {
-                if (tableName.equalsIgnoreCase(tableNames.getString("TABLE_NAME"))) {
+                String actualTableName = sqlService.getTableName(tableNames.getString("TABLE_NAME"), true);
+                if (tableName.equalsIgnoreCase(actualTableName)) {
                     return true;
                 }
             }

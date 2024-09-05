@@ -96,12 +96,12 @@ public class SqlUpdateRequest implements SqlRequest {
     private String createRequest() {
         StringPrettyWriter prettyWriter = new StringPrettyWriter();
         prettyWriter.append("UPDATE ")
-                .append(sqlService.getTableName(globType))
+                .append(sqlService.getTableName(globType, true))
                 .append(" SET ");
         for (Iterator it = values.keySet().iterator(); it.hasNext(); ) {
             Field field = (Field) it.next();
             prettyWriter
-                    .append(sqlService.getColumnName(field))
+                    .append(sqlService.getColumnName(field, true))
                     .append(" = ?").
                     appendIf(" , ", it.hasNext());
         }

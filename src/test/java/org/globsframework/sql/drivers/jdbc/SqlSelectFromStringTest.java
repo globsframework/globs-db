@@ -26,9 +26,9 @@ public class SqlSelectFromStringTest extends DbServicesTestCase {
                 XmlGlobStreamReader.parse(
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
         final String sql = "select " + rename(DummyObject.ID, "ID") + ", " + rename(DummyObject.NAME, "NAME") + ", " + rename(DummyObject2.LABEL, "LABEL")
-                           + " from " + sqlService.getTableName(DummyObject.TYPE) + ", " + sqlService.getTableName(DummyObject2.TYPE) + " where " + sqlService.getTableName(DummyObject.TYPE) + "." +
-                           sqlService.getColumnName(DummyObject.ID) + " = " + sqlService.getTableName(DummyObject2.TYPE) + "." +
-                           sqlService.getColumnName(DummyObject2.ID);
+                           + " from " + sqlService.getTableName(DummyObject.TYPE, true) + ", " + sqlService.getTableName(DummyObject2.TYPE, true) + " where " + sqlService.getTableName(DummyObject.TYPE, true) + "." +
+                           sqlService.getColumnName(DummyObject.ID, true) + " = " + sqlService.getTableName(DummyObject2.TYPE, true) + "." +
+                           sqlService.getColumnName(DummyObject2.ID, true);
         final GlobType globType = sqlConnection.extractFromQuery(sql + " AND  0=1");
         System.out.println(globType.describe());
         final SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(globType);
@@ -42,6 +42,6 @@ public class SqlSelectFromStringTest extends DbServicesTestCase {
     }
 
     private String rename(Field field, String as) {
-        return sqlService.getTableName(field.getGlobType()) + "." + sqlService.getColumnName(field) + " as " + as;
+        return sqlService.getTableName(field.getGlobType(), true) + "." + sqlService.getColumnName(field, true) + " as " + as;
     }
 }

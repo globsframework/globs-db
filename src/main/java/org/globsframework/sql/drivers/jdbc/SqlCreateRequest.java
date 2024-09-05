@@ -7,7 +7,7 @@ import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
-import org.globsframework.sql.accessors.GeneratedKeyAccessor;
+import org.globsframework.sql.drivers.jdbc.request.GeneratedKeyAccessor;
 import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
 import org.globsframework.sql.utils.PrettyWriter;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -17,10 +17,7 @@ import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,11 +66,11 @@ public class SqlCreateRequest implements SqlRequest {
     private String prepareRequest(List<Pair<Field, Accessor>> fields, GlobType globType, Value value) {
         PrettyWriter writer = new StringPrettyWriter();
         writer.append("INSERT INTO ")
-                .append(sqlService.getTableName(globType))
+                .append(sqlService.getTableName(globType, true))
                 .append(" (");
         int columnCount = 0;
         for (Pair<Field, Accessor> pair : fields) {
-            String columnName = sqlService.getColumnName(pair.getFirst());
+            String columnName = sqlService.getColumnName(pair.getFirst(), true);
             writer.appendIf(", ", columnCount > 0);
             columnCount++;
             writer.append(columnName);
@@ -97,7 +94,13 @@ public class SqlCreateRequest implements SqlRequest {
             }
             final int result = preparedStatement.executeUpdate();
             if (generatedKeyAccessor != null) {
-                generatedKeyAccessor.setResult(preparedStatement.getGeneratedKeys());
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    generatedKeyAccessor.setResult(generatedKeys, sqlService);
+                }
+                else {
+                    generatedKeyAccessor.reset();
+                }
             }
             return result;
         } catch (SQLException e) {

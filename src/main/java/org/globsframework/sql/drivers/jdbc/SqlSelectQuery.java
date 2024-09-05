@@ -113,7 +113,7 @@ public class SqlSelectQuery implements SelectQuery {
 
     private boolean updateSqlIndex(Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService, int i, String columnName) {
         for (Map.Entry<Field, SqlAccessor> fieldSqlAccessorEntry : fieldToAccessorHolder.entrySet()) {
-            if (sqlService.getColumnName(fieldSqlAccessorEntry.getKey()).equals(columnName)) {
+            if (sqlService.getColumnName(fieldSqlAccessorEntry.getKey(), true).equals(columnName)) {
                 fieldSqlAccessorEntry.getValue().setIndex(i);
                 return true;
             }
@@ -137,8 +137,8 @@ public class SqlSelectQuery implements SelectQuery {
                         public String toSqlName(Field field) {
                             GlobType globType = field.getGlobType();
                             globTypes.add(globType);
-                            String tableName = sqlService.getTableName(globType);
-                            return tableName + "." + sqlService.getColumnName(field);
+                            String tableName = sqlService.getTableName(globType, true);
+                            return tableName + "." + sqlService.getColumnName(field, true);
                         }
                     })
             );
@@ -150,13 +150,13 @@ public class SqlSelectQuery implements SelectQuery {
             Field field = fieldAndAccessor.getKey();
             GlobType globType = field.getGlobType();
             globTypes.add(globType);
-            String tableName = sqlService.getTableName(globType);
+            String tableName = sqlService.getTableName(globType, true);
             if (distinct.contains(field)) {
                 prettyWriter.append(" DISTINCT ");
             }
             prettyWriter.append(tableName)
                     .append(".")
-                    .append(sqlService.getColumnName(field))
+                    .append(sqlService.getColumnName(field, true))
                     .append(", ");
         }
         // remove ", "
@@ -169,9 +169,9 @@ public class SqlSelectQuery implements SelectQuery {
         }
 
         prettyWriter.append(" from ");
-        for (Iterator it = globTypes.iterator(); it.hasNext(); ) {
-            GlobType globType = (GlobType) it.next();
-            prettyWriter.append(sqlService.getTableName(globType))
+        for (Iterator<GlobType> it = globTypes.iterator(); it.hasNext(); ) {
+            GlobType globType = it.next();
+            prettyWriter.append(sqlService.getTableName(globType, true))
                     .appendIf(", ", it.hasNext());
         }
         if (where != null) {
@@ -181,10 +181,10 @@ public class SqlSelectQuery implements SelectQuery {
         if (!groupBy.isEmpty()) {
             prettyWriter.append(" GROUP BY ");
             for (Field field : groupBy) {
-                String tableName = sqlService.getTableName(field.getGlobType());
+                String tableName = sqlService.getTableName(field.getGlobType(), true);
                 prettyWriter.append(tableName)
                         .append(".")
-                        .append(sqlService.getColumnName(field))
+                        .append(sqlService.getColumnName(field, true))
                         .append(", ");
             }
             prettyWriter.removeLast().removeLast();
@@ -193,7 +193,7 @@ public class SqlSelectQuery implements SelectQuery {
         if (!orders.isEmpty()) {
             prettyWriter.append(" ORDER BY ");
             for (SqlQueryBuilder.Order order : orders) {
-                prettyWriter.append(sqlService.getColumnName(order.field));
+                prettyWriter.append(sqlService.getColumnName(order.field, true));
                 if (order.asc) {
                     prettyWriter.append(" ASC");
                 } else {

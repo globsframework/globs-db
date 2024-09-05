@@ -134,9 +134,9 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
 
     public void visitFieldOperand(Field field) {
         globTypes.add(field.getGlobType());
-        prettyWriter.append(sqlService.getTableName(field.getGlobType()))
+        prettyWriter.append(sqlService.getTableName(field.getGlobType(), true))
                 .append(".")
-                .append(sqlService.getColumnName(field));
+                .append(sqlService.getColumnName(field, true));
     }
 
     private void visitBinary(BinaryOperandConstraint constraint, String operator) {

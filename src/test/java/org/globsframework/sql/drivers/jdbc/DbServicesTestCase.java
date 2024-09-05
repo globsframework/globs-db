@@ -66,6 +66,18 @@ public abstract class DbServicesTestCase {
 // MB localtest HSQLDB
 // sqlService = new JdbcSqlService("jdbc:hsqldb:http://localhost/", "SA", "");
 // MB localtest postgree
+
+        /*
+            podman run --name test_glob \
+    -v ~/tmp/.testGlob/postgres:/var/lib/postgresql/data \
+    -e POSTGRES_USER=admin \
+    -e POSTGRES_PASSWORD=DevTeam! \
+    -p 5432:5432 \
+    postgres:16
+
+-e POSTGRES_HOST_AUTH_METHOD=trust \
+
+         */
 // sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/postgres", "admin", "DevTeam!");
 // MB localtest mysql
 // sqlService = new JdbcSqlService("jdbc:mysql://127.0.0.1:3306/sys", "root", "DevTeam!");

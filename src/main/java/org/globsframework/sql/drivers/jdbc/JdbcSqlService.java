@@ -42,17 +42,17 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public interface NamingMapping {
-        default String getTableName(GlobType globType) {
-            return getTableName(TargetTypeName.getOptName(globType).orElse(globType.getName()));
+        default String getTableName(GlobType globType, boolean escaped) {
+            return getTableName(TargetTypeName.getOptName(globType).orElse(globType.getName()), escaped);
         }
 
-        String getTableName(String typeName);
+        String getTableName(String typeName, boolean escaped);
 
-        default String getColumnName(Field field) {
-            return getColumnName(DbFieldName.getOptName(field).orElse(field.getName()));
+        default String getColumnName(Field field, boolean escaped) {
+            return getColumnName(DbFieldName.getOptName(field).orElse(field.getName()), escaped);
         }
 
-        String getColumnName(String fieldName);
+        String getColumnName(String fieldName, boolean escaped);
 
         default String getLikeIgnoreCase() {
             return null;
@@ -67,24 +67,24 @@ public class JdbcSqlService extends AbstractSqlService {
         return namingMapping;
     }
 
-    public String getTableName(GlobType globType) {
-        return namingMapping.getTableName(globType);
+    public String getTableName(GlobType globType, boolean escaped) {
+        return namingMapping.getTableName(globType, escaped);
     }
 
-    public String getTableName(String name) {
-        return namingMapping.getTableName(name);
+    public String getTableName(String name, boolean escaped) {
+        return namingMapping.getTableName(name, escaped);
     }
 
-    public String getColumnName(String field) {
-        return namingMapping.getColumnName(field);
+    public String getColumnName(String field, boolean escaped) {
+        return namingMapping.getColumnName(field, escaped);
     }
 
     public String getLikeIgnoreCase() {
         return namingMapping.getLikeIgnoreCase();
     }
 
-    public String getColumnName(Field field) {
-        return namingMapping.getColumnName(field);
+    public String getColumnName(Field field, boolean escaped) {
+        return namingMapping.getColumnName(field, escaped);
     }
 
     private void loadDriver() {
@@ -177,11 +177,11 @@ public class JdbcSqlService extends AbstractSqlService {
         }
         if (namingMapping == DefaultNamingMapping.INSTANCE) {
             namingMapping = new NamingMapping() {
-                public String getTableName(String typeName) {
+                public String getTableName(String typeName, boolean escaped) {
                     return toSqlName(typeName);
                 }
 
-                public String getColumnName(String fieldName) {
+                public String getColumnName(String fieldName, boolean escaped) {
                     return toSqlName(fieldName);
                 }
             };
@@ -218,11 +218,11 @@ public class JdbcSqlService extends AbstractSqlService {
     private static class DefaultNamingMapping implements NamingMapping {
         public static NamingMapping INSTANCE = new DefaultNamingMapping();
 
-        public String getTableName(String typeName) {
+        public String getTableName(String typeName, boolean escaped) {
             return typeName;
         }
 
-        public String getColumnName(String fieldName) {
+        public String getColumnName(String fieldName, boolean escaped) {
             return fieldName;
         }
     }
