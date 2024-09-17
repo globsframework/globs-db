@@ -12,6 +12,7 @@ import org.globsframework.sql.utils.AbstractSqlService;
 import org.globsframework.utils.exceptions.ItemNotFound;
 import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
+import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -170,11 +171,9 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     private void setupHsqldb() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-        driver = loadedDrivers.get(dbName);
-        if (driver == null) {
-            driver = (Driver) Class.forName("org.hsqldb.jdbcDriver").getDeclaredConstructor().newInstance();
-            loadedDrivers.put(dbName, driver);
-        }
+        DataSource dataSource = (DataSource) Class.forName("org.hsqldb.jdbc.JDBCPool").getDeclaredConstructor().newInstance();
+        dataSource.getClass().getDeclaredMethod("setUrl", String.class).invoke(dataSource, dbName);
+        dataSource.getClass().getDeclaredMethod("setProperties", Properties.class).invoke(dataSource, dbInfo);
         if (namingMapping == DefaultNamingMapping.INSTANCE) {
             namingMapping = new NamingMapping() {
                 public String getTableName(String typeName, boolean escaped) {
@@ -186,15 +185,13 @@ public class JdbcSqlService extends AbstractSqlService {
                 }
             };
         }
-        dbFactory = new DbFactory() {
-            public JdbcConnection create(boolean autoCommit) {
-                Connection connection = getConnection();
-                try {
-                    connection.setAutoCommit(autoCommit);
-                } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
-                }
+        dbFactory = autoCommit -> {
+            try {
+                Connection connection = dataSource.getConnection();
+                connection.setAutoCommit(autoCommit);
                 return new HsqlConnection(autoCommit, connection, JdbcSqlService.this);
+            } catch (SQLException e) {
+                throw new UnexpectedApplicationState(e);
             }
         };
     }
