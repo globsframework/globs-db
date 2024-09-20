@@ -1,13 +1,13 @@
 package org.globsframework.sql.annotations;
 
-import org.globsframework.metamodel.Annotations;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.GlobCreateFromAnnotation;
-import org.globsframework.metamodel.annotations.InitUniqueKey;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.model.Glob;
-import org.globsframework.model.Key;
+import org.globsframework.core.metamodel.Annotations;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
+import org.globsframework.core.metamodel.annotations.InitUniqueKey;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.Key;
 import org.globsframework.sql.annotations.typed.TargetTypeNameAnnotation;
 
 import java.util.Optional;
@@ -25,8 +25,8 @@ public class TargetTypeName {
 
     static {
         GlobTypeLoaderFactory.create(TargetTypeName.class, "PHYSICAL_TYPE")
-              .register(GlobCreateFromAnnotation.class, annotation -> create(((TargetTypeNameAnnotation)annotation).value()))
-              .load();
+                .register(GlobCreateFromAnnotation.class, annotation -> create(((TargetTypeNameAnnotation) annotation).value()))
+                .load();
     }
 
     public static Glob get(Annotations annotations) {

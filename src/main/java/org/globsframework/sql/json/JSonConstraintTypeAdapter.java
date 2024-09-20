@@ -3,13 +3,12 @@ package org.globsframework.sql.json;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.globsframework.core.metamodel.GlobTypeResolver;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.utils.Ref;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobTypeResolver;
-import org.globsframework.metamodel.fields.*;
 import org.globsframework.sql.constraints.*;
 import org.globsframework.sql.constraints.impl.*;
-import org.globsframework.utils.Ref;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -282,7 +281,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 findField((JsonObject) entry.getValue(), leftOp, rightOp);
                 return new StrictlyBiggerThanConstraint(leftOp.get(), rightOp.get());
             }
-            case CASE_SENSITIVE_REGEXP_MATCHES:{
+            case CASE_SENSITIVE_REGEXP_MATCHES: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
@@ -294,7 +293,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 JsonElement jsonElement = in.get(VALUE);
                 return new RegularExpressionConstraint(field, jsonElement.getAsString(), true, false);
             }
-            case NOT_CASE_SENSITIVE_REGEXP_MATCHES:{
+            case NOT_CASE_SENSITIVE_REGEXP_MATCHES: {
                 JsonObject in = (JsonObject) entry.getValue();
                 Field field = readField(in);
                 JsonElement jsonElement = in.get(VALUE);
@@ -522,15 +521,13 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 if (startWith) {
                     if (ignoreCase) {
                         jsonWriter.name(contains ? START_WITH_IGNORE_CASE : START_NOT_CONTAINS_WITH_IGNORE_CASE);
-                    }
-                    else {
+                    } else {
                         jsonWriter.name(contains ? START_WITH : START_NOT_CONTAINS);
                     }
                 } else {
                     if (ignoreCase) {
                         jsonWriter.name(contains ? CONTAINS_WITH_IGNORE_CASE : NOT_CONTAINS_WITH_IGNORE_CASE);
-                    }
-                    else {
+                    } else {
                         jsonWriter.name(contains ? CONTAINS : NOT_CONTAINS);
                     }
                 }
@@ -546,7 +543,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
 
         public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
             try {
-                if(caseSensitive) {
+                if (caseSensitive) {
                     jsonWriter.name(not ? NOT_CASE_SENSITIVE_REGEXP_MATCHES : CASE_SENSITIVE_REGEXP_MATCHES);
                 } else {
                     jsonWriter.name(not ? NOT_CASE_INSENSITIVE_REGEXP_MATCHES : CASE_INSENSITIVE_REGEXP_MATCHES);
@@ -559,6 +556,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 throw new RuntimeException(e);
             }
         }
+
         public void visitValueOperand(ValueOperand valueOperand) {
             try {
                 jsonWriter.name(VALUE);

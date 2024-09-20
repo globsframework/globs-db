@@ -1,17 +1,16 @@
 package org.globsframework.sql;
 
 import com.google.gson.Gson;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.utils.Strings;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
 import org.globsframework.saxstack.utils.XmlUtils;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
-import org.globsframework.utils.Strings;
 
 import java.io.*;
 import java.time.LocalDate;

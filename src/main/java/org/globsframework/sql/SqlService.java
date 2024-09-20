@@ -1,7 +1,7 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
 
 public interface SqlService {
 

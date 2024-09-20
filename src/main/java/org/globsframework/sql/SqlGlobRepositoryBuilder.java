@@ -1,13 +1,13 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.GlobRepository;
-import org.globsframework.model.repository.DefaultGlobRepository;
-import org.globsframework.model.repository.GlobIdGenerator;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.GlobRepository;
+import org.globsframework.core.model.repository.DefaultGlobRepository;
+import org.globsframework.core.model.repository.GlobIdGenerator;
+import org.globsframework.core.utils.collections.T3uples;
+import org.globsframework.core.utils.exceptions.InvalidParameter;
 import org.globsframework.sql.constraints.Constraint;
-import org.globsframework.utils.collections.T3uples;
-import org.globsframework.utils.exceptions.InvalidParameter;
 
 import java.util.ArrayList;
 import java.util.List;

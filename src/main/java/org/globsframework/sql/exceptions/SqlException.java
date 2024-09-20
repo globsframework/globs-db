@@ -1,6 +1,6 @@
 package org.globsframework.sql.exceptions;
 
-import org.globsframework.utils.exceptions.GlobsException;
+import org.globsframework.core.utils.exceptions.GlobsException;
 
 import java.sql.SQLException;
 

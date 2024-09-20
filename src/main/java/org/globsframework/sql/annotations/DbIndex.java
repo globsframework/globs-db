@@ -1,20 +1,20 @@
 package org.globsframework.sql.annotations;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.FieldNameAnnotation;
-import org.globsframework.metamodel.annotations.InitUniqueKey;
-import org.globsframework.metamodel.fields.BooleanField;
-import org.globsframework.metamodel.fields.StringArrayField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.index.Index;
-import org.globsframework.metamodel.index.impl.DefaultMultiFieldNotUniqueIndex;
-import org.globsframework.metamodel.index.impl.DefaultMultiFieldUniqueIndex;
-import org.globsframework.metamodel.index.impl.DefaultNotUniqueIndex;
-import org.globsframework.metamodel.index.impl.DefaultUniqueIndex;
-import org.globsframework.model.Glob;
-import org.globsframework.model.Key;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.FieldNameAnnotation;
+import org.globsframework.core.metamodel.annotations.InitUniqueKey;
+import org.globsframework.core.metamodel.fields.BooleanField;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.StringArrayField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.index.Index;
+import org.globsframework.core.metamodel.index.impl.DefaultMultiFieldNotUniqueIndex;
+import org.globsframework.core.metamodel.index.impl.DefaultMultiFieldUniqueIndex;
+import org.globsframework.core.metamodel.index.impl.DefaultNotUniqueIndex;
+import org.globsframework.core.metamodel.index.impl.DefaultUniqueIndex;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.Key;
 
 import java.util.stream.Stream;
 

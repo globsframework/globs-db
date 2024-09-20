@@ -1,20 +1,20 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.model.Glob;
-import org.globsframework.model.Key;
-import org.globsframework.model.KeyBuilder;
-import org.globsframework.sql.model.DummyObject;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.model.KeyBuilder;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.utils.ValueDoubleAccessor;
+import org.globsframework.core.streams.accessors.utils.ValueIntegerAccessor;
+import org.globsframework.core.xml.XmlGlobStreamReader;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.UpdateBuilder;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.constraints.impl.KeyConstraint;
 import org.globsframework.sql.drivers.jdbc.DbServicesTestCase;
+import org.globsframework.sql.model.DummyObject;
 import org.globsframework.sql.model.DummyWithDateTime;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.utils.ValueDoubleAccessor;
-import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
-import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -69,7 +69,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
     public void updateDateAndTime() {
         try {
             sqlConnection.emptyTable(DummyWithDateTime.TYPE);
-        } catch(Exception e){
+        } catch (Exception e) {
             //Assert.assertTrue(e.getMessage(), true);
         } finally {
             sqlConnection.commit();
@@ -104,7 +104,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         String offsetId = ZoneId.systemDefault().getRules().getStandardOffset(Instant.now()).getId();
 
         Assert.assertEquals("{ \"_kind\":\"dummyWithDateTime\", \"uuid\":\"AAAAA\", \"created\":\"1973-10-03T08:00" +
-                        offsetId +"[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
+                        offsetId + "[" + ZoneId.systemDefault() + "]\", \"date\":\"1973-10-03\"}",
                 aaaaa.get().toString());
     }
 

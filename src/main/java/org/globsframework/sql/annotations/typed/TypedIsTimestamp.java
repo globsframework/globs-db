@@ -1,6 +1,6 @@
 package org.globsframework.sql.annotations.typed;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.sql.annotations.IsTimestamp;
 
 import java.lang.annotation.ElementType;

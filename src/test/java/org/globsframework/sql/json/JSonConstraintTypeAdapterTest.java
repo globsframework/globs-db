@@ -3,11 +3,11 @@ package org.globsframework.sql.json;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.globsframework.sql.constraints.impl.*;
-import org.globsframework.sql.model.DummyObject;
+import org.globsframework.core.utils.Utils;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
-import org.globsframework.utils.Utils;
+import org.globsframework.sql.constraints.impl.*;
+import org.globsframework.sql.model.DummyObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,70 +19,70 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void write() {
         Constraint constraint = Constraints.or(Constraints.and(Constraints.equal(DummyObject.NAME, "a name"),
-              Constraints.equal(DummyObject.ID, 3)),
-              Constraints.and(Constraints.in(DummyObject.VALUE, Utils.set(1.1, 2.2)),
-                    Constraints.contains(DummyObject.NAME, "m")));
+                        Constraints.equal(DummyObject.ID, 3)),
+                Constraints.and(Constraints.in(DummyObject.VALUE, Utils.set(1.1, 2.2)),
+                        Constraints.contains(DummyObject.NAME, "m")));
         Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\n" +
-              "  \"or\": [\n" +
-              "    {\n" +
-              "      \"and\": [\n" +
-              "        {\n" +
-              "          \"equal\": {\n" +
-              "            \"left\": {\n" +
-              "              \"field\": {\n" +
-              "                \"type\": \"dummyObject\",\n" +
-              "                \"name\": \"name\"\n" +
-              "              }\n" +
-              "            },\n" +
-              "            \"right\": {\n" +
-              "              \"value\": \"a name\"\n" +
-              "            }\n" +
-              "          }\n" +
-              "        },\n" +
-              "        {\n" +
-              "          \"equal\": {\n" +
-              "            \"left\": {\n" +
-              "              \"field\": {\n" +
-              "                \"type\": \"dummyObject\",\n" +
-              "                \"name\": \"id\"\n" +
-              "              }\n" +
-              "            },\n" +
-              "            \"right\": {\n" +
-              "              \"value\": 3\n" +
-              "            }\n" +
-              "          }\n" +
-              "        }\n" +
-              "      ]\n" +
-              "    },\n" +
-              "    {\n" +
-              "      \"and\": [\n" +
-              "        {\n" +
-              "          \"in\": {\n" +
-              "            \"field\": {\n" +
-              "              \"type\": \"dummyObject\",\n" +
-              "              \"name\": \"value\"\n" +
-              "            },\n" +
-              "            \"values\": [\n" +
-              "              1.1,\n" +
-              "              2.2\n" +
-              "            ]\n" +
-              "          }\n" +
-              "        },\n" +
-              "        {\n" +
-              "          \"contains\": {\n" +
-              "            \"field\": {\n" +
-              "              \"type\": \"dummyObject\",\n" +
-              "              \"name\": \"name\"\n" +
-              "            },\n" +
-              "            \"value\": \"m\"\n" +
-              "          }\n" +
-              "        }\n" +
-              "      ]\n" +
-              "    }\n" +
-              "  ]\n" +
-              "}", s);
+                "  \"or\": [\n" +
+                "    {\n" +
+                "      \"and\": [\n" +
+                "        {\n" +
+                "          \"equal\": {\n" +
+                "            \"left\": {\n" +
+                "              \"field\": {\n" +
+                "                \"type\": \"dummyObject\",\n" +
+                "                \"name\": \"name\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            \"right\": {\n" +
+                "              \"value\": \"a name\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"equal\": {\n" +
+                "            \"left\": {\n" +
+                "              \"field\": {\n" +
+                "                \"type\": \"dummyObject\",\n" +
+                "                \"name\": \"id\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            \"right\": {\n" +
+                "              \"value\": 3\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"and\": [\n" +
+                "        {\n" +
+                "          \"in\": {\n" +
+                "            \"field\": {\n" +
+                "              \"type\": \"dummyObject\",\n" +
+                "              \"name\": \"value\"\n" +
+                "            },\n" +
+                "            \"values\": [\n" +
+                "              1.1,\n" +
+                "              2.2\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"contains\": {\n" +
+                "            \"field\": {\n" +
+                "              \"type\": \"dummyObject\",\n" +
+                "              \"name\": \"name\"\n" +
+                "            },\n" +
+                "            \"value\": \"m\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}", s);
 
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
         Assert.assertTrue(constraint1 instanceof OrConstraint);
@@ -102,7 +102,7 @@ public class JSonConstraintTypeAdapterTest {
     @Test
     public void containsOrNot() {
         Constraint constraint = Constraints.and(Constraints.contains(DummyObject.NAME, "a name"),
-              Constraints.notContains(DummyObject.NAME, "aaa"));
+                Constraints.notContains(DummyObject.NAME, "aaa"));
         Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
         String s = gson.toJson(constraint);
         assertEquivalent("{\"and\":[{\"contains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"a name\"}},{\"notContains\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"aaa\"}}]}", s);
@@ -132,6 +132,7 @@ public class JSonConstraintTypeAdapterTest {
         Constraint constraint1 = gson.fromJson(s, Constraint.class);
         Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
     }
+
     @Test
     public void containsRegularExpressionCaseSensitive() {
         Constraint constraint = Constraints.regularExpressionCaseSensitive(DummyObject.NAME, "^h.*");

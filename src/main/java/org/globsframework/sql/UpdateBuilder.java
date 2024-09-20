@@ -1,9 +1,8 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
-import org.globsframework.streams.accessors.*;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

@@ -1,10 +1,10 @@
 package org.globsframework.sql.model;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.fields.DateField;
-import org.globsframework.metamodel.fields.DateTimeField;
-import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.fields.DateField;
+import org.globsframework.core.metamodel.fields.DateTimeField;
+import org.globsframework.core.metamodel.fields.StringField;
 
 public class DummyWithDateTime {
     public static GlobType TYPE;

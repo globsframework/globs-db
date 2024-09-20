@@ -1,23 +1,23 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.annotations.KeyAnnotationType;
-import org.globsframework.metamodel.fields.DoubleField;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
-import org.globsframework.metamodel.type.DataType;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.annotations.KeyAnnotationType;
+import org.globsframework.core.metamodel.fields.DoubleField;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.IntegerField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.metamodel.type.DataType;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.utils.NanoChrono;
+import org.globsframework.core.utils.Strings;
+import org.globsframework.core.utils.exceptions.GlobsException;
 import org.globsframework.sql.annotations.*;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
-import org.globsframework.utils.NanoChrono;
-import org.globsframework.utils.Strings;
-import org.globsframework.utils.exceptions.GlobsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -308,7 +308,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                         //        case Types.TIME:
                         DataType type1 = forcedType.get(columnName);
                         DataType type2 = transtype.getType(columnName, DataType.Date);
-                        DataType wantedType = type1 != null ? type1 : type2 ;
+                        DataType wantedType = type1 != null ? type1 : type2;
                         if (wantedType != null) {
                             if (wantedType == DataType.Integer) {
                                 this.globTypeBuilder.declareIntegerField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName),
@@ -331,7 +331,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                     case Types.TIMESTAMP: {
                         DataType type1 = forcedType.get(columnName);
                         DataType type2 = transtype.getType(columnName, DataType.DateTime);
-                        DataType wantedType = type1 != null ? type1 : type2 ;
+                        DataType wantedType = type1 != null ? type1 : type2;
                         if (wantedType != null) {
                             if (wantedType == DataType.Long) {
                                 this.globTypeBuilder.declareLongField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName),
@@ -343,7 +343,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                                 LOGGER.error(message);
                                 throw new RuntimeException(message);
                             }
-                        } else{
+                        } else {
                             this.globTypeBuilder.declareDateTimeField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
                         }
                         break;

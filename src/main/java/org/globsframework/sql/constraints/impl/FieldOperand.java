@@ -1,6 +1,6 @@
 package org.globsframework.sql.constraints.impl;
 
-import org.globsframework.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.constraints.Operand;
 import org.globsframework.sql.constraints.OperandVisitor;
 

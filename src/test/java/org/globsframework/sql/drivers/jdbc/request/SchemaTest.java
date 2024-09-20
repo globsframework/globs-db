@@ -1,9 +1,9 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.sql.GlobTypeExtractor;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;

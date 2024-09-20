@@ -1,17 +1,17 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.IntegerField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.IntegerAccessor;
+import org.globsframework.core.utils.Ref;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.exceptions.RollbackFailed;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.IntegerAccessor;
-import org.globsframework.utils.Ref;
 
 public class DbGlobIdGenerator {
     private GlobType globType;

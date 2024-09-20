@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.jdbc.impl;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
@@ -69,8 +69,7 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
         visitFieldOperand(constraint.getField());
         if (constraint.checkNull()) {
             prettyWriter.append(" IS NULL ");
-        }
-        else {
+        } else {
             prettyWriter.append(" IS NOT NULL ");
         }
     }
@@ -90,14 +89,12 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
             final String likeIgnoreCase = sqlService.getLikeIgnoreCase();
             if (likeIgnoreCase != null) {
                 visitFieldOperand(field);
-            }
-            else {
+            } else {
                 prettyWriter.append(" lower(");
                 visitFieldOperand(field);
                 prettyWriter.append(") ");
             }
-        }
-        else {
+        } else {
             visitFieldOperand(field);
         }
         if (!contains) {
@@ -109,12 +106,11 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
             final String likeIgnoreCase = sqlService.getLikeIgnoreCase();
             if (likeIgnoreCase != null) {
                 prettyWriter.append(" ").append(likeIgnoreCase).append(" ? ");
-            }
-            else {
+            } else {
                 prettyWriter.append(" LIKE lower( ? ) ");
             }
-        }else {
-            prettyWriter.append(" LIKE ? " );
+        } else {
+            prettyWriter.append(" LIKE ? ");
         }
     }
 

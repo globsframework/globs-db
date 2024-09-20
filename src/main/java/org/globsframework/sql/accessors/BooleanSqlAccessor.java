@@ -1,7 +1,7 @@
 package org.globsframework.sql.accessors;
 
+import org.globsframework.core.streams.accessors.BooleanAccessor;
 import org.globsframework.sql.drivers.jdbc.SqlDbStream;
-import org.globsframework.streams.accessors.BooleanAccessor;
 
 public class BooleanSqlAccessor extends SqlAccessor implements BooleanAccessor {
     private Boolean cachedValue;

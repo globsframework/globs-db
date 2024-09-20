@@ -1,6 +1,6 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.DateAccessor;
+import org.globsframework.core.streams.accessors.DateAccessor;
 
 import java.time.LocalDate;
 import java.util.Date;

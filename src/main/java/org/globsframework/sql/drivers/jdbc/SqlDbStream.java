@@ -1,11 +1,11 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.Accessor;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.accessors.SqlAccessor;
 import org.globsframework.sql.exceptions.SqlException;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.Accessor;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,18 +1,18 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.LongField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.type.DataType;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.LongField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.type.DataType;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.KeyBuilder;
+import org.globsframework.core.streams.accessors.IntegerAccessor;
+import org.globsframework.core.streams.accessors.utils.*;
 import org.globsframework.sql.CreateBuilder;
-import org.globsframework.sql.model.DummyObject;
-import org.globsframework.model.KeyBuilder;
 import org.globsframework.sql.drivers.jdbc.DbServicesTestCase;
+import org.globsframework.sql.model.DummyObject;
 import org.globsframework.sql.model.DummyObjectWithGlob;
-import org.globsframework.streams.accessors.IntegerAccessor;
-import org.globsframework.streams.accessors.utils.*;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -86,7 +86,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
 
     public void tearDown() throws Exception {
         super.tearDown();
-        if(sqlConnection != null) {
+        if (sqlConnection != null) {
             try {
                 sqlConnection.emptyTable(DummyObjectWithGlob.TYPE);
             } catch (Exception e) {
@@ -120,10 +120,10 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
 
         Glob glob = sqlConnection.getQueryBuilder(DummyObjectWithGlob.TYPE)
                 .selectAll().getQuery().executeUnique();
-        Assert.assertNotNull(glob.get(DummyObjectWithGlob.simple) );
-        Assert.assertNotNull(glob.get(DummyObjectWithGlob.arrayField) );
-        Assert.assertEquals(2, glob.get(DummyObjectWithGlob.simple).get(DummyObjectWithGlob.ID).intValue() );
-        Assert.assertEquals(3, glob.get(DummyObjectWithGlob.arrayField)[0].get(DummyObjectWithGlob.ID).intValue() );
-        Assert.assertEquals(4, glob.get(DummyObjectWithGlob.arrayField)[1].get(DummyObjectWithGlob.ID).intValue() );
+        Assert.assertNotNull(glob.get(DummyObjectWithGlob.simple));
+        Assert.assertNotNull(glob.get(DummyObjectWithGlob.arrayField));
+        Assert.assertEquals(2, glob.get(DummyObjectWithGlob.simple).get(DummyObjectWithGlob.ID).intValue());
+        Assert.assertEquals(3, glob.get(DummyObjectWithGlob.arrayField)[0].get(DummyObjectWithGlob.ID).intValue());
+        Assert.assertEquals(4, glob.get(DummyObjectWithGlob.arrayField)[1].get(DummyObjectWithGlob.ID).intValue());
     }
 }

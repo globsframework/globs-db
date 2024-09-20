@@ -1,12 +1,12 @@
 package org.globsframework.sql.drivers.jdbc.impl;
 
-import org.globsframework.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
 import org.globsframework.sql.constraints.OperandVisitor;
 import org.globsframework.sql.constraints.impl.*;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +93,7 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
             setValue("%" + value + "%", ++index);
         } else if (startWith) {
             setValue(value + "%", ++index);
-        }
-        else {
+        } else {
             setValue(value, ++index);
         }
         field.safeAccept(this);

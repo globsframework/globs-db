@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.hsqldb;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.SqlAccessor;
 import org.globsframework.sql.constraints.Constraint;

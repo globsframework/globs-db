@@ -1,6 +1,6 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.LongAccessor;
+import org.globsframework.core.streams.accessors.LongAccessor;
 
 public class LongSqlAccessor extends SqlAccessor implements LongAccessor {
 

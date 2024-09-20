@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.hsqldb.impl;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -14,7 +14,7 @@ public class HsqldbWhereClauseConstraintVisitor extends WhereClauseConstraintVis
     }
 
     public void visitRegularExpression(Field field, String value, boolean caseSensitive, boolean not) {
-        if(not) {
+        if (not) {
             prettyWriter.append(" NOT ");
         }
         prettyWriter.append("REGEXP_MATCHES(");

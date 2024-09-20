@@ -1,15 +1,14 @@
 package org.globsframework.sql.utils;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
 import org.globsframework.sql.BulkDbRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.exceptions.SqlException;
-import org.globsframework.streams.accessors.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

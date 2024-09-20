@@ -1,13 +1,12 @@
 package org.globsframework.sql.drivers.jdbc.impl;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
-import org.globsframework.metamodel.annotations.MaxSizeType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.annotations.MaxSizeType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SqlService;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
 import org.globsframework.sql.annotations.DbFieldIsNullable;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -29,7 +28,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     public void visitInteger(IntegerField field) throws Exception {
         if (field.hasAnnotation(IsDate.KEY)) {
-            add("DATE",field);
+            add("DATE", field);
         } else {
             add("INTEGER", field);
         }
@@ -37,7 +36,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     public void visitLong(LongField field) throws Exception {
         if (field.hasAnnotation(IsDate.KEY)) {
-            add("DATE",field);
+            add("DATE", field);
         } else if (field.hasAnnotation(IsDateTime.KEY)) {
             add("DATETIME", field);
         } else if (field.hasAnnotation(IsTimestamp.KEY)) {
@@ -63,13 +62,12 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         }
         if (maxSize >= 30000) {
             add(getLongStringType(), field);
-        }
-        else {
+        } else {
             add("VARCHAR(" + maxSize + ")", field);
         }
     }
 
-    public String getLongStringType(){
+    public String getLongStringType() {
         return "TEXT";
     }
 

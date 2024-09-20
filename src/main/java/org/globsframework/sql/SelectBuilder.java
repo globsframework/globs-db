@@ -1,9 +1,8 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.utils.Ref;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.utils.Ref;
 
 public interface SelectBuilder {
 
@@ -64,7 +63,9 @@ public interface SelectBuilder {
 
     default LongAccessor count(LongField field) {
         return count(((Field) field));
-    };
+    }
+
+    ;
 
     LongAccessor sum(IntegerField count);
 

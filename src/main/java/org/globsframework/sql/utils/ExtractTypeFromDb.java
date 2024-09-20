@@ -1,8 +1,8 @@
 package org.globsframework.sql.utils;
 
 import com.google.gson.Gson;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.metamodel.GlobType;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,9 +1,11 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.DateTimeAccessor;
+import org.globsframework.core.streams.accessors.DateTimeAccessor;
 
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class DateTimeSqlAccessor extends SqlAccessor implements DateTimeAccessor {
 

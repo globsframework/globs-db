@@ -1,8 +1,8 @@
 package org.globsframework.sql.drivers.hsqldb;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.BlobField;
+import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.hsqldb.request.HsqldbSqlQueryBuilder;
@@ -47,6 +47,7 @@ public class HsqlConnection extends JdbcConnection {
             }
         };
     }
+
     public SelectBuilder getQueryBuilder(GlobType globType) {
         checkConnectionIsNotClosed();
         return new HsqldbSqlQueryBuilder(getConnection(), globType, null, sqlService, blobUpdater);

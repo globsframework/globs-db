@@ -1,9 +1,9 @@
 package org.globsframework.sql.constraints.impl;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.Key;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 
 import java.util.HashMap;
 import java.util.Map;

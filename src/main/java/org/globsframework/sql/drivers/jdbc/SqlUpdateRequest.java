@@ -1,8 +1,11 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.Key;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.streams.accessors.Accessor;
+import org.globsframework.core.utils.NanoChrono;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
@@ -11,9 +14,6 @@ import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.utils.StringPrettyWriter;
-import org.globsframework.streams.accessors.Accessor;
-import org.globsframework.utils.NanoChrono;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

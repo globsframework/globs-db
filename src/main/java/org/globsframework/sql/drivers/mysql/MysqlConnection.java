@@ -1,6 +1,6 @@
 package org.globsframework.sql.drivers.mysql;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
@@ -44,6 +44,7 @@ public class MysqlConnection extends JdbcConnection {
     protected boolean isRollbackSQLState(SQLException e) {
         return e.getErrorCode() == 1099 && "HY000".equals(e.getSQLState());
     }
+
     public SelectBuilder getQueryBuilder(GlobType globType) {
         checkConnectionIsNotClosed();
         return new MysqlQueryBuilder(getConnection(), globType, null, sqlService, blobUpdater);

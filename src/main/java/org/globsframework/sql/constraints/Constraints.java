@@ -1,11 +1,10 @@
 package org.globsframework.sql.constraints;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.FieldValues;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.FieldValues;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.constraints.impl.*;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import java.util.Set;
 
@@ -185,7 +184,7 @@ public class Constraints {
         return and(arg1, and(arg2, arg3));
     }
 
-    public static Constraint and(Constraint...args){
+    public static Constraint and(Constraint... args) {
         return AndConstraint.build(args);
     }
 
@@ -193,7 +192,7 @@ public class Constraints {
         return OrConstraint.build(arg1, arg2);
     }
 
-    public static Constraint or(Constraint...args) {
+    public static Constraint or(Constraint... args) {
         return OrConstraint.build(args);
     }
 

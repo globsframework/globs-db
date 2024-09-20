@@ -1,15 +1,13 @@
 package org.globsframework.sql.model;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoader;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.MutableGlobLinkModel;
-import org.globsframework.metamodel.annotations.*;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.metamodel.index.NotUniqueIndex;
-import org.globsframework.metamodel.links.DirectLink;
-import org.globsframework.metamodel.annotations.TypedIsDate;
-import org.globsframework.metamodel.annotations.TypedIsDateTime;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoader;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.MutableGlobLinkModel;
+import org.globsframework.core.metamodel.annotations.*;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.metamodel.index.NotUniqueIndex;
+import org.globsframework.core.metamodel.links.DirectLink;
 import org.globsframework.sql.annotations.typed.TypedIsNullable;
 
 public class DummyObject {
@@ -59,16 +57,16 @@ public class DummyObject {
 
     static {
         GlobTypeLoader loader = GlobTypeLoaderFactory.create(DummyObject.class, true)
-              .register(MutableGlobLinkModel.LinkRegister.class,
-                    mutableGlobLinkModel -> {
-                        LINK = mutableGlobLinkModel.getDirectLinkBuilder(LINK)
-                              .add(LINK_ID, DummyObject.ID)
-                              .publish();
-                        LINK2 = mutableGlobLinkModel.getDirectLinkBuilder(LINK2)
-                              .add(LINK2_ID, DummyObject2.ID)
-                              .publish();
-                    })
-              .load();
+                .register(MutableGlobLinkModel.LinkRegister.class,
+                        mutableGlobLinkModel -> {
+                            LINK = mutableGlobLinkModel.getDirectLinkBuilder(LINK)
+                                    .add(LINK_ID, DummyObject.ID)
+                                    .publish();
+                            LINK2 = mutableGlobLinkModel.getDirectLinkBuilder(LINK2)
+                                    .add(LINK2_ID, DummyObject2.ID)
+                                    .publish();
+                        })
+                .load();
 //    loader.defineUniqueIndex(NAME_INDEX, NAME);
         loader.defineNonUniqueIndex(DATE_INDEX, DATE);
     }

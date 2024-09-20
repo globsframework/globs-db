@@ -1,12 +1,12 @@
 package org.globsframework.sql.model;
 
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.ChangeSet;
-import org.globsframework.model.Glob;
-import org.globsframework.model.GlobRepository;
-import org.globsframework.model.GlobRepositoryBuilder;
-import org.globsframework.xml.tests.XmlComparisonMode;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.model.ChangeSet;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.GlobRepository;
+import org.globsframework.core.model.GlobRepositoryBuilder;
+import org.globsframework.core.xml.tests.XmlComparisonMode;
 
 import java.util.List;
 

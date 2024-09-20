@@ -1,6 +1,6 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.DoubleAccessor;
+import org.globsframework.core.streams.accessors.DoubleAccessor;
 
 public class DoubleSqlAccessor extends SqlAccessor implements DoubleAccessor {
 

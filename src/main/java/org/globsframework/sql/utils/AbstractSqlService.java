@@ -1,7 +1,7 @@
 package org.globsframework.sql.utils;
 
+import org.globsframework.core.utils.Strings;
 import org.globsframework.sql.SqlService;
-import org.globsframework.utils.Strings;
 
 public abstract class AbstractSqlService implements SqlService {
 

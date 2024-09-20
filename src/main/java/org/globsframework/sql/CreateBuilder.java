@@ -1,9 +1,8 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
-import org.globsframework.streams.accessors.*;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -69,15 +68,16 @@ public interface CreateBuilder {
 
     Accessor getKeyGeneratedAccessor(Field field);
 
-    default LongAccessor getKeyGeneratedAccessor(LongField field){
-        return (LongAccessor) getKeyGeneratedAccessor((Field)field);
+    default LongAccessor getKeyGeneratedAccessor(LongField field) {
+        return (LongAccessor) getKeyGeneratedAccessor((Field) field);
     }
 
-    default StringAccessor getKeyGeneratedAccessor(StringField field){
-        return (StringAccessor) getKeyGeneratedAccessor((Field)field);
+    default StringAccessor getKeyGeneratedAccessor(StringField field) {
+        return (StringAccessor) getKeyGeneratedAccessor((Field) field);
     }
-    default IntegerAccessor getKeyGeneratedAccessor(IntegerField field){
-        return (IntegerAccessor) getKeyGeneratedAccessor((Field)field);
+
+    default IntegerAccessor getKeyGeneratedAccessor(IntegerField field) {
+        return (IntegerAccessor) getKeyGeneratedAccessor((Field) field);
 
     }
 

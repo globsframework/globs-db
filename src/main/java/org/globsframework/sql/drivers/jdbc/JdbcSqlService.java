@@ -1,7 +1,9 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.Field;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.utils.exceptions.ItemNotFound;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.annotations.DbFieldName;
 import org.globsframework.sql.annotations.TargetTypeName;
 import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
@@ -9,8 +11,6 @@ import org.globsframework.sql.drivers.mysql.MysqlConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
 import org.globsframework.sql.drivers.postgresql.ToPostgreCaseNamingMapping;
 import org.globsframework.sql.utils.AbstractSqlService;
-import org.globsframework.utils.exceptions.ItemNotFound;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;

@@ -1,16 +1,22 @@
 package org.globsframework.sql.drivers.jdbc;
 
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
+import org.globsframework.core.metamodel.annotations.Target;
+import org.globsframework.core.metamodel.annotations.Targets;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.FieldValues;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.streams.accessors.utils.ValueIntegerAccessor;
+import org.globsframework.core.utils.Ref;
+import org.globsframework.core.utils.Utils;
+import org.globsframework.core.xml.XmlGlobStreamReader;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.KeyField;
-import org.globsframework.metamodel.annotations.Target;
-import org.globsframework.metamodel.annotations.Targets;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.FieldValues;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
@@ -21,12 +27,6 @@ import org.globsframework.sql.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.model.DummyObject;
 import org.globsframework.sql.model.DummyObject2;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.streams.accessors.utils.ValueIntegerAccessor;
-import org.globsframework.utils.Ref;
-import org.globsframework.utils.Utils;
-import org.globsframework.xml.XmlGlobStreamReader;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(expectedException.getName() + " expected but was " + e.getClass().getName() + "\n" +
-                            writer.toString());
+                        writer.toString());
             }
         }
     }
@@ -154,7 +154,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
@@ -168,7 +168,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true' />" +
-                        "<dummyObject id='2' name='world' value='2.2' present='false' />", directory.get(GlobModel.class)));
+                                "<dummyObject id='2' name='world' value='2.2' present='false' />", directory.get(GlobModel.class)));
 
         assertEquals(1, execute(Constraints.lessUncheck(DummyObject.VALUE, 1.2)).get(DummyObject.ID).intValue());
         assertEquals(1, execute(Constraints.lessUncheck(DummyObject.VALUE, 1.1)).get(DummyObject.ID).intValue());
@@ -190,11 +190,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
@@ -218,11 +218,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         Integer[] values = {1, 2, 3, 4, 5};
         List<Glob> list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                 Constraints.in(DummyObject.ID, Utils.set(values))).withKeys().getQuery().executeAsGlobs();
@@ -234,11 +234,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         Integer[] values = {1, 2, 3, 4, 5};
         List<Glob> list = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                         Constraints.in(DummyObject.ID, Utils.set(values)))
@@ -264,7 +264,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.notEqual(DummyObject.NAME, "hello"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 3);
@@ -275,7 +275,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.contains(DummyObject.NAME, "hello"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 1);
@@ -290,7 +290,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hi/hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.regularExpressionCaseInsensitive(DummyObject.NAME, "(\\/|^)HELLO(\\/|$)"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 1);
@@ -302,7 +302,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hi/hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.notRegularExpressionCaseInsensitive(DummyObject.NAME, "(.*\\/|^)HELLO(\\/.*|$)"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 3);
@@ -313,8 +313,8 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello/bye' value='1.1' present='true'/>" +
-                        "<dummyObject id='2' name='HELLO/BYE' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='2' name='HELLO/BYE' value='1.1' present='true'/>" +
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.regularExpressionCaseSensitive(DummyObject.NAME, "(.*\\/|^)HELLO(\\/.*|$)"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 2);
@@ -325,7 +325,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='bye' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='hello/bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='hello/bye' value='2.2' present='false'/>", directory.get(GlobModel.class)));
 
         Glob glob = execute(Constraints.notRegularExpressionCaseSensitive(DummyObject.NAME, "(.*\\/|^)hello(\\/.*|$)"));
         assertEquals(glob.get(DummyObject.ID).intValue(), 1);
@@ -335,7 +335,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         DbStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1'  name='hello' value='1.1' ids='25,32' present='true'/>" +
-                        "<dummyObject id='2'  name='world' value='2.2' present='false'/>", directory.get(GlobModel.class));
+                                "<dummyObject id='2'  name='world' value='2.2' present='false'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);
         return sqlConnection;
     }
@@ -345,11 +345,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE)
                 .select(DummyObject.NAME))
                 .distinct(Collections.singletonList(DummyObject.NAME))
@@ -362,11 +362,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWith(DummyObject.NAME, "world"))
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
@@ -378,11 +378,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='World' value='2.2' present='false'/>" +
-                        "<dummyObject id='4' name='woRld' value='2.2' present='false'/>" +
-                        "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
-                        "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                        "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='World' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='woRld' value='2.2' present='false'/>" +
+                                "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
+                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
+                                "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWithIgnoreCase(DummyObject.NAME, "world"))
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
@@ -394,7 +394,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='2' name='hello' value='1.2' present='true'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='2' name='hello' value='1.2' present='true'/>", directory.get(GlobModel.class)));
         try (Stream<Glob> globStream = sqlConnection.getQueryBuilder(DummyObject.TYPE)
                 .select(DummyObject.NAME)
                 .selectAll()
@@ -410,7 +410,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello 1' value='1.1' present='true'/>" +
-                        "<dummyObject id='2' name='hello 2' value='1.2' present='true'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='2' name='hello 2' value='1.2' present='true'/>", directory.get(GlobModel.class)));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
         StringAccessor nameAcessor = queryBuilder.retrieve(DummyObject.NAME);
         try (Stream<?> globStream = queryBuilder
@@ -464,11 +464,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' count='1' present='true'/>" +
-                        "<dummyObject id='3' name='world' count='5' present='false'/>" +
-                        "<dummyObject id='4' name='world' count='6' present='false'/>" +
-                        "<dummyObject id='5' name='world' count='2' present='false'/>" +
-                        "<dummyObject id='6' name='world' count='4' present='false'/>" +
-                        "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
         IntegerAccessor max = queryBuilder.max(DummyObject.COUNT);
         IntegerAccessor min = queryBuilder.min(DummyObject.COUNT);
@@ -483,11 +483,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' count='1' present='true'/>" +
-                        "<dummyObject id='3' name='world' count='5' present='false'/>" +
-                        "<dummyObject id='4' name='world' count='6' present='false'/>" +
-                        "<dummyObject id='5' name='world' count='2' present='false'/>" +
-                        "<dummyObject id='6' name='world' count='4' present='false'/>" +
-                        "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
         Ref<StringAccessor> accessor = new Ref<>();
         IntegerAccessor max = queryBuilder
@@ -506,11 +506,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' count='1' present='true'/>" +
-                        "<dummyObject id='3' name='world' count='5' present='false'/>" +
-                        "<dummyObject id='4' name='world' count='6' present='false'/>" +
-                        "<dummyObject id='5' name='world' count='2' present='false'/>" +
-                        "<dummyObject id='6' name='world' count='4' present='false'/>" +
-                        "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
         {
             SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
             Ref<StringAccessor> accessor = new Ref<>();
@@ -541,11 +541,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' count='1' present='true'/>" +
-                        "<dummyObject id='3' name='world' count='5' present='false'/>" +
-                        "<dummyObject id='4' name='world' count='6' present='false'/>" +
-                        "<dummyObject id='5' name='world' count='2' present='false'/>" +
-                        "<dummyObject id='6' name='world' count='4' present='false'/>" +
-                        "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' count='5' present='false'/>" +
+                                "<dummyObject id='4' name='world' count='6' present='false'/>" +
+                                "<dummyObject id='5' name='world' count='2' present='false'/>" +
+                                "<dummyObject id='6' name='world' count='4' present='false'/>" +
+                                "<dummyObject id='7' name='world' count='2' present='false'/>", directory.get(GlobModel.class)));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
         Ref<StringAccessor> accessor = new Ref<>();
         LongAccessor max = queryBuilder
@@ -595,7 +595,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                        "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+                                "<dummyObject id='3' name='world' value='2.2' present='false'/>", directory.get(GlobModel.class)));
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));

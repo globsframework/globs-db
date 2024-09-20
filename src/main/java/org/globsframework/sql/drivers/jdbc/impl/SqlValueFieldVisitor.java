@@ -3,11 +3,11 @@ package org.globsframework.sql.drivers.jdbc.impl;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 

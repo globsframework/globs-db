@@ -1,6 +1,6 @@
 package org.globsframework.sql.annotations.typed;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.sql.annotations.DbFieldName;
 
 import java.lang.annotation.ElementType;
@@ -13,6 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ElementType.FIELD})
 public @interface TypedDbFieldName {
     String value();
+
     GlobType TYPE = DbFieldName.TYPE;
 
 }

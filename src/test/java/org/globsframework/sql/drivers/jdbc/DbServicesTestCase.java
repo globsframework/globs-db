@@ -1,23 +1,24 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.directory.DefaultDirectory;
-import org.globsframework.directory.Directory;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.sql.model.DummyObject;
-import org.globsframework.sql.model.DummyObject2;
-import org.globsframework.model.Key;
+import org.globsframework.core.directory.DefaultDirectory;
+import org.globsframework.core.directory.Directory;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.impl.DefaultGlobModel;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.sql.*;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
+import org.globsframework.sql.model.DummyObject;
+import org.globsframework.sql.model.DummyObject2;
 import org.globsframework.sql.utils.MultiCreateBuilder;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.Accessor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

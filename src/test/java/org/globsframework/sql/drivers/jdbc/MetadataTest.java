@@ -1,11 +1,11 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.LongArrayField;
-import org.globsframework.metamodel.fields.StringArrayField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.type.DataType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.LongArrayField;
+import org.globsframework.core.metamodel.fields.StringArrayField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.type.DataType;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.model.DummyObject;
 import org.junit.Test;

@@ -3,14 +3,15 @@ package org.globsframework.sql.drivers.jdbc.request;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeResolver;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.utils.Ref;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeResolver;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlService;
@@ -18,8 +19,6 @@ import org.globsframework.sql.accessors.*;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.*;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.utils.Ref;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -462,8 +461,7 @@ public class SqlQueryBuilder implements SelectBuilder {
                 } else {
                     if (value.charAt(0) != '[') {
                         return value.split(",");
-                    }
-                    else {
+                    } else {
                         try {
                             return (String[]) adapter.fromJson(value);
                         } catch (IOException e) {

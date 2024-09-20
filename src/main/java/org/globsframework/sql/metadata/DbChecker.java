@@ -1,10 +1,10 @@
 package org.globsframework.sql.metadata;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.utils.exceptions.InvalidData;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
-import org.globsframework.utils.exceptions.InvalidData;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

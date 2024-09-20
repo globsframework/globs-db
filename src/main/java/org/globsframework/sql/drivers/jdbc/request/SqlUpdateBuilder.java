@@ -1,9 +1,10 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.streams.accessors.utils.*;
 import org.globsframework.sql.BulkDbRequest;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
@@ -12,8 +13,6 @@ import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.SqlUpdateRequest;
 import org.globsframework.sql.exceptions.SqlException;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.streams.accessors.utils.*;
 
 import java.sql.Connection;
 import java.time.LocalDate;
@@ -206,6 +205,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
                     public int run() throws SqlException {
                         return 0;
                     }
+
                     public void close() {
                     }
                 };

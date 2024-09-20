@@ -1,9 +1,9 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.fields.IntegerField;
+import org.globsframework.core.metamodel.fields.IntegerField;
+import org.globsframework.core.streams.accessors.IntegerAccessor;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.exceptions.SqlException;
-import org.globsframework.streams.accessors.IntegerAccessor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

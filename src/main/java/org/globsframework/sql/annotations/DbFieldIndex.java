@@ -1,11 +1,11 @@
 package org.globsframework.sql.annotations;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.InitUniqueKey;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.model.Key;
-import org.globsframework.model.MutableGlob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.InitUniqueKey;
+import org.globsframework.core.metamodel.fields.IntegerField;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.model.MutableGlob;
 
 public class DbFieldIndex {
     public static GlobType TYPE;
@@ -17,7 +17,7 @@ public class DbFieldIndex {
 
     static {
         GlobTypeLoaderFactory.create(DbFieldIndex.class, "DbFieldIndex")
-              .load();
+                .load();
     }
 
     public static MutableGlob create(int fieldIndex) {

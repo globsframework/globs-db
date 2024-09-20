@@ -1,9 +1,13 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.utils.collections.MultiMap;
+import org.globsframework.core.utils.exceptions.GlobsException;
+import org.globsframework.core.utils.exceptions.OperationDenied;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.*;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.impl.SqlFieldCreationVisitor;
@@ -17,10 +21,6 @@ import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.metadata.DbChecker;
 import org.globsframework.sql.utils.ExtractType;
 import org.globsframework.sql.utils.StringPrettyWriter;
-import org.globsframework.utils.collections.MultiMap;
-import org.globsframework.utils.exceptions.GlobsException;
-import org.globsframework.utils.exceptions.OperationDenied;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

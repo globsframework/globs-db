@@ -1,24 +1,24 @@
 package org.globsframework;
 
 import com.google.gson.Gson;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobModelBuilder;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.annotations.AllAnnotations;
+import org.globsframework.core.metamodel.fields.DoubleField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.metamodel.type.DataType;
+import org.globsframework.core.model.MutableGlob;
+import org.globsframework.core.utils.serialization.CompressedSerializationOutput;
+import org.globsframework.core.utils.serialization.SerializedOutput;
 import org.globsframework.json.GlobsGson;
 import org.globsframework.json.annottations.IsJsonContentType;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobModelBuilder;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.annotations.AllAnnotations;
-import org.globsframework.metamodel.fields.DoubleField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
-import org.globsframework.metamodel.type.DataType;
-import org.globsframework.model.MutableGlob;
 import org.globsframework.sql.GlobTypeExtractor;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
-import org.globsframework.utils.serialization.CompressedSerializationOutput;
-import org.globsframework.utils.serialization.SerializedOutput;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class TheozReadFromDb {
         new TheozReadFromDb()
                 .read(args[0], args[1], args[2], args[3],
                         args.length <= 4 ? Collections.emptySet() :
-                        new HashSet<String>(Arrays.asList(Arrays.copyOfRange(args, 4, args.length))),
+                                new HashSet<String>(Arrays.asList(Arrays.copyOfRange(args, 4, args.length))),
                         args[4]);
     }
 

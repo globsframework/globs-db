@@ -1,9 +1,9 @@
 package org.globsframework.sql.annotations;
 
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.impl.DefaultGlobModel;
 
 public class AllAnnotations {
     public final static GlobModel MODEL =

@@ -1,7 +1,7 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.type.DataType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.type.DataType;
 
 import java.util.Set;
 

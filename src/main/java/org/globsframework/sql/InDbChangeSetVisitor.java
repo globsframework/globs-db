@@ -1,7 +1,7 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.model.*;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.*;
 import org.globsframework.sql.constraints.Constraints;
 
 public class InDbChangeSetVisitor implements ChangeSetVisitor {

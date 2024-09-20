@@ -14,8 +14,7 @@ public class ToPostgreCaseNamingMapping implements JdbcSqlService.NamingMapping 
     public String getTableName(String typeName, boolean escaped) {
         if (escaped) {
             return escapeUppercase(typeName);
-        }
-        else {
+        } else {
             return typeName;
         }
     }

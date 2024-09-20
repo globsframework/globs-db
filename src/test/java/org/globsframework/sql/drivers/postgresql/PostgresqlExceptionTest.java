@@ -1,6 +1,6 @@
 package org.globsframework.sql.drivers.postgresql;
 
-import org.globsframework.metamodel.DummyObject2;
+import org.globsframework.core.metamodel.DummyObject2;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;

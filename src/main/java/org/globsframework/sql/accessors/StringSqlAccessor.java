@@ -1,6 +1,6 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.StringAccessor;
+import org.globsframework.core.streams.accessors.StringAccessor;
 
 public class StringSqlAccessor extends SqlAccessor implements StringAccessor {
 

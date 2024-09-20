@@ -1,6 +1,6 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.streams.accessors.IntegerAccessor;
+import org.globsframework.core.streams.accessors.IntegerAccessor;
 
 public class IntegerSqlAccessor extends SqlAccessor implements IntegerAccessor {
 

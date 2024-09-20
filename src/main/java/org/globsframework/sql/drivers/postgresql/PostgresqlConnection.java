@@ -1,12 +1,12 @@
 package org.globsframework.sql.drivers.postgresql;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.annotations.AutoIncrementAnnotationType;
-import org.globsframework.metamodel.annotations.IsDate;
-import org.globsframework.metamodel.annotations.IsDateTime;
-import org.globsframework.metamodel.annotations.MaxSizeType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.annotations.IsDate;
+import org.globsframework.core.metamodel.annotations.IsDateTime;
+import org.globsframework.core.metamodel.annotations.MaxSizeType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.constraints.Constraint;

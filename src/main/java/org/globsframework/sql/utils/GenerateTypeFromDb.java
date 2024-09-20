@@ -1,8 +1,7 @@
 package org.globsframework.sql.utils;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +96,7 @@ public class GenerateTypeFromDb {
 
         for (Field field : globType.getFields()) {
             writer.append("@FieldNameAnnotation(\"" + field.getName() + "\")\n");
-            writer.append("public static " );
+            writer.append("public static ");
             writer.append(getType(field));
             writer.append(" " + field.getName() + ";\n");
         }

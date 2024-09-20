@@ -1,7 +1,7 @@
 package org.globsframework.sql.accessors;
 
+import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.sql.drivers.jdbc.SqlDbStream;
-import org.globsframework.streams.accessors.Accessor;
 
 public abstract class SqlAccessor implements Accessor {
     private SqlDbStream sqlMoStream;

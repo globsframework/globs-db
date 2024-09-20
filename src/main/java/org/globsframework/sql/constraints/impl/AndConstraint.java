@@ -35,8 +35,7 @@ public class AndConstraint extends ArrayConstraint implements Constraint {
             if (constraint != null) {
                 if (constraint instanceof AndConstraint) {
                     c.addAll(Arrays.asList(((AndConstraint) constraint).getConstraints()));
-                }
-                else {
+                } else {
                     c.add(constraint);
                 }
             }

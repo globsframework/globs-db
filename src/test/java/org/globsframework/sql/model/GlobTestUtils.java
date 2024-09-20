@@ -1,21 +1,24 @@
 package org.globsframework.sql.model;
 
 import junit.framework.AssertionFailedError;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.*;
-import org.globsframework.utils.exceptions.InvalidParameter;
-import org.globsframework.xml.XmlChangeSetWriter;
-import org.globsframework.xml.XmlGlobParser;
-import org.globsframework.xml.XmlGlobWriter;
-import org.globsframework.xml.tests.XmlComparisonMode;
-import org.globsframework.xml.tests.XmlTestUtils;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.model.ChangeSet;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.GlobRepository;
+import org.globsframework.core.model.Key;
+import org.globsframework.core.utils.exceptions.InvalidParameter;
+import org.globsframework.core.xml.XmlChangeSetWriter;
+import org.globsframework.core.xml.XmlGlobParser;
+import org.globsframework.core.xml.XmlGlobWriter;
+import org.globsframework.core.xml.tests.XmlComparisonMode;
+import org.globsframework.core.xml.tests.XmlTestUtils;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
-import static org.globsframework.xml.tests.XmlTestUtils.assertEquivalent;
+import static org.globsframework.core.xml.tests.XmlTestUtils.assertEquivalent;
 
 public class GlobTestUtils {
 
@@ -32,7 +35,7 @@ public class GlobTestUtils {
 
     public static void assertEquals(GlobRepository repository, GlobType type, String expectedOutput) {
         assertListEquals(repository.getAll(type), repository, expectedOutput,
-                         XmlComparisonMode.EXPECTED_ATTRIBUTES_ONLY);
+                XmlComparisonMode.EXPECTED_ATTRIBUTES_ONLY);
     }
 
     public static void assertListEquals(List<Glob> globs,
@@ -58,23 +61,21 @@ public class GlobTestUtils {
                 default:
                     throw new InvalidParameter("Unexpected comparison mode: " + comparisonMode);
             }
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void assertEquals(GlobRepository repository1, GlobRepository repository2) {
         XmlTestUtils.assertIsSubset(dumpRepository(repository1),
-                                    dumpRepository(repository2));
+                dumpRepository(repository2));
     }
 
     public static void assertEquals(List expectedList, List actualList, GlobRepository repository) {
         XmlTestUtils.assertIsSubset(dumpRepository(expectedList, repository),
-                                    dumpRepository(actualList, repository));
+                dumpRepository(actualList, repository));
     }
 
     public static String dumpRepository(GlobRepository repository) {
@@ -85,11 +86,9 @@ public class GlobTestUtils {
         StringWriter writer = new StringWriter();
         try {
             XmlGlobWriter.write(globs, repository, writer);
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return writer.toString();
@@ -106,8 +105,7 @@ public class GlobTestUtils {
         XmlChangeSetWriter.write(changeSet, type, writer);
         try {
             assertEquivalent("<changes>" + expectedXml + "</changes>", writer.toString());
-        }
-        catch (AssertionFailedError e) {
+        } catch (AssertionFailedError e) {
             System.out.println("Expected changes: \n" + writer.toString());
             throw e;
         }
@@ -121,14 +119,14 @@ public class GlobTestUtils {
 
     public static void parse(GlobModel model, GlobRepository repository, String xmlStream) {
         XmlGlobParser.parse(model, repository,
-                            new StringReader("<globs>" + xmlStream + "</globs>"),
-                            "globs");
+                new StringReader("<globs>" + xmlStream + "</globs>"),
+                "globs");
     }
 
     public static void parseIgnoreError(GlobModel model, GlobRepository repository, String xmlStream) {
         XmlGlobParser.parseIgnoreError(model, repository,
-                                       new StringReader("<globs>" + xmlStream + "</globs>"),
-                                       "globs");
+                new StringReader("<globs>" + xmlStream + "</globs>"),
+                "globs");
     }
 
 }

@@ -1,6 +1,7 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
@@ -8,7 +9,6 @@ import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.utils.StringPrettyWriter;
-import org.globsframework.utils.exceptions.UnexpectedApplicationState;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

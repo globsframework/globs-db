@@ -1,11 +1,14 @@
 package org.globsframework.sql.drivers.jdbc;
 
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.FieldValues;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.utils.DefaultFieldValues;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.accessors.Accessor;
+import org.globsframework.core.utils.NanoChrono;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.FieldValues;
-import org.globsframework.model.Glob;
-import org.globsframework.model.utils.DefaultFieldValues;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.SqlAccessor;
@@ -15,9 +18,6 @@ import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.utils.StringPrettyWriter;
-import org.globsframework.streams.DbStream;
-import org.globsframework.streams.accessors.Accessor;
-import org.globsframework.utils.NanoChrono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

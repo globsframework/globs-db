@@ -36,8 +36,7 @@ public class OrConstraint extends ArrayConstraint implements Constraint {
             if (constraint != null) {
                 if (constraint instanceof OrConstraint) {
                     c.addAll(Arrays.asList(((OrConstraint) constraint).getConstraints()));
-                }
-                else {
+                } else {
                     c.add(constraint);
                 }
             }
@@ -47,6 +46,7 @@ public class OrConstraint extends ArrayConstraint implements Constraint {
         }
         return new OrConstraint(c.toArray(Constraint[]::new));
     }
+
     public <T extends ConstraintVisitor> T accept(T visitor) {
         visitor.visitOr(this);
         return visitor;

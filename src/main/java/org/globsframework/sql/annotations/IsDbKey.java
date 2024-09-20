@@ -1,12 +1,12 @@
 package org.globsframework.sql.annotations;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.GlobCreateFromAnnotation;
-import org.globsframework.metamodel.annotations.InitUniqueGlob;
-import org.globsframework.metamodel.annotations.InitUniqueKey;
-import org.globsframework.model.Glob;
-import org.globsframework.model.Key;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
+import org.globsframework.core.metamodel.annotations.InitUniqueGlob;
+import org.globsframework.core.metamodel.annotations.InitUniqueKey;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.Key;
 
 public class IsDbKey {
     public static GlobType TYPE;
@@ -19,7 +19,7 @@ public class IsDbKey {
 
     static {
         GlobTypeLoaderFactory.create(IsDbKey.class, "IsDbKey")
-              .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE_GLOB)
-              .load();
+                .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE_GLOB)
+                .load();
     }
 }

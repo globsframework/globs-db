@@ -1,6 +1,6 @@
 package org.globsframework.sql.drivers.postgresql.request;
 
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;

@@ -1,9 +1,11 @@
 package org.globsframework.sql.drivers.jdbc.request;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.*;
+import org.globsframework.core.streams.accessors.utils.*;
+import org.globsframework.core.utils.collections.Pair;
 import org.globsframework.sql.BulkDbRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlRequest;
@@ -12,9 +14,6 @@ import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.SqlCreateRequest;
 import org.globsframework.sql.exceptions.SqlException;
-import org.globsframework.streams.accessors.*;
-import org.globsframework.streams.accessors.utils.*;
-import org.globsframework.utils.collections.Pair;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -252,6 +251,7 @@ public class SqlCreateBuilder implements CreateBuilder {
 
     private static class DelegateGeneratedKeyAccessor implements GeneratedKeyAccessor {
         List<GeneratedKeyAccessor> keyAccessors = new ArrayList<>();
+
         public void setResult(ResultSet generatedKeys, SqlService sqlService) {
             for (GeneratedKeyAccessor keyAccessor : keyAccessors) {
                 keyAccessor.setResult(generatedKeys, sqlService);

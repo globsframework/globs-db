@@ -1,10 +1,10 @@
 package org.globsframework.sql;
 
-import org.globsframework.model.FieldValues;
-import org.globsframework.model.Glob;
-import org.globsframework.streams.DbStream;
-import org.globsframework.utils.exceptions.ItemNotFound;
-import org.globsframework.utils.exceptions.TooManyItems;
+import org.globsframework.core.model.FieldValues;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.utils.exceptions.ItemNotFound;
+import org.globsframework.core.utils.exceptions.TooManyItems;
 
 import java.util.List;
 import java.util.Optional;

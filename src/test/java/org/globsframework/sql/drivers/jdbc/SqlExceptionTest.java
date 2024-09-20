@@ -1,6 +1,6 @@
 package org.globsframework.sql.drivers.jdbc;
 
-import org.globsframework.model.Glob;
+import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.constraints.Constraints;

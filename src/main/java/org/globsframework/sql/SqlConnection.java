@@ -1,8 +1,8 @@
 package org.globsframework.sql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.Glob;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.exceptions.DbConstraintViolation;
 import org.globsframework.sql.exceptions.RollbackFailed;

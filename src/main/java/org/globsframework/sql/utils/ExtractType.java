@@ -1,12 +1,12 @@
 package org.globsframework.sql.utils;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.utils.exceptions.GlobsException;
 import org.globsframework.sql.annotations.*;
-import org.globsframework.utils.exceptions.GlobsException;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -14,7 +14,7 @@ import java.sql.Types;
 
 public class ExtractType {
 
-    static public GlobType createFromMetaData(ResultSetMetaData resultSetMetaData)  {
+    static public GlobType createFromMetaData(ResultSetMetaData resultSetMetaData) {
         try {
             int columnCount = resultSetMetaData.getColumnCount();
 
