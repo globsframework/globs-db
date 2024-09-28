@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
 
-public class DbFieldNumericPrecision {
+public class DbNumericPrecision {
     public static GlobType TYPE;
 
     public static IntegerField SIZE;
@@ -16,7 +16,7 @@ public class DbFieldNumericPrecision {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldNumericPrecision.class, "DbFieldNumericPrecision")
+        GlobTypeLoaderFactory.create(DbNumericPrecision.class, "DbNumericPrecision")
                 .load();
     }
 

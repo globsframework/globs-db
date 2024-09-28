@@ -2,7 +2,7 @@ package org.globsframework.sql.annotations;
 
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.core.metamodel.annotations.FieldNameAnnotation;
+import org.globsframework.core.metamodel.annotations.FieldName_;
 import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.BooleanField;
 import org.globsframework.core.metamodel.fields.Field;
@@ -21,13 +21,13 @@ import java.util.stream.Stream;
 public class DbIndex {
     public static GlobType TYPE;
 
-    @FieldNameAnnotation("name")
+    @FieldName_("name")
     public static StringField NAME;
 
-    @FieldNameAnnotation("fields")
+    @FieldName_("fields")
     public static StringArrayField FIELDS;
 
-    @FieldNameAnnotation("isUnique")
+    @FieldName_("isUnique")
     public static BooleanField IS_UNIQUE;
 
     @InitUniqueKey

@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
 
-public class DbFieldSqlType {
+public class DbSqlType {
     public static GlobType TYPE;
 
     public static IntegerField SQL_TYPE;
@@ -16,7 +16,7 @@ public class DbFieldSqlType {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldSqlType.class, "DbFieldSqlType")
+        GlobTypeLoaderFactory.create(DbSqlType.class, "DbSqlType")
                 .load();
     }
 

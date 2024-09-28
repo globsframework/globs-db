@@ -8,11 +8,10 @@ import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
-import org.globsframework.sql.annotations.typed.TargetTypeNameAnnotation;
 
 import java.util.Optional;
 
-public class TargetTypeName {
+public class DbTableName {
     public static GlobType TYPE;
 
     public static StringField NAME;
@@ -20,12 +19,9 @@ public class TargetTypeName {
     @InitUniqueKey
     public static Key UNIQUE_KEY;
 
-    static class PHYSICAL_TYPE {
-    }
-
     static {
-        GlobTypeLoaderFactory.create(TargetTypeName.class, "PHYSICAL_TYPE")
-                .register(GlobCreateFromAnnotation.class, annotation -> create(((TargetTypeNameAnnotation) annotation).value()))
+        GlobTypeLoaderFactory.create(DbTableName.class, "DbTableName")
+                .register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()))
                 .load();
     }
 

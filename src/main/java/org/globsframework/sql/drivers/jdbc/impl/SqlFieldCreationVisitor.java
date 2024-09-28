@@ -1,13 +1,13 @@
 package org.globsframework.sql.drivers.jdbc.impl;
 
-import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.annotations.AutoIncrement;
 import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
-import org.globsframework.core.metamodel.annotations.MaxSizeType;
+import org.globsframework.core.metamodel.annotations.MaxSize;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SqlService;
-import org.globsframework.sql.annotations.DbFieldIsNullable;
+import org.globsframework.sql.annotations.DbIsNullable;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.utils.StringPrettyWriter;
 
@@ -51,10 +51,10 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     public void visitString(StringField field) throws Exception {
-        Glob annotation = field.findAnnotation(MaxSizeType.KEY);
+        Glob annotation = field.findAnnotation(MaxSize.KEY);
         int maxSize = 255;
         if (annotation != null) {
-            maxSize = annotation.get(MaxSizeType.VALUE, 255);
+            maxSize = annotation.get(MaxSize.VALUE, 255);
             if (maxSize == -1) {
                 add(getLongStringType(), field);
                 return;
@@ -112,7 +112,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     protected void add(String param, Field field) {
-        boolean isAutoIncrementField = field.hasAnnotation(AutoIncrementAnnotationType.KEY);
+        boolean isAutoIncrementField = field.hasAnnotation(AutoIncrement.KEY);
         String columnName = sqlService.getColumnName(field, true);
         if (columnName != null) {
             prettyWriter
@@ -120,7 +120,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
                     .append(" ")
                     .append(param)
                     .append(isAutoIncrementField ? " " + getAutoIncrementKeyWord() : "")
-                    .append(field.hasAnnotation(DbFieldIsNullable.KEY) ? " NULL " : "")
+                    .append(field.hasAnnotation(DbIsNullable.KEY) ? " NULL " : "")
                     .appendIf(", ", appendComma);
         }
     }

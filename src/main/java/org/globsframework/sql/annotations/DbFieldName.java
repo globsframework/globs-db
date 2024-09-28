@@ -8,7 +8,6 @@ import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
-import org.globsframework.sql.annotations.typed.TypedDbFieldName;
 
 import java.util.Optional;
 
@@ -22,11 +21,11 @@ public class DbFieldName {
 
     static {
         GlobTypeLoaderFactory.create(DbFieldName.class, "DbFieldName")
-                .register(GlobCreateFromAnnotation.class, annotation -> create((TypedDbFieldName) annotation))
+                .register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation))
                 .load();
     }
 
-    private static MutableGlob create(TypedDbFieldName annotation) {
+    private static MutableGlob create(DbFieldName_ annotation) {
         return TYPE.instantiate().set(NAME, annotation.value());
     }
 

@@ -8,7 +8,7 @@ import org.globsframework.core.metamodel.fields.BooleanField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
 
-public class DbFieldIsNullable {
+public class DbIsNullable {
     public static GlobType TYPE;
 
     public static BooleanField IS_NULLABLE;
@@ -17,7 +17,7 @@ public class DbFieldIsNullable {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldIsNullable.class, "DbFieldIsNullable")
+        GlobTypeLoaderFactory.create(DbIsNullable.class, "DbIsNullable")
                 .register(GlobCreateFromAnnotation.class, annotation -> create(true))
                 .load();
     }

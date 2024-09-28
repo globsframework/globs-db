@@ -8,17 +8,17 @@ import org.globsframework.core.metamodel.annotations.*;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.metamodel.index.NotUniqueIndex;
 import org.globsframework.core.metamodel.links.DirectLink;
-import org.globsframework.sql.annotations.typed.TypedIsNullable;
+import org.globsframework.sql.annotations.DbIsNullable_;
 
 public class DummyObject {
 
     public static GlobType TYPE;
 
-    @KeyField
-    @AutoIncrement
+    @KeyField_
+    @AutoIncrement_
     public static IntegerField ID;
 
-    @NamingField
+    @NamingField_
     public static StringField NAME;
 
     public static StringArrayField ALIAS;
@@ -27,22 +27,22 @@ public class DummyObject {
 
     public static DoubleField VALUE;
 
-    @TypedIsNullable
+    @DbIsNullable_
     public static IntegerField COUNT;
 
     public static BooleanField PRESENT;
 
-    @TypedIsDate
+    @IsDate_
     public static IntegerField DATE;
 
-    @TypedIsDateTime
+    @IsDateTime_
     public static LongField CREATED_AT;
 
     public static BlobField PASSWORD;
 
     public static DateTimeField REAL_DATE_TIME;
 
-    @ContainmentLink
+    @ContainmentLink_
     public static IntegerField LINK_ID;
 
     public static DirectLink LINK;

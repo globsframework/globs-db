@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.jdbc;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.annotations.AutoIncrement;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.utils.collections.MultiMap;
@@ -219,7 +219,7 @@ public abstract class JdbcConnection implements SqlConnection {
         for (Glob glob : all) {
             CreateBuilder createBuilder = getCreateBuilder(glob.getType());
             for (Field field : glob.getType().getFields()) {
-                if (!field.hasAnnotation(AutoIncrementAnnotationType.KEY) || glob.isSet(field)) {
+                if (!field.hasAnnotation(AutoIncrement.KEY) || glob.isSet(field)) {
                     createBuilder.setObject(field, glob.getValue(field));
                 }
             }

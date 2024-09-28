@@ -1,10 +1,10 @@
 package org.globsframework.sql.drivers.postgresql;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.annotations.AutoIncrementAnnotationType;
+import org.globsframework.core.metamodel.annotations.AutoIncrement;
 import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
-import org.globsframework.core.metamodel.annotations.MaxSizeType;
+import org.globsframework.core.metamodel.annotations.MaxSize;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SelectBuilder;
@@ -50,7 +50,7 @@ public class PostgresqlConnection extends JdbcConnection {
 
             @Override
             public void visitLong(LongField field) throws Exception {
-                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
+                if (field.hasAnnotation(AutoIncrement.KEY)) {
                     add("BIGSERIAL", field);
                 } else if (field.hasAnnotation(IsDate.KEY)) {
                     add("DATE", field);
@@ -68,7 +68,7 @@ public class PostgresqlConnection extends JdbcConnection {
             }
 
             public void visitInteger(IntegerField field) throws Exception {
-                if (field.hasAnnotation(AutoIncrementAnnotationType.KEY)) {
+                if (field.hasAnnotation(AutoIncrement.KEY)) {
                     add("SERIAL", field);
                 } else {
                     super.visitInteger(field);
@@ -76,10 +76,10 @@ public class PostgresqlConnection extends JdbcConnection {
             }
 
             public void visitString(StringField field) throws Exception {
-                Glob annotation = field.findAnnotation(MaxSizeType.KEY);
+                Glob annotation = field.findAnnotation(MaxSize.KEY);
                 int maxSize = 255;
                 if (annotation != null) {
-                    maxSize = annotation.get(MaxSizeType.VALUE, 255);
+                    maxSize = annotation.get(MaxSize.VALUE, 255);
                     if (maxSize == -1) {
                         add("TEXT", field);
                         return;

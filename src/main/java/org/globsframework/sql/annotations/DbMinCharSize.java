@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
 
-public class DbFieldMaxCharSize {
+public class DbMinCharSize {
     public static GlobType TYPE;
 
     public static IntegerField SIZE;
@@ -16,7 +16,7 @@ public class DbFieldMaxCharSize {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldMaxCharSize.class, "DbFieldMaxCharSize")
+        GlobTypeLoaderFactory.create(DbMinCharSize.class, "DbMinCharSize")
                 .load();
     }
 

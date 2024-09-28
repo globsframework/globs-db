@@ -18,7 +18,7 @@ public class IsTimestamp {
     public static Glob UNIQUE;
 
     static {
-        GlobTypeLoaderFactory.create(IsTimestamp.class)
+        GlobTypeLoaderFactory.create(IsTimestamp.class, "IsTimestamp")
                 .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
                 .load();
     }

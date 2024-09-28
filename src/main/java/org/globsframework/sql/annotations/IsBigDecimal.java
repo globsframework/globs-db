@@ -18,7 +18,7 @@ public class IsBigDecimal {
     public static Glob UNIQUE;
 
     static {
-        GlobTypeLoaderFactory.create(IsBigDecimal.class)
+        GlobTypeLoaderFactory.create(IsBigDecimal.class, "IsBigDecimal")
                 .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
                 .load();
     }

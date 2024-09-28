@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.impl.DefaultGlobModel;
 
 public class AllAnnotations {
     public final static GlobModel MODEL =
-            new DefaultGlobModel(DbFieldName.TYPE, DbRef.TYPE, IsBigDecimal.TYPE, DbIndex.TYPE, IsDbKey.TYPE, TargetTypeName.TYPE,
-                    DbFieldSqlType.TYPE, DbFieldIndex.TYPE, DbFieldIsNullable.TYPE, DbFieldMaxCharSize.TYPE, DbFieldNumericPrecision.TYPE,
-                    DbFieldNumericDigit.TYPE, DbFieldMinCharSize.TYPE, IsTimestamp.TYPE, IsDate.TYPE, IsDateTime.TYPE);
+            new DefaultGlobModel(DbFieldName.TYPE, DbRef.TYPE, IsBigDecimal.TYPE, DbIndex.TYPE, IsDbKey.TYPE, DbTableName.TYPE,
+                    DbSqlType.TYPE, DbFieldIndex.TYPE, DbIsNullable.TYPE, DbMaxCharSize.TYPE, DbNumericPrecision.TYPE,
+                    DbNumericDigit.TYPE, DbMinCharSize.TYPE, IsTimestamp.TYPE, IsDate.TYPE, IsDateTime.TYPE);
 }

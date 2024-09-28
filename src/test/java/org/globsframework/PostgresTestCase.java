@@ -17,12 +17,12 @@ import org.globsframework.core.model.MutableGlob;
 import org.globsframework.core.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.core.utils.serialization.SerializedOutput;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.json.annottations.IsJsonContentType;
+import org.globsframework.json.annottations.IsJsonContent;
 import org.globsframework.sql.GlobTypeExtractor;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
-import org.globsframework.sql.annotations.DbFieldIsNullable;
+import org.globsframework.sql.annotations.DbIsNullable;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -60,7 +60,7 @@ public class PostgresTestCase {
             if (type == null) {
                 throw new RuntimeException(tableName + " not found");
             }
-            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContentType.TYPE)
+            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContent.TYPE)
                     .add(org.globsframework.sql.annotations.AllAnnotations.MODEL)
                     .get();
 
@@ -105,7 +105,7 @@ public class PostgresTestCase {
         GlobTypeBuilder globTypeBuilder = DefaultGlobTypeBuilder.init("TEST");
         StringField f1 = globTypeBuilder.declareStringField("f1");
         DoubleField f2 = globTypeBuilder.declareDoubleField("f2");
-        Glob nullable = DbFieldIsNullable.create(true);
+        Glob nullable = DbIsNullable.create(true);
         Glob idDateTime = IsDateTime.TYPE.instantiate();
         LongField f3 = globTypeBuilder.declareLongField("f3", idDateTime);
 

@@ -26,15 +26,15 @@ public class ExtractType {
 
                 Glob sqlIndex = DbFieldIndex.create(i);
                 Glob sqlName = DbFieldName.create(columnName);
-                Glob nullable = DbFieldIsNullable.create(resultSetMetaData.isNullable(i) == ResultSetMetaData.columnNullable);
-                Glob sqlType = DbFieldSqlType.create(dataType);
+                Glob nullable = DbIsNullable.create(resultSetMetaData.isNullable(i) == ResultSetMetaData.columnNullable);
+                Glob sqlType = DbSqlType.create(dataType);
                 Glob minSize = null;
 
                 switch (dataType) {
                     case Types.CHAR: {
                         int size = resultSetMetaData.getPrecision(i);
                         if (size != Integer.MAX_VALUE) {
-                            minSize = DbFieldMinCharSize.create(size);
+                            minSize = DbMinCharSize.create(size);
                         }
                         //no break;
                     }
@@ -44,7 +44,7 @@ public class ExtractType {
                         int size = resultSetMetaData.getPrecision(i);
                         Glob maxSize = null;
                         if (size != Integer.MAX_VALUE) {
-                            maxSize = DbFieldMaxCharSize.create(size);
+                            maxSize = DbMaxCharSize.create(size);
                         }
                         StringField field = globTypeBuilder.declareStringField(columnName, maxSize, sqlType, nullable,
                                 minSize, sqlName, sqlIndex);
@@ -54,9 +54,9 @@ public class ExtractType {
                     case Types.NUMERIC: {
 
                         int size = resultSetMetaData.getPrecision(i);
-                        Glob maxSize = DbFieldNumericPrecision.create(size);
+                        Glob maxSize = DbNumericPrecision.create(size);
                         int decimal = resultSetMetaData.getScale(i);
-                        Glob scale = DbFieldNumericDigit.create(decimal);
+                        Glob scale = DbNumericDigit.create(decimal);
                         if (decimal == 0) {
                             if (size > 0 && size <= 9) {
                                 globTypeBuilder.declareIntegerField(columnName, sqlType, nullable, sqlName, sqlIndex);

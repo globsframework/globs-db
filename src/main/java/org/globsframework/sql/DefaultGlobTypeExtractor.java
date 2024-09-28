@@ -4,7 +4,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
-import org.globsframework.core.metamodel.annotations.KeyAnnotationType;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.fields.DoubleField;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.metamodel.fields.IntegerField;
@@ -96,7 +96,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                 LOGGER.warn("Table not found");
                 return false;
             }
-            globTypeBuilder.addAnnotation(TargetTypeName.create(tableName));
+            globTypeBuilder.addAnnotation(DbTableName.create(tableName));
             SortedMap<String, Integer> primaryKeys = fillPrimaryKeys(connection, tableName, databaseMetaData);
             initColumns(connection, sqlTableName, databaseMetaData, primaryKeys);
         } catch (SQLException e) {
@@ -226,14 +226,14 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                 }
                 Glob sqlName = DbFieldName.create(columnName);
                 int dataType = columnInfo.dataType;
-                Glob nullable = DbFieldIsNullable.create(columnInfo.nullable == DatabaseMetaData.columnNullable);
-                Glob sqlType = DbFieldSqlType.create(dataType);
+                Glob nullable = DbIsNullable.create(columnInfo.nullable == DatabaseMetaData.columnNullable);
+                Glob sqlType = DbSqlType.create(dataType);
                 Glob minSize = null;
                 switch (dataType) {
                     case Types.CHAR: {
                         int size = columnInfo.columnSize;
                         if (size != Integer.MAX_VALUE) {
-                            minSize = DbFieldMinCharSize.create(size);
+                            minSize = DbMinCharSize.create(size);
                         }
                         //no break;
                     }
@@ -243,7 +243,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                         int size = columnInfo.columnSize;
                         Glob maxSize = null;
                         if (size != Integer.MAX_VALUE) {
-                            maxSize = DbFieldMaxCharSize.create(size);
+                            maxSize = DbMaxCharSize.create(size);
                         }
                         StringField field = this.globTypeBuilder.declareStringField(columnName, maxSize, sqlType, nullable,
                                 minSize, sqlName, sqlIndex, keyInfo.invoke(columnName));
@@ -255,12 +255,12 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                         Glob maxSize = null;
                         int size = columnInfo.columnSize;
                         if (size != 0 || !columnInfo.columnSizeIsNull) {
-                            maxSize = DbFieldNumericPrecision.create(size);
+                            maxSize = DbNumericPrecision.create(size);
                         }
                         Glob scale = null;
                         int decimal = columnInfo.decimalDigits;
                         if (!columnInfo.decimalDigitsIsNull) {
-                            scale = DbFieldNumericDigit.create(decimal);
+                            scale = DbNumericDigit.create(decimal);
                         }
                         if (decimal == 0 && !columnInfo.decimalDigitsIsNull) {
                             Field field;
@@ -393,7 +393,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
 
         public Glob invoke(String columnName) {
             Integer indexOfKeyField = keys.get(columnName);
-            return indexOfKeyField != null ? KeyAnnotationType.create(indexOfKeyField) : null;
+            return indexOfKeyField != null ? KeyField.create(indexOfKeyField) : null;
         }
     }
 }

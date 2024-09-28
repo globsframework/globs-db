@@ -14,7 +14,7 @@ import org.globsframework.core.model.MutableGlob;
 import org.globsframework.core.utils.serialization.CompressedSerializationOutput;
 import org.globsframework.core.utils.serialization.SerializedOutput;
 import org.globsframework.json.GlobsGson;
-import org.globsframework.json.annottations.IsJsonContentType;
+import org.globsframework.json.annottations.IsJsonContent;
 import org.globsframework.sql.GlobTypeExtractor;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
@@ -54,7 +54,7 @@ public class TheozReadFromDb {
             if (type == null) {
                 throw new RuntimeException(tableName + " not found");
             }
-            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContentType.TYPE)
+            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContent.TYPE)
                     .add(org.globsframework.sql.annotations.AllAnnotations.MODEL)
                     .get();
 

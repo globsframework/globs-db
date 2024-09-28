@@ -5,7 +5,7 @@ import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.utils.exceptions.ItemNotFound;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.annotations.DbFieldName;
-import org.globsframework.sql.annotations.TargetTypeName;
+import org.globsframework.sql.annotations.DbTableName;
 import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sql.drivers.mysql.MysqlConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
@@ -44,7 +44,7 @@ public class JdbcSqlService extends AbstractSqlService {
 
     public interface NamingMapping {
         default String getTableName(GlobType globType, boolean escaped) {
-            return getTableName(TargetTypeName.getOptName(globType).orElse(globType.getName()), escaped);
+            return getTableName(DbTableName.getOptName(globType).orElse(globType.getName()), escaped);
         }
 
         String getTableName(String typeName, boolean escaped);

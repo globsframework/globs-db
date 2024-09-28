@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.MutableGlob;
 
-public class DbFieldNumericDigit {
+public class DbNumericDigit {
     public static GlobType TYPE;
 
     public static IntegerField SIZE;
@@ -16,7 +16,7 @@ public class DbFieldNumericDigit {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldNumericDigit.class, "DbFieldNumericDigit")
+        GlobTypeLoaderFactory.create(DbNumericDigit.class, "DbNumericDigit")
                 .load();
     }
 
