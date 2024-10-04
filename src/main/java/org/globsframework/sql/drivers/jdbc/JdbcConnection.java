@@ -32,12 +32,12 @@ import java.util.Map;
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
     private final boolean autoCommit;
-    protected JdbcSqlService sqlService;
+    protected SqlService sqlService;
     private Connection connection;
     protected BlobUpdater blobUpdater;
     private DbChecker checker;
 
-    public JdbcConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService, BlobUpdater blobUpdater) {
+    public JdbcConnection(boolean autoCommit, Connection connection, SqlService sqlService, BlobUpdater blobUpdater) {
         this.autoCommit = autoCommit;
         this.connection = connection;
         this.sqlService = sqlService;
@@ -284,7 +284,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public GlobTypeExtractor extractType(String tableName) {
-        return new DefaultGlobTypeExtractor(sqlService, sqlService.getNamingMapping().getTableName(tableName, false));
+        return new DefaultGlobTypeExtractor(sqlService, sqlService.getTableName(tableName, false));
     }
 
     public GlobType extractFromQuery(String query) {

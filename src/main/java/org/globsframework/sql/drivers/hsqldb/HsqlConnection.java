@@ -4,6 +4,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.BlobField;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SelectBuilder;
+import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.hsqldb.request.HsqldbSqlQueryBuilder;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
@@ -20,7 +21,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class HsqlConnection extends JdbcConnection {
-    public HsqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
+    public HsqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBlob(index, new JDBCBlob(bytes));

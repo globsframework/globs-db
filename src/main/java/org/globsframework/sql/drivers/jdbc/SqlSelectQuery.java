@@ -160,7 +160,7 @@ public class SqlSelectQuery implements SelectQuery {
                     .append(", ");
         }
         // remove ", "
-        prettyWriter.removeLast().removeLast();
+        prettyWriter.removeLast(2);
         StringPrettyWriter where = null;
         if (constraint != null) {
             where = new StringPrettyWriter();
@@ -187,7 +187,7 @@ public class SqlSelectQuery implements SelectQuery {
                         .append(sqlService.getColumnName(field, true))
                         .append(", ");
             }
-            prettyWriter.removeLast().removeLast();
+            prettyWriter.removeLast(2);
         }
 
         if (!orders.isEmpty()) {
@@ -201,7 +201,7 @@ public class SqlSelectQuery implements SelectQuery {
                 }
                 prettyWriter.append(", ");
             }
-            prettyWriter.removeLast().removeLast();
+            prettyWriter.removeLast(2);
         }
         if (top != -1) {
             prettyWriter.append(" LIMIT " + top);
@@ -217,7 +217,9 @@ public class SqlSelectQuery implements SelectQuery {
         final DbStreamIterator iterator = new DbStreamIterator(dbStream);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
-                    LOGGER.info("read " + iterator.count() + " elements");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.info("read " + iterator.count() + " elements");
+                    }
                 })
                 .onClose(this::resultSetClose);
     }
@@ -227,7 +229,9 @@ public class SqlSelectQuery implements SelectQuery {
         final GlobIterator iterator = new GlobIterator(dbStream, fallBackType);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
-                    LOGGER.info("read " + iterator.count + " elements.");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("read " + iterator.count + " elements.");
+                    }
                 })
                 .onClose(this::resultSetClose);
     }
@@ -237,7 +241,9 @@ public class SqlSelectQuery implements SelectQuery {
         final FieldValuesIterator iterator = new FieldValuesIterator(dbStream);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
-                    LOGGER.info("read " + iterator.count + " elements.");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("read " + iterator.count + " elements.");
+                    }
                 })
                 .onClose(this::resultSetClose);
     }

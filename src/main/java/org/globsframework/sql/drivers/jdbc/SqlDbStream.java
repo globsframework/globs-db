@@ -49,7 +49,7 @@ public class SqlDbStream implements DbStream {
             rowId++;
             boolean hasNext = resultSet.next();
             if (!hasNext) {
-                LOGGER.debug("end");
+                LOGGER.trace("end");
                 close();
             }
             return hasNext;
@@ -61,7 +61,7 @@ public class SqlDbStream implements DbStream {
 
     public void close() {
         try {
-            LOGGER.debug("close");
+            LOGGER.trace("close");
             resultSet.close();
             query.resultSetClose();
         } catch (SQLException e) {

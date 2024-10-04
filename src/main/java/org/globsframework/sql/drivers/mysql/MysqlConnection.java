@@ -2,6 +2,7 @@ package org.globsframework.sql.drivers.mysql;
 
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.sql.SelectBuilder;
+import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
@@ -16,7 +17,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class MysqlConnection extends JdbcConnection {
-    public MysqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
+    public MysqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBytes(index, bytes);

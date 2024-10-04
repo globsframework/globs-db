@@ -1,14 +1,13 @@
 package org.globsframework.sql.drivers.postgresql;
 
-import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
+import org.globsframework.sql.drivers.jdbc.NamingMapping;
 
 import java.util.Locale;
 
-public class ToPostgreCaseNamingMapping implements JdbcSqlService.NamingMapping {
-    private JdbcSqlService.NamingMapping namingMapping;
+public class ToPostgreCaseNamingMapping implements NamingMapping {
 
-    public ToPostgreCaseNamingMapping(JdbcSqlService.NamingMapping namingMapping) {
-        this.namingMapping = namingMapping;
+    public String getLikeIgnoreCase() {
+        return "iLike";
     }
 
     public String getTableName(String typeName, boolean escaped) {

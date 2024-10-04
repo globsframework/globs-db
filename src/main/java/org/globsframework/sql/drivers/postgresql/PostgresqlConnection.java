@@ -8,6 +8,7 @@ import org.globsframework.core.metamodel.annotations.MaxSize;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SelectBuilder;
+import org.globsframework.sql.SqlService;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
@@ -23,7 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 public class PostgresqlConnection extends JdbcConnection {
-    public PostgresqlConnection(boolean autoCommit, Connection connection, JdbcSqlService sqlService) {
+    public PostgresqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService, new BlobUpdater() {
             public void setBlob(PreparedStatement preparedStatement, int index, byte[] bytes) throws SQLException {
                 preparedStatement.setBytes(index, bytes);

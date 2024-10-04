@@ -26,7 +26,7 @@ import java.util.*;
 
 public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
-    private JdbcSqlService sqlService;
+    private SqlService sqlService;
     private String tableName;
     private Set<String> columnToIgnore = new HashSet<>();
     private GlobTypeBuilder globTypeBuilder;
@@ -37,7 +37,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
         }
     };
 
-    public DefaultGlobTypeExtractor(JdbcSqlService sqlService, String tableName) {
+    public DefaultGlobTypeExtractor(SqlService sqlService, String tableName) {
         this.sqlService = sqlService;
         this.tableName = tableName;
         globTypeBuilder = DefaultGlobTypeBuilder.init(tableName);
@@ -75,7 +75,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
             LOGGER.error(msg);
             throw new GlobsException(msg);
         }
-        JdbcConnection db = sqlService.getAutoCommitDb();
+        JdbcConnection db = (JdbcConnection) sqlService.getAutoCommitDb();
         try {
             Connection connection = db.getConnection();
             return createFrom(connection, connection.getMetaData(), tableName);
