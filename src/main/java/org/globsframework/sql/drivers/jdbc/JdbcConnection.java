@@ -78,21 +78,17 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public void commitAndClose() {
-        applyAndClose(new DbFunctor() {
-            public void doIt() throws SQLException {
-                if (!autoCommit) {
-                    connection.commit();
-                }
+        applyAndClose(() -> {
+            if (!autoCommit) {
+                connection.commit();
             }
         });
     }
 
     public void rollbackAndClose() {
-        applyAndClose(new DbFunctor() {
-            public void doIt() throws SQLException {
-                if (!autoCommit) {
-                    connection.rollback();
-                }
+        applyAndClose(() -> {
+            if (!autoCommit) {
+                connection.rollback();
             }
         });
     }
