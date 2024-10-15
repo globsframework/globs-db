@@ -5,7 +5,7 @@ import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.utils.DefaultFieldValues;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.NanoChrono;
 import org.globsframework.json.GSonUtils;
@@ -213,8 +213,8 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     public Stream<?> executeAsStream() {
-        DbStream dbStream = execute();
-        final DbStreamIterator iterator = new DbStreamIterator(dbStream);
+        GlobStream globStream = execute();
+        final DbStreamIterator iterator = new DbStreamIterator(globStream);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
                     if (LOGGER.isDebugEnabled()) {
@@ -225,8 +225,8 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     public Stream<Glob> executeAsGlobStream() {
-        DbStream dbStream = execute();
-        final GlobIterator iterator = new GlobIterator(dbStream, fallBackType);
+        GlobStream globStream = execute();
+        final GlobIterator iterator = new GlobIterator(globStream, fallBackType);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
                     if (LOGGER.isDebugEnabled()) {
@@ -237,8 +237,8 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     public Stream<FieldValues> executeAsFieldValuesStream() {
-        DbStream dbStream = execute();
-        final FieldValuesIterator iterator = new FieldValuesIterator(dbStream);
+        GlobStream globStream = execute();
+        final FieldValuesIterator iterator = new FieldValuesIterator(globStream);
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                 .onClose(() -> {
                     if (LOGGER.isDebugEnabled()) {
@@ -248,7 +248,7 @@ public class SqlSelectQuery implements SelectQuery {
                 .onClose(this::resultSetClose);
     }
 
-    public DbStream execute() {
+    public GlobStream execute() {
         if (preparedStatement == null) {
             String message = "Query closed " + sql;
             LOGGER.error(message);
@@ -267,7 +267,7 @@ public class SqlSelectQuery implements SelectQuery {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Execution of " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
             }
-            return new SqlDbStream(resultSet, fieldToAccessorHolder,
+            return new SqlGlobStream(resultSet, fieldToAccessorHolder,
                     sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
         } catch (SQLException e) {
             String message = "for request : " + sql;
@@ -308,13 +308,13 @@ public class SqlSelectQuery implements SelectQuery {
 
     private static class GlobIterator implements Iterator<Glob> {
         private AccessorGlobBuilder globsBuilder;
-        private DbStream dbStream;
+        private GlobStream globStream;
         private Glob current;
         int count = 0;
 
-        public GlobIterator(DbStream dbStream, GlobType fallBackType) {
-            this.dbStream = dbStream;
-            globsBuilder = AccessorGlobBuilder.init(this.dbStream, fallBackType);
+        public GlobIterator(GlobStream globStream, GlobType fallBackType) {
+            this.globStream = globStream;
+            globsBuilder = AccessorGlobBuilder.init(this.globStream, fallBackType);
             goToNext();
         }
 
@@ -332,7 +332,7 @@ public class SqlSelectQuery implements SelectQuery {
         }
 
         private void goToNext() {
-            if (dbStream.next()) {
+            if (globStream.next()) {
                 current = globsBuilder.getGlob();
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("load " + GSonUtils.encode(current, true));
@@ -344,7 +344,7 @@ public class SqlSelectQuery implements SelectQuery {
     }
 
     private static class FieldValuesIterator implements Iterator<FieldValues> {
-        private DbStream dbStream;
+        private GlobStream globStream;
         private Acc[] accs;
         private FieldValues current;
         int count = 0;
@@ -353,12 +353,12 @@ public class SqlSelectQuery implements SelectQuery {
 
         }
 
-        public FieldValuesIterator(DbStream dbStream) {
-            this.dbStream = dbStream;
-            accs = new Acc[dbStream.getFields().size()];
+        public FieldValuesIterator(GlobStream globStream) {
+            this.globStream = globStream;
+            accs = new Acc[globStream.getFields().size()];
             int i = 0;
-            for (Field field : dbStream.getFields()) {
-                final Accessor accessor = dbStream.getAccessor(field);
+            for (Field field : globStream.getFields()) {
+                final Accessor accessor = globStream.getAccessor(field);
                 accs[i++] = new Acc(field, accessor);
             }
             goToNext();
@@ -386,7 +386,7 @@ public class SqlSelectQuery implements SelectQuery {
         }
 
         private void goToNext() {
-            if (dbStream.next()) {
+            if (globStream.next()) {
                 current = create();
             } else {
                 current = null;
@@ -396,17 +396,17 @@ public class SqlSelectQuery implements SelectQuery {
 
     private static class DbStreamIterator implements Iterator<Object> {
         private static final Object NULL = new Object();
-        private final DbStream dbStream;
+        private final GlobStream globStream;
         private int count = 0;
         private Boolean hasNext;
 
-        public DbStreamIterator(DbStream dbStream) {
-            this.dbStream = dbStream;
+        public DbStreamIterator(GlobStream globStream) {
+            this.globStream = globStream;
         }
 
         public boolean hasNext() {
             if (hasNext == null) {
-                hasNext = dbStream.next();
+                hasNext = globStream.next();
             }
             return hasNext;
         }

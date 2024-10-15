@@ -4,7 +4,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.MutableGlob;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.Check;
 
@@ -15,8 +15,8 @@ public class AccessorGlobBuilder {
     private Accessor[] accessors;
     private GlobType globType = null;
 
-    private AccessorGlobBuilder(DbStream dbStream, GlobType fallBackType) {
-        this(dbStream.getFields(), dbStream::getAccessor, fallBackType);
+    private AccessorGlobBuilder(GlobStream globStream, GlobType fallBackType) {
+        this(globStream.getFields(), globStream::getAccessor, fallBackType);
     }
 
     private AccessorGlobBuilder(Collection<Field> fields, FieldAccessor fieldAccessor, GlobType fallBackType) {
@@ -46,8 +46,8 @@ public class AccessorGlobBuilder {
         return new AccessorGlobBuilder(fields, fieldAccessor, fallBackType);
     }
 
-    public static AccessorGlobBuilder init(DbStream dbStream, GlobType fallBackType) {
-        return new AccessorGlobBuilder(dbStream, fallBackType);
+    public static AccessorGlobBuilder init(GlobStream globStream, GlobType fallBackType) {
+        return new AccessorGlobBuilder(globStream, fallBackType);
     }
 
     public Glob getGlob() {

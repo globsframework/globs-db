@@ -4,7 +4,7 @@ import org.globsframework.core.metamodel.GlobModel;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.KeyBuilder;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.utils.ValueDoubleAccessor;
 import org.globsframework.core.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.core.xml.XmlGlobStreamReader;
@@ -26,7 +26,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
     @Test
     public void testUpdate() throws Exception {
-        DbStream streamToWrite =
+        GlobStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true' password='zerzer'/>" +
                                 "<dummyObject id='2' name='hello' value='0.0' present='true' password='gzsefd'/>", directory.get(GlobModel.class));
@@ -110,7 +110,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
 
     @Test
     public void testUpdateWithKey() throws Exception {
-        DbStream streamToWrite =
+        GlobStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
                                 "<dummyObject id='2' name='hello' value='0.0' present='true'/>", directory.get(GlobModel.class));

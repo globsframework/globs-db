@@ -1,13 +1,13 @@
 package org.globsframework.sql.accessors;
 
 import org.globsframework.core.streams.accessors.Accessor;
-import org.globsframework.sql.drivers.jdbc.SqlDbStream;
+import org.globsframework.sql.drivers.jdbc.SqlGlobStream;
 
 public abstract class SqlAccessor implements Accessor {
-    private SqlDbStream sqlMoStream;
+    private SqlGlobStream sqlMoStream;
     private int index;
 
-    public void setMoStream(SqlDbStream sqlMoStream) {
+    public void setMoStream(SqlGlobStream sqlMoStream) {
         this.sqlMoStream = sqlMoStream;
     }
 
@@ -19,7 +19,7 @@ public abstract class SqlAccessor implements Accessor {
         return index;
     }
 
-    public SqlDbStream getSqlMoStream() {
+    public SqlGlobStream getSqlMoStream() {
         return sqlMoStream;
     }
 

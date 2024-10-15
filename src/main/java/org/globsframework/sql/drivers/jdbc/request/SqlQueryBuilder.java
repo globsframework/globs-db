@@ -410,7 +410,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             this.typeResolver = typeResolver;
         }
 
-        public void setMoStream(SqlDbStream sqlMoStream) {
+        public void setMoStream(SqlGlobStream sqlMoStream) {
             super.setMoStream(sqlMoStream);
             accessor.setMoStream(sqlMoStream);
         }
@@ -443,7 +443,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             this.accessor = accessor;
         }
 
-        public void setMoStream(SqlDbStream sqlMoStream) {
+        public void setMoStream(SqlGlobStream sqlMoStream) {
             super.setMoStream(sqlMoStream);
             accessor.setMoStream(sqlMoStream);
         }
@@ -486,7 +486,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             this.accessor = accessor;
         }
 
-        public void setMoStream(SqlDbStream sqlMoStream) {
+        public void setMoStream(SqlGlobStream sqlMoStream) {
             super.setMoStream(sqlMoStream);
             accessor.setMoStream(sqlMoStream);
         }
@@ -615,7 +615,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             this.typeResolver = typeResolver;
         }
 
-        public void setMoStream(SqlDbStream sqlMoStream) {
+        public void setMoStream(SqlGlobStream sqlMoStream) {
             super.setMoStream(sqlMoStream);
             accessor.setMoStream(sqlMoStream);
         }

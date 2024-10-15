@@ -2,7 +2,7 @@ package org.globsframework.sql;
 
 import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.model.Glob;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.utils.exceptions.ItemNotFound;
 import org.globsframework.core.utils.exceptions.TooManyItems;
 
@@ -17,7 +17,7 @@ public interface SelectQuery extends AutoCloseable {
 
     Stream<FieldValues> executeAsFieldValuesStream();
 
-    DbStream execute();
+    GlobStream execute();
 
     List<Glob> executeAsGlobs();
 

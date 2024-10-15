@@ -7,7 +7,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.metamodel.impl.DefaultGlobModel;
 import org.globsframework.core.model.Key;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.sql.*;
 import org.globsframework.sql.constraints.Constraint;
@@ -100,12 +100,12 @@ public abstract class DbServicesTestCase {
         }
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(key.getGlobType(), constraint);
         Accessor accessor = queryBuilder.retrieveUnTyped(field);
-        DbStream dbStream = queryBuilder.getQuery().execute();
-        Assert.assertTrue(dbStream.next());
+        GlobStream globStream = queryBuilder.getQuery().execute();
+        Assert.assertTrue(globStream.next());
         return accessor.getObjectValue();
     }
 
-    protected void populate(SqlConnection connection, DbStream stream) {
+    protected void populate(SqlConnection connection, GlobStream stream) {
         Set<GlobType> types = new HashSet<GlobType>();
         for (Field field : stream.getFields()) {
             types.add(field.getGlobType());

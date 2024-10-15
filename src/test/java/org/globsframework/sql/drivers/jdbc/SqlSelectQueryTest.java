@@ -10,7 +10,7 @@ import org.globsframework.core.metamodel.annotations.Targets;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.model.Glob;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.streams.accessors.utils.ValueIntegerAccessor;
 import org.globsframework.core.utils.Ref;
@@ -57,7 +57,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
 
     @Test
     public void testSimpleRequest() throws Exception {
-        DbStream streamToWrite =
+        GlobStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);
@@ -74,7 +74,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         .select(DummyObject.COUNT)
                         .select(DummyObject.VALUE).getQuery();
 
-        DbStream requestStream = query.execute();
+        GlobStream requestStream = query.execute();
         assertTrue(requestStream.next());
         assertEquals(1, idAccessor.get().getValue(0));
         assertEquals("hello", nameAccessor.get().getString());
@@ -92,12 +92,12 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.equal(DummyObject.ID, value))
                         .select(DummyObject.NAME)
                         .getQuery();
-        DbStream hellotream = query.execute();
+        GlobStream hellotream = query.execute();
         assertTrue(hellotream.next());
         assertEquals("hello", hellotream.getAccessor(DummyObject.NAME).getObjectValue());
 
         value.setValue(2);
-        DbStream worldStream = query.execute();
+        GlobStream worldStream = query.execute();
         assertTrue(worldStream.next());
         assertEquals("world", worldStream.getAccessor(DummyObject.NAME).getObjectValue());
 
@@ -203,12 +203,12 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         SelectQuery query = sqlConnection.getQueryBuilder(DummyObject.TYPE,
                         Constraints.fieldEqual(DummyObject.NAME, DummyObject2.LABEL))
                 .select(DummyObject.ID, ref).getQuery();
-        final DbStream firstDbStream = query.execute();
+        final GlobStream firstGlobStream = query.execute();
         final IntegerAccessor firstAccessor = ref.get();
-        DbStream secondDbStream = query.execute();
+        GlobStream secondGlobStream = query.execute();
         IntegerAccessor secondAccessor = ref.get();
         assertFails(() -> {
-            firstDbStream.next();
+            firstGlobStream.next();
             firstAccessor.getValue(0);
         }, SqlException.class);
     }
@@ -332,7 +332,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     }
 
     private SqlConnection init() {
-        DbStream streamToWrite =
+        GlobStream streamToWrite =
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1'  name='hello' value='1.1' ids='25,32' present='true'/>" +
                                 "<dummyObject id='2'  name='world' value='2.2' present='false'/>", directory.get(GlobModel.class));
@@ -494,7 +494,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .select(DummyObject.NAME, accessor)
                 .groupBy(DummyObject.NAME)
                 .max(DummyObject.COUNT);
-        DbStream execute = queryBuilder.getQuery().execute();
+        GlobStream execute = queryBuilder.getQuery().execute();
         Assert.assertTrue(execute.next());
         Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getInteger().intValue());
         Assert.assertTrue(execute.next());
@@ -518,7 +518,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                     .select(DummyObject.NAME, accessor)
                     .groupBy(DummyObject.NAME)
                     .count(DummyObject.COUNT);
-            DbStream execute = queryBuilder.getQuery().execute();
+            GlobStream execute = queryBuilder.getQuery().execute();
             Assert.assertTrue(execute.next());
             Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getLong().intValue());
             Assert.assertTrue(execute.next());
@@ -552,7 +552,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .select(DummyObject.NAME, accessor)
                 .groupBy(DummyObject.NAME)
                 .sum(DummyObject.COUNT);
-        DbStream execute = queryBuilder.getQuery().execute();
+        GlobStream execute = queryBuilder.getQuery().execute();
         Assert.assertTrue(execute.next());
         Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 19, max.getLong().intValue());
         Assert.assertTrue(execute.next());
@@ -567,7 +567,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         sqlConnection.populate(List.of(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(obj_1);
         try {
-            DbStream execute = queryBuilder.selectAll().getQuery().execute();
+            GlobStream execute = queryBuilder.selectAll().getQuery().execute();
             Assert.fail("Should not be call!");
         } catch (SqlException e) {
         }

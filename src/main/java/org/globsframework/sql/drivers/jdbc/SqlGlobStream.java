@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.jdbc;
 
 import org.globsframework.core.metamodel.fields.Field;
-import org.globsframework.core.streams.DbStream;
+import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.accessors.SqlAccessor;
@@ -21,17 +21,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class SqlDbStream implements DbStream {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDbStream.class);
+public class SqlGlobStream implements GlobStream {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlGlobStream.class);
     private ResultSet resultSet;
     private int rowId = 0;
     private Map<Field, SqlAccessor> fieldToAccessorHolder;
     private List<SqlAccessor> additionalAccessor;
     private SqlSelectQuery query;
 
-    public SqlDbStream(ResultSet resultSet, Map<Field, SqlAccessor> fieldToAccessorHolder,
-                       List<SqlAccessor> additionalAccessor,
-                       SqlSelectQuery query) {
+    public SqlGlobStream(ResultSet resultSet, Map<Field, SqlAccessor> fieldToAccessorHolder,
+                         List<SqlAccessor> additionalAccessor,
+                         SqlSelectQuery query) {
         this.resultSet = resultSet;
         this.fieldToAccessorHolder = fieldToAccessorHolder;
         this.additionalAccessor = additionalAccessor;
