@@ -5,7 +5,7 @@ import org.globsframework.core.metamodel.GlobModel;
 import org.globsframework.core.metamodel.GlobModelBuilder;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
-import org.globsframework.core.metamodel.annotations.AllAnnotations;
+import org.globsframework.core.metamodel.annotations.AllCoreAnnotations;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
 import org.globsframework.core.metamodel.fields.DoubleField;
 import org.globsframework.core.metamodel.fields.LongField;
@@ -22,6 +22,7 @@ import org.globsframework.sql.GlobTypeExtractor;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.annotations.AllSqlAnnotations;
 import org.globsframework.sql.annotations.DbIsNullable;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
@@ -60,8 +61,8 @@ public class PostgresTestCase {
             if (type == null) {
                 throw new RuntimeException(tableName + " not found");
             }
-            GlobModel globTypes = GlobModelBuilder.create(AllAnnotations.MODEL).add(IsJsonContent.TYPE)
-                    .add(org.globsframework.sql.annotations.AllAnnotations.MODEL)
+            GlobModel globTypes = GlobModelBuilder.create(AllCoreAnnotations.MODEL).add(IsJsonContent.TYPE)
+                    .add(AllSqlAnnotations.MODEL)
                     .get();
 
             Gson gson = GlobsGson.create(globTypes::getType);
