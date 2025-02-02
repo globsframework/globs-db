@@ -601,7 +601,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                         "<dummyObject2 id='2' label='world'/>", directory.get(GlobModel.class)));
 
         Constraint constraint = Constraints.fieldEqual(DummyObject.NAME, DummyObject2.LABEL);
-        FieldValues glob;
+        FieldValues fieldValues;
         try (SelectQuery query = sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint)
                 .select(DummyObject.ID)
                 .select(DummyObject.NAME)
@@ -609,13 +609,13 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .getQuery()) {
             try (Stream<FieldValues> fieldValuesStream = query
                     .executeAsFieldValuesStream()) {
-                glob = fieldValuesStream
+                fieldValues = fieldValuesStream
                         .findFirst().orElseThrow();
             }
         }
-        assertEquals(3, glob.get(DummyObject.ID).intValue());
-        assertEquals("world", glob.get(DummyObject.NAME));
-        assertEquals("world", glob.get(DummyObject2.LABEL));
+        assertEquals(3, fieldValues.get(DummyObject.ID).intValue());
+        assertEquals("world", fieldValues.get(DummyObject.NAME));
+        assertEquals("world", fieldValues.get(DummyObject2.LABEL));
     }
 
     public static class ValueType {
