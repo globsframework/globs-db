@@ -1,28 +1,36 @@
 package org.globsframework.sql.annotations;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
 import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Key;
+import org.globsframework.core.model.KeyBuilder;
 import org.globsframework.core.model.MutableGlob;
 
 import java.util.Optional;
 
 public class DbFieldName {
-    public static GlobType TYPE;
+    public static final GlobType TYPE;
 
-    public static StringField NAME;
+    public static final StringField NAME;
 
     @InitUniqueKey
-    public static Key KEY;
+    public static final Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbFieldName.class, "DbFieldName")
-                .register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation))
-                .load();
+        GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbFieldName");
+        TYPE = typeBuilder.unCompleteType();
+        NAME = typeBuilder.declareStringField("name");
+        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation));
+        KEY = KeyBuilder.newEmptyKey(TYPE);
+//        GlobTypeLoaderFactory.create(DbFieldName.class, "DbFieldName")
+//                .register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation))
+//                .load();
     }
 
     private static MutableGlob create(DbFieldName_ annotation) {

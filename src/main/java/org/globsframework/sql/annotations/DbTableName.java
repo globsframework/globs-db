@@ -2,27 +2,36 @@ package org.globsframework.sql.annotations;
 
 import org.globsframework.core.metamodel.Annotations;
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
 import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
+import org.globsframework.core.model.KeyBuilder;
 
 import java.util.Optional;
 
 public class DbTableName {
-    public static GlobType TYPE;
+    public static final GlobType TYPE;
 
-    public static StringField NAME;
+    public static final StringField NAME;
 
     @InitUniqueKey
-    public static Key UNIQUE_KEY;
+    public static final Key UNIQUE_KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbTableName.class, "DbTableName")
-                .register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()))
-                .load();
+        GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbTableName");
+        TYPE = typeBuilder.unCompleteType();
+        NAME = typeBuilder.declareStringField("name");
+        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()));
+        UNIQUE_KEY = KeyBuilder.newEmptyKey(TYPE);
+
+//        GlobTypeLoaderFactory.create(DbTableName.class, "DbTableName")
+//                .register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()))
+//                .load();
     }
 
     public static Glob get(Annotations annotations) {

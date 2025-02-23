@@ -1,23 +1,31 @@
 package org.globsframework.sql.annotations;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
+import org.globsframework.core.model.KeyBuilder;
 import org.globsframework.core.model.MutableGlob;
 
 public class DbNumericPrecision {
-    public static GlobType TYPE;
+    public static final GlobType TYPE;
 
-    public static IntegerField SIZE;
+    public static final IntegerField SIZE;
 
     @InitUniqueKey
-    public static Key KEY;
+    public static final Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(DbNumericPrecision.class, "DbNumericPrecision")
-                .load();
+        GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbNumericPrecision");
+        TYPE = typeBuilder.unCompleteType();
+        SIZE = typeBuilder.declareIntegerField("size");
+        typeBuilder.complete();
+        KEY = KeyBuilder.newEmptyKey(TYPE);
+
+//        GlobTypeLoaderFactory.create(DbNumericPrecision.class, "DbNumericPrecision")
+//                .load();
     }
 
     public static MutableGlob create(int size) {
