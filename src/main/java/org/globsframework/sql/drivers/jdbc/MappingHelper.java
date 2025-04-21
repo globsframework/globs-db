@@ -5,10 +5,20 @@ import org.globsframework.sql.drivers.postgresql.ToPostgreCaseNamingMapping;
 public class MappingHelper {
 
     public static NamingMapping get(DbType dbType) {
-        return switch (dbType) {
-            case postgresql -> new ToPostgreCaseNamingMapping();
-            case hsqldb -> new HsqlDbNamingMapping();
-            case mysql, mariadb -> new DefaultNamingMapping();
-        };
+        switch (dbType) {
+            case postgresql:{
+                return new ToPostgreCaseNamingMapping();
+            }
+            case hsqldb:{
+                return new HsqlDbNamingMapping();
+            }
+            case mysql:
+            case mariadb:{
+                return new DefaultNamingMapping();
+            }
+            default:{
+                throw new IllegalArgumentException("Unknown database type: " + dbType);
+            }
+        }
     }
 }

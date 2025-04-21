@@ -43,7 +43,7 @@ public class AndConstraint extends ArrayConstraint implements Constraint {
         if (c.isEmpty()) {
             return null;
         }
-        return new AndConstraint(c.toArray(Constraint[]::new));
+        return new AndConstraint(c.toArray(new Constraint[0]));
     }
 
     public <T extends ConstraintVisitor> T accept(T visitor) {

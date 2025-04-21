@@ -118,7 +118,7 @@ public class PostgresTestCase {
                 .set(f3, ZonedDateTime.now().toInstant().toEpochMilli());
 
         db.createTable(globType);
-        db.populate(List.of(data));
+        db.populate(Collections.singletonList(data));
 
         db.commitAndClose();
 

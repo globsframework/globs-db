@@ -18,35 +18,49 @@ public class DataSourceSqlService extends AbstractSqlService {
         super(namingMapping);
         this.dataSource = dataSource;
 
-        dbFactory = switch (dbType) {
-            case postgresql -> (autoCommit) -> {
-                try {
-                    Connection connection = dataSource.getConnection();
-                    connection.setAutoCommit(autoCommit);
-                    return new PostgresqlConnection(autoCommit, connection, DataSourceSqlService.this);
-                } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
-                }
-            };
-            case hsqldb -> (autoCommit) -> {
-                try {
-                    Connection connection = dataSource.getConnection();
-                    connection.setAutoCommit(autoCommit);
-                    return new HsqlConnection(autoCommit, connection, DataSourceSqlService.this);
-                } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
-                }
-            };
-            case mysql, mariadb -> (autoCommit) -> {
-                try {
-                    Connection connection = dataSource.getConnection();
-                    connection.setAutoCommit(autoCommit);
-                    return new MysqlConnection(autoCommit, connection, DataSourceSqlService.this);
-                } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
-                }
-            };
-        };
+        dbFactory = getDbFactory(dataSource, dbType);
+    }
+
+    private DbFactory getDbFactory(DataSource dataSource, DbType dbType) {
+         switch (dbType) {
+             case postgresql: {
+                 return (autoCommit) -> {
+                     try {
+                         Connection connection = dataSource.getConnection();
+                         connection.setAutoCommit(autoCommit);
+                         return new PostgresqlConnection(autoCommit, connection, DataSourceSqlService.this);
+                     } catch (SQLException e) {
+                         throw new UnexpectedApplicationState(e);
+                     }
+                 };
+             }
+             case hsqldb: {
+                 return (autoCommit) -> {
+                     try {
+                         Connection connection = dataSource.getConnection();
+                         connection.setAutoCommit(autoCommit);
+                         return new HsqlConnection(autoCommit, connection, DataSourceSqlService.this);
+                     } catch (SQLException e) {
+                         throw new UnexpectedApplicationState(e);
+                     }
+                 };
+             }
+             case mysql:
+             case mariadb: {
+                 return (autoCommit) -> {
+                     try {
+                         Connection connection = dataSource.getConnection();
+                         connection.setAutoCommit(autoCommit);
+                         return new MysqlConnection(autoCommit, connection, DataSourceSqlService.this);
+                     } catch (SQLException e) {
+                         throw new UnexpectedApplicationState(e);
+                     }
+                 };
+             }
+             default: {
+                 throw new IllegalArgumentException("Unknown database type: " + dbType);
+             }
+        }
     }
 
     interface DbFactory {

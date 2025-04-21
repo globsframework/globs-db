@@ -564,7 +564,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         GlobType obj_1 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").addStringField("B").get();
         GlobType obj_2 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").get();
         sqlConnection.createTable(obj_2);
-        sqlConnection.populate(List.of(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
+        sqlConnection.populate(Collections.singletonList(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(obj_1);
         try {
             GlobStream execute = queryBuilder.selectAll().getQuery().execute();
@@ -610,7 +610,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
             try (Stream<FieldValues> fieldValuesStream = query
                     .executeAsFieldValuesStream()) {
                 fieldValues = fieldValuesStream
-                        .findFirst().orElseThrow();
+                        .findFirst().orElseThrow(() -> new IllegalStateException("No result found"));
             }
         }
         assertEquals(3, fieldValues.get(DummyObject.ID).intValue());

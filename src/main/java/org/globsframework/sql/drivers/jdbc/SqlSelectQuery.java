@@ -47,8 +47,8 @@ public class SqlSelectQuery implements SelectQuery {
         this.sqlService = sqlService;
         this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
         this.fallBackType = fallBackType;
-        sqlOperations = List.of();
-        distinct = Set.of();
+        sqlOperations = Collections.emptyList();
+        distinct = Collections.emptySet();
         constraint = null;
         blobUpdater = null;
         autoClose = true;
@@ -349,8 +349,14 @@ public class SqlSelectQuery implements SelectQuery {
         private FieldValues current;
         int count = 0;
 
-        record Acc(Field field, Accessor accessor) {
+        static class Acc{
+        public final Field field;
+        public final Accessor accessor;
 
+            Acc(Field field, Accessor accessor) {
+                this.field = field;
+                this.accessor = accessor;
+            }
         }
 
         public FieldValuesIterator(GlobStream globStream) {
