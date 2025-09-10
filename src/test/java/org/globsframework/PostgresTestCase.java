@@ -15,6 +15,8 @@ import org.globsframework.core.metamodel.type.DataType;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.MutableGlob;
 import org.globsframework.core.utils.serialization.CompressedSerializationOutput;
+import org.globsframework.core.utils.serialization.GlobSerializer;
+import org.globsframework.core.utils.serialization.SerializedInputOutputFactory;
 import org.globsframework.core.utils.serialization.SerializedOutput;
 import org.globsframework.json.GlobsGson;
 import org.globsframework.json.annottations.IsJsonContent;
@@ -76,15 +78,15 @@ public class PostgresTestCase {
 
             fileInputStream = new BufferedOutputStream(new FileOutputStream(outputFile + ".ser"));
 
-            SerializedOutput serializedOutput = new CompressedSerializationOutput(fileInputStream);
-
+            SerializedOutput serializedOutput = SerializedInputOutputFactory.init(fileInputStream);
+            GlobSerializer globSerializer = new GlobSerializer(serializedOutput);
 
             long count;
             try (SelectQuery query = db.getQueryBuilder(type)
                     .selectAll().getQuery()) {
                 try (Stream<Glob> globStream = query.executeAsGlobStream()) {
                     count = globStream
-                            .peek(serializedOutput::writeGlob)
+                            .peek(globSerializer::writeGlob)
                             .count();
                 }
             }
