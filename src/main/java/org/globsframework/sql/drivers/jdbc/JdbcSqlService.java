@@ -4,6 +4,7 @@ import org.globsframework.core.utils.exceptions.ItemNotFound;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sql.drivers.mysql.MysqlConnection;
+import org.globsframework.sql.drivers.oracle.OracleConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
 import org.globsframework.sql.utils.AbstractSqlService;
 
@@ -39,6 +40,8 @@ public class JdbcSqlService extends AbstractSqlService {
             return new DefaultNamingMapping();
         } else if (dbName.startsWith("jdbc:postgresql:")) {
             return new DefaultNamingMapping();
+        } else if (dbName.startsWith("jdbc:oracle:")) {
+            return new DefaultNamingMapping();
         } else {
             return namingMapping;
         }
@@ -62,6 +65,8 @@ public class JdbcSqlService extends AbstractSqlService {
                 setupMariaDb();
             } else if (dbName.startsWith("jdbc:postgresql:")) {
                 setupPostgresql();
+            } else if (dbName.startsWith("jdbc:oracle:")) {
+                setupOrableSql();
             }
         } catch (Exception e) {
             throw new ItemNotFound(e);
@@ -83,6 +88,24 @@ public class JdbcSqlService extends AbstractSqlService {
                 throw new UnexpectedApplicationState(e);
             }
             return new PostgresqlConnection(autoCommit, connection, JdbcSqlService.this);
+        };
+    }
+
+    private void setupOrableSql() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        driver = loadedDrivers.get(dbName);
+        if (driver == null) {
+            driver = (Driver) Class.forName("oracle.jdbc.OracleDriver").getDeclaredConstructor().newInstance();
+            loadedDrivers.put(dbName, driver);
+        }
+
+        dbFactory = autoCommit -> {
+            Connection connection = getConnection();
+            try {
+                connection.setAutoCommit(autoCommit);
+            } catch (SQLException e) {
+                throw new UnexpectedApplicationState(e);
+            }
+            return new OracleConnection(autoCommit, connection, JdbcSqlService.this);
         };
     }
 

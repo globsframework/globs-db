@@ -122,13 +122,6 @@ public class PostgresTestCase {
 
         db.commitAndClose();
 
-//        Path theOz = Files.createTempFile("theOz", "");
-//        System.out.println("TheozReadFromDb.name " + theOz.toAbsolutePath().toString());
-//        main("jdbc:postgresql://localhost/glindaBackend", "glindaBackend", "glinda", globType.getName(), theOz.toAbsolutePath().toString());
-//        Path theOz1 = Paths.get(theOz.toUri(), ".ser");
-//        Assert.assertTrue(theOz1.toFile().exists());
-//        Assert.assertTrue(theOz.toFile().length() > 10);
-
         Assert.assertTrue(true);
 
     }

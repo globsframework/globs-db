@@ -122,7 +122,8 @@ public abstract class JdbcConnection implements SqlConnection {
             }
             writer.append(") ");
         }
-        writer.append(");");
+        writer.append(")");
+        endOfRequest(writer);
         try {
             PreparedStatement statement = connection.prepareStatement(writer.toString());
             statement.executeUpdate();
@@ -133,6 +134,10 @@ public abstract class JdbcConnection implements SqlConnection {
             LOGGER.error(message);
             throw new UnexpectedApplicationState(message, e);
         }
+    }
+
+    public void endOfRequest(StringPrettyWriter writer) {
+        writer.append(";");
     }
 
     public void addColumn(Field... column) {
@@ -172,7 +177,7 @@ public abstract class JdbcConnection implements SqlConnection {
                         writer.append(", ");
                     }
                 }
-                writer.append(";");
+                endOfRequest(writer);
                 try {
                     PreparedStatement statement = connection.prepareStatement(writer.toString());
                     statement.executeUpdate();
@@ -195,8 +200,9 @@ public abstract class JdbcConnection implements SqlConnection {
     public void emptyTable(GlobType globType) {
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("DELETE FROM ")
-                .append(sqlService.getTableName(globType, true))
-                .append(";");
+                .append(sqlService.getTableName(globType, true));
+        endOfRequest(writer);
+
         try {
             PreparedStatement statament = connection.prepareStatement(writer.toString());
             statament.executeUpdate();

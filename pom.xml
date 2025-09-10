@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.1.1</version>
+            <version>4.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
@@ -157,9 +157,14 @@
             <version>42.6.1</version>
         </dependency>
         <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc17</artifactId>
+            <version>23.9.0.25.07</version>
+        </dependency>
+        <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.1.1</version>
+            <version>4.7.0</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
