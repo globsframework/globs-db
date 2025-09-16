@@ -475,7 +475,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 jsonWriter.name(VALUES)
                         .beginArray();
                 for (Object o : constraint.getValues()) {
-                    constraint.getField().safeAccept(this, o);
+                    constraint.getField().safeAcceptValue(this, o);
                 }
                 jsonWriter.endArray();
                 jsonWriter.endObject();
@@ -507,7 +507,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 jsonWriter.name(VALUES)
                         .beginArray();
                 for (Object o : constraint.getValues()) {
-                    constraint.getField().safeAccept(this, o);
+                    constraint.getField().safeAcceptValue(this, o);
                 }
                 jsonWriter.endArray();
                 jsonWriter.endObject();
@@ -560,7 +560,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitValueOperand(ValueOperand valueOperand) {
             try {
                 jsonWriter.name(VALUE);
-                valueOperand.getField().safeAccept(this, valueOperand.getValue());
+                valueOperand.getField().safeAcceptValue(this, valueOperand.getValue());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -569,7 +569,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
         public void visitAccessorOperand(AccessorOperand accessorOperand) {
             try {
                 jsonWriter.name(VALUE);
-                accessorOperand.getField().safeAccept(this, accessorOperand.getAccessor().getObjectValue());
+                accessorOperand.getField().safeAcceptValue(this, accessorOperand.getAccessor().getObjectValue());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
