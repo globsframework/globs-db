@@ -14,6 +14,7 @@ import org.globsframework.sql.SqlService;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.util.List;
 public class OracleTest {
 
     @Test
-//    @Ignore
+    @Ignore
     public void simpleCreateInsertSelectTest() throws IOException {
         String url = System.getProperty("oracle.url", "jdbc:oracle:thin:@//127.0.0.1:1521/FREEPDB1");
         String user = System.getProperty("oracle.user", "system");
