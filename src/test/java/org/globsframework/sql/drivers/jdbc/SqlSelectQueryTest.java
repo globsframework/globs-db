@@ -444,7 +444,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .set(GlobWithGlobType.VALUES__2, new Glob[]{ValueType.TYPE.instantiate().set(ValueType.DATE, 1).set(ValueType.VALUE, 3.14), ValueType.TYPE.instantiate().set(ValueType.DATE, 2).set(ValueType.VALUE, 6.28)})
                 .set(GlobWithGlobType.ANY_TYPE, ValueType.TYPE.instantiate().set(ValueType.DATE, 1).set(ValueType.VALUE, 3.14))
                 .set(GlobWithGlobType.ANY_TYPES, new Glob[]{ValueType.TYPE.instantiate().set(ValueType.DATE, 1).set(ValueType.VALUE, 3.14), ValueType.TYPE.instantiate().set(ValueType.DATE, 2).set(ValueType.VALUE, 6.28)})
-                .getRequest().run();
+                .getRequest().apply();
 
         SelectBuilder queryBuilder = db.getQueryBuilder(GlobWithGlobType.TYPE);
         GlobAccessor globAccessor = queryBuilder.retrieve(GlobWithGlobType.VALUE);
@@ -580,7 +580,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         SqlRequest request = db.getCreateBuilder(DummyObjectWithArray.TYPE)
                 .set(DummyObjectWithArray.longs, new long[]{1, 4, -2})
                 .getRequest();
-        request.run();
+        request.apply();
 
         SelectBuilder queryBuilder = db.getQueryBuilder(DummyObjectWithArray.TYPE);
         LongArrayAccessor longArrayAccessor = queryBuilder.retrieve(DummyObjectWithArray.longs);

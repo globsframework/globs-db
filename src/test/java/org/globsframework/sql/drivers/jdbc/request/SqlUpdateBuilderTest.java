@@ -48,19 +48,19 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         Key key1 = KeyBuilder.newKey(DummyObject.TYPE, 1);
 
         keyValue.setValue(1);
-        updateRequest.run();
+        updateRequest.apply();
         checkDb(key1, DummyObject.DATE, nbDays, sqlConnection);
         checkDb(key1, DummyObject.CREATED_AT, 123321L, sqlConnection);
         checkDb(key1, DummyObject.VALUE, 2.2, sqlConnection);
         Assert.assertEquals(new String((byte[]) getNextValue(key1, sqlConnection, DummyObject.PASSWORD)), "some blog");
 
         valueAccessor.setValue(3.3);
-        updateRequest.run();
+        updateRequest.apply();
         checkDb(key1, DummyObject.VALUE, 3.3, sqlConnection);
 
         keyValue.setValue(2);
         Key key2 = KeyBuilder.newKey(DummyObject.TYPE, 2);
-        updateRequest.run();
+        updateRequest.apply();
         checkDb(key2, DummyObject.VALUE, 3.3, sqlConnection);
     }
 
@@ -82,7 +82,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
                 .set(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(2022, 10, 3),
                         LocalTime.of(12, 0, 0), ZoneId.systemDefault()))
                 .getRequest()
-                .run();
+                .apply();
         sqlConnection.commit();
 
         final LocalDate laure = LocalDate.of(1973, 10, 3);
@@ -91,7 +91,7 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
                 .update(DummyWithDateTime.created, ZonedDateTime.of(LocalDate.of(1973, 10, 3),
                         LocalTime.of(8, 0, 0), ZoneId.systemDefault()))
                 .getRequest()
-                .run();
+                .apply();
         sqlConnection.commit();
 
         final Optional<Glob> aaaaa = sqlConnection.getQueryBuilder(DummyWithDateTime.TYPE, Constraints.equal(DummyWithDateTime.uuid, "AAAAA"))
@@ -122,7 +122,12 @@ public class SqlUpdateBuilderTest extends DbServicesTestCase {
         sqlConnection.getUpdateBuilder(DummyObject.TYPE, Constraints.keyEquals(keyAccessor))
                 .update(DummyObject.NAME, "world")
                 .getRequest()
-                .run();
+                .apply();
         checkDb(key1, DummyObject.NAME, "world", sqlConnection);
+    }
+
+    @Test
+    public void testBulkUpdate() {
+
     }
 }

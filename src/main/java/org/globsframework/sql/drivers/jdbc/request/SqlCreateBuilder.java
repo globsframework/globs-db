@@ -6,14 +6,13 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.streams.accessors.utils.*;
 import org.globsframework.core.utils.collections.Pair;
-import org.globsframework.sql.BulkDbRequest;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.SqlCreateRequest;
-import org.globsframework.sql.exceptions.SqlException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -233,20 +232,8 @@ public class SqlCreateBuilder implements CreateBuilder {
         return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
     }
 
-    public BulkDbRequest getBulkRequest() {
-        SqlRequest request = getRequest();
-        return new BulkDbRequest() {
-            public void flush() {
-            }
-
-            public int run() throws SqlException {
-                return request.run();
-            }
-
-            public void close() {
-                request.close();
-            }
-        };
+    public BatchSqlRequest getBulkRequest() {
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
     }
 
     private static class DelegateGeneratedKeyAccessor implements GeneratedKeyAccessor {

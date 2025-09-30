@@ -83,6 +83,6 @@ public interface CreateBuilder {
 
     SqlRequest getRequest();
 
-    BulkDbRequest getBulkRequest();
+    BatchSqlRequest getBulkRequest();
 
 }

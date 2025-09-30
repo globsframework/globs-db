@@ -226,7 +226,7 @@ public abstract class JdbcConnection implements SqlConnection {
                 }
             }
             try (SqlRequest request = createBuilder.getRequest()) {
-                request.run();
+                request.apply();
             }
         }
     }

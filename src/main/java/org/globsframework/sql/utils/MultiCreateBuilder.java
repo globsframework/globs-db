@@ -4,7 +4,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.streams.accessors.*;
-import org.globsframework.sql.BulkDbRequest;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlRequest;
@@ -181,8 +181,8 @@ public class MultiCreateBuilder implements CreateBuilder {
         return new MultiSqlRequest(createBuilders);
     }
 
-    public BulkDbRequest getBulkRequest() {
-        return new MultiBulkDbRequest(createBuilders);
+    public BatchSqlRequest getBulkRequest() {
+        return new MultiBatchSqlRequest(createBuilders);
     }
 
     static private class MultiSqlRequest implements SqlRequest {
@@ -195,10 +195,10 @@ public class MultiCreateBuilder implements CreateBuilder {
             }
         }
 
-        public int run() throws SqlException {
+        public int apply() throws SqlException {
             int result = 0;
             for (SqlRequest sqlRequest : sqlRequests) {
-                result += sqlRequest.run();
+                result += sqlRequest.apply();
             }
             return result;
         }
@@ -210,34 +210,42 @@ public class MultiCreateBuilder implements CreateBuilder {
         }
     }
 
-    static private class MultiBulkDbRequest implements BulkDbRequest {
-        private Collection<BulkDbRequest> sqlRequests;
+    static private class MultiBatchSqlRequest implements BatchSqlRequest {
+        private Collection<BatchSqlRequest> sqlRequests;
 
-        public MultiBulkDbRequest(Map<GlobType, CreateBuilder> createBuilders) {
-            sqlRequests = new ArrayList<BulkDbRequest>(createBuilders.size());
+        public MultiBatchSqlRequest(Map<GlobType, CreateBuilder> createBuilders) {
+            sqlRequests = new ArrayList<BatchSqlRequest>(createBuilders.size());
             for (CreateBuilder builder : createBuilders.values()) {
                 sqlRequests.add(builder.getBulkRequest());
             }
         }
 
-        public int run() throws SqlException {
-            int result = 0;
-            for (SqlRequest sqlRequest : sqlRequests) {
-                result += sqlRequest.run();
+        public void addBatch() throws SqlException {
+            for (BatchSqlRequest sqlRequest : sqlRequests) {
+              sqlRequest.addBatch();
             }
-            return result;
         }
 
         public void close() {
-            for (SqlRequest request : sqlRequests) {
+            for (BatchSqlRequest request : sqlRequests) {
                 request.close();
             }
         }
 
-        public void flush() {
-            for (BulkDbRequest request : sqlRequests) {
-                request.flush();
+        public int[] applyBatch() {
+            int[] result = null;
+            for (BatchSqlRequest request : sqlRequests) {
+                final int[] tmp = request.applyBatch();
+                if (result == null) {
+                    result = tmp;
+                }
+                else {
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] += tmp[i];
+                    }
+                }
             }
+            return result;
         }
     }
 }

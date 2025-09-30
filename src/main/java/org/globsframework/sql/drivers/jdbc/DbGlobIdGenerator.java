@@ -40,14 +40,14 @@ public class DbGlobIdGenerator {
                 if (globStream.next()) {
                     id = idRef.get().getInteger() + idCount;
                     sqlConnection.getUpdateBuilder(globType, Constraints.equal(tableNameField, tableName))
-                            .update(idField, id).getRequest().run();
+                            .update(idField, id).getRequest().apply();
                 } else {
                     id = idCount;
                     CreateBuilder builder = sqlConnection.getCreateBuilder(globType)
                             .setObject(idField, idCount)
                             .setObject(tableNameField, tableName);
                     addAdditionalInfo(builder);
-                    builder.getRequest().run();
+                    builder.getRequest().apply();
                 }
                 sqlConnection.commitAndClose();
                 return id - idCount;

@@ -16,11 +16,11 @@ public abstract class PostgresqlExceptionTest extends SqlExceptionTest {
         SqlConnection db1 = new JdbcSqlService("jdbc:postgresql://localhost:5432/shopify_db",
                 "xxx", "www").getDb();
         db1.createTable(DummyObject2.TYPE);
-        db1.getDeleteRequest(DummyObject2.TYPE, Constraints.equal(DummyObject2.ID, 1)).run();
-        db1.getCreateBuilder(DummyObject2.TYPE).set(DummyObject2.ID, 1).getRequest().run();
+        db1.getDeleteRequest(DummyObject2.TYPE, Constraints.equal(DummyObject2.ID, 1)).apply();
+        db1.getCreateBuilder(DummyObject2.TYPE).set(DummyObject2.ID, 1).getRequest().apply();
         db1.commit();
         try {
-            db1.getCreateBuilder(DummyObject2.TYPE).set(DummyObject2.ID, 1).getRequest().run();
+            db1.getCreateBuilder(DummyObject2.TYPE).set(DummyObject2.ID, 1).getRequest().apply();
         } catch (ConstraintViolation e) {
             System.out.println("PostgresqlExceptionTest.main ignore duplicate");
         } catch (Exception exception) {

@@ -9,7 +9,10 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.KeyBuilder;
 import org.globsframework.core.streams.accessors.IntegerAccessor;
 import org.globsframework.core.streams.accessors.utils.*;
+import org.globsframework.json.GSonUtils;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.CreateBuilder;
+import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.DbServicesTestCase;
 import org.globsframework.sql.model.DummyObject;
 import org.globsframework.sql.model.DummyObjectWithGlob;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class SqlCreateBuilderTest extends DbServicesTestCase {
 
@@ -45,7 +49,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
                 .set(DummyObject.CREATED_AT, 4324L)
                 .set(DummyObject.REAL_DATE_TIME, dateTime)
                 .getRequest()
-                .run();
+                .apply();
         checkDb(KeyBuilder.newKey(DummyObject.TYPE, 1), DummyObject.NAME, "hello", sqlConnection);
         checkDb(KeyBuilder.newKey(DummyObject.TYPE, 1), DummyObject.CREATED_AT, 4324L, sqlConnection);
         Assert.assertEquals("world",
@@ -67,7 +71,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
         createBuilder
                 .set(DummyObject.NAME, "val1")
                 .getRequest()
-                .run();
+                .apply();
 
         Integer valId1 = keyGeneratedAccessor.getInteger();
         Assert.assertNotNull(valId1);
@@ -116,7 +120,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
                         .set(DummyObjectWithGlob.ID, 3), DummyObjectWithGlob.TYPE.instantiate()
                         .set(DummyObjectWithGlob.ID, 4)}))
                 .getRequest()
-                .run();
+                .apply();
 
         Glob glob = sqlConnection.getQueryBuilder(DummyObjectWithGlob.TYPE)
                 .selectAll().getQuery().executeUnique();
@@ -125,5 +129,53 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
         Assert.assertEquals(2, glob.get(DummyObjectWithGlob.simple).get(DummyObjectWithGlob.ID).intValue());
         Assert.assertEquals(3, glob.get(DummyObjectWithGlob.arrayField)[0].get(DummyObjectWithGlob.ID).intValue());
         Assert.assertEquals(4, glob.get(DummyObjectWithGlob.arrayField)[1].get(DummyObjectWithGlob.ID).intValue());
+    }
+
+    @Test
+    public void testBulkInsertAndUpdate() {
+        sqlConnection.createTable(DummyObject.TYPE);
+        final ValueIntegerAccessor accessor = new ValueIntegerAccessor(1);
+        final ValueStringAccessor hello = new ValueStringAccessor("hello");
+        final BatchSqlRequest bulkRequest = sqlConnection.getCreateBuilder(DummyObject.TYPE)
+                .set(DummyObject.ID, accessor)
+                .set(DummyObject.NAME, hello)
+                .set(DummyObject.CREATED_AT, 4324L)
+                .getBulkRequest();
+        for (int i = 0; i < 100; i++){
+            accessor.setValue(i);
+            bulkRequest.addBatch();
+            if (i % 10 == 0) {
+                bulkRequest.applyBatch();
+            }
+        }
+        bulkRequest.applyBatch();
+        sqlConnection.commit();
+
+        {
+            final List<Glob> globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
+                    .selectAll().getQuery().executeAsGlobs();
+            Assert.assertEquals(100, globs.size());
+        }
+
+        final ValueIntegerAccessor idAccessor = new ValueIntegerAccessor();
+        final ValueStringAccessor nameAccessor = new ValueStringAccessor();
+        final BatchSqlRequest bulkUpdate = sqlConnection.getUpdateBuilder(DummyObject.TYPE, Constraints.equal(DummyObject.ID, idAccessor))
+                .update(DummyObject.NAME, nameAccessor)
+                .getBulkRequest();
+
+        for (int i = 0; i <100; i++) {
+            idAccessor.setValue(i);
+            nameAccessor.setValue("Hello " + i);
+            bulkUpdate.addBatch();
+        }
+        bulkUpdate.applyBatch();
+        {
+            final List<Glob> globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
+                    .selectAll()
+                    .orderAsc(DummyObject.ID).getQuery().executeAsGlobs();
+            Assert.assertEquals(100, globs.size());
+            Assert.assertEquals("Hello 10", globs.get(10).get(DummyObject.NAME));
+        }
+
     }
 }

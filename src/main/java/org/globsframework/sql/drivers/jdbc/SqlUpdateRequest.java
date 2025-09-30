@@ -3,9 +3,9 @@ package org.globsframework.sql.drivers.jdbc;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.model.Key;
-import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.NanoChrono;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
@@ -13,6 +13,8 @@ import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
+import org.globsframework.sql.drivers.jdbc.request.SqlUpdateBuilder;
+import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.utils.StringPrettyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,24 +23,25 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-public class SqlUpdateRequest implements SqlRequest {
+public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
     private final static Logger LOGGER = LoggerFactory.getLogger(SqlUpdateRequest.class);
     private GlobType globType;
     private Constraint constraint;
     private BlobUpdater blobUpdater;
-    private Map<Field, Accessor> values;
+    private SqlUpdateBuilder.FieldWithAccessor[] values;
     private SqlService sqlService;
     private PreparedStatement preparedStatement;
     private SqlValueFieldVisitor sqlValueFieldVisitor;
     private String sqlRequest;
 
-    public SqlUpdateRequest(GlobType globType, Constraint constraint, Map<Field, Accessor> values,
+    public SqlUpdateRequest(GlobType globType, Constraint constraint, SqlUpdateBuilder.FieldWithAccessor[] values,
                             Connection connection, SqlService sqlService, BlobUpdater blobUpdater) {
         this.globType = globType;
         this.constraint = constraint;
         this.blobUpdater = blobUpdater;
-        this.values = new HashMap<Field, Accessor>(values);
+        this.values = values;
         this.sqlService = sqlService;
         sqlRequest = createRequest();
         try {
@@ -53,13 +56,8 @@ public class SqlUpdateRequest implements SqlRequest {
         sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
     }
 
-    public int run() {
-        int index = 0;
-        for (Map.Entry<Field, Accessor> entry : values.entrySet()) {
-            sqlValueFieldVisitor.setValue(entry.getValue().getObjectValue(), ++index);
-            entry.getKey().safeAccept(sqlValueFieldVisitor);
-        }
-        constraint.accept(new ValueConstraintVisitor(preparedStatement, index, blobUpdater));
+    public int apply() {
+        updateStatement();
         try {
             NanoChrono nanoChrono = NanoChrono.start();
             final int count = preparedStatement.executeUpdate();
@@ -72,6 +70,14 @@ public class SqlUpdateRequest implements SqlRequest {
             LOGGER.error(message, e);
             throw new UnexpectedApplicationState(message, e);
         }
+    }
+
+    private void updateStatement() {
+        for (int i = 0; i < values.length; i++) {
+            sqlValueFieldVisitor.setValue(values[i].accessor().getObjectValue(), i + 1);
+            values[i].field().safeAccept(sqlValueFieldVisitor);
+        }
+        constraint.accept(new ValueConstraintVisitor(preparedStatement, values.length, blobUpdater));
     }
 
     public void close() {
@@ -90,7 +96,7 @@ public class SqlUpdateRequest implements SqlRequest {
             constraint = Constraints.and(constraint, Constraints.equalsObject(field, key.getValue(field)));
         }
         this.constraint = Constraints.and(this.constraint, constraint);
-        run();
+        apply();
     }
 
     private String createRequest() {
@@ -98,12 +104,13 @@ public class SqlUpdateRequest implements SqlRequest {
         prettyWriter.append("UPDATE ")
                 .append(sqlService.getTableName(globType, true))
                 .append(" SET ");
-        for (Iterator it = values.keySet().iterator(); it.hasNext(); ) {
-            Field field = (Field) it.next();
+        for (int i = 0; i < values.length; i++) {
+            SqlUpdateBuilder.FieldWithAccessor value = values[i];
+            Field field = value.field();
             prettyWriter
                     .append(sqlService.getColumnName(field, true))
                     .append(" = ?").
-                    appendIf(" , ", it.hasNext());
+                    appendIf(" , ", i != values.length - 1);
         }
         prettyWriter.append(" WHERE ");
         Set<GlobType> globTypes = new HashSet<GlobType>();
@@ -114,5 +121,34 @@ public class SqlUpdateRequest implements SqlRequest {
         }
 
         return prettyWriter.toString();
+    }
+
+    @Override
+    public void addBatch() throws SqlException {
+        updateStatement();
+        try {
+            preparedStatement.addBatch();
+        } catch (SQLException e) {
+            String message = "For request : " + sqlRequest;
+            LOGGER.error(message, e);
+            throw new UnexpectedApplicationState(message, e);
+        }
+
+    }
+
+    @Override
+    public int[] applyBatch() {
+        try {
+            long start = System.nanoTime();
+            final int[] results = preparedStatement.executeBatch();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Apply batch request " + sqlRequest + " in " + TimeUnit.NANOSECONDS.toMicros(start - System.nanoTime()) + " us.");
+            }
+            return results;
+        } catch (SQLException e) {
+            String message = "For request : " + sqlRequest;
+            LOGGER.error(message, e);
+            throw new UnexpectedApplicationState(message, e);
+        }
     }
 }

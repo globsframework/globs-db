@@ -28,7 +28,7 @@ public class InDbChangeSetVisitor implements ChangeSetVisitor {
         createBuilder = sqlConnection.getCreateBuilder(key.getGlobType());
         key.applyOnKeyField(functorForCreate);
         values.apply(functorForCreate);
-        createBuilder.getRequest().run();
+        createBuilder.getRequest().apply();
     }
 
     public void visitUpdate(Key key, FieldsValueWithPreviousScanner values) throws Exception {
@@ -36,10 +36,10 @@ public class InDbChangeSetVisitor implements ChangeSetVisitor {
                 Constraints.fieldsEqual(key.asFieldValues()));
         key.applyOnKeyField(functorForUpdate);
         values.apply(functorForUpdate);
-        updateBuilder.getRequest().run();
+        updateBuilder.getRequest().apply();
     }
 
     public void visitDeletion(Key key, FieldsValueScanner values) throws Exception {
-        sqlConnection.getDeleteRequest(key.getGlobType(), Constraints.fieldsEqual(key.asFieldValues())).run();
+        sqlConnection.getDeleteRequest(key.getGlobType(), Constraints.fieldsEqual(key.asFieldValues())).apply();
     }
 }

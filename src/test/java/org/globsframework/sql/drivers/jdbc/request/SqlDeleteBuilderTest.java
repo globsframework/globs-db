@@ -23,7 +23,7 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
                 XmlGlobStreamReader.parse(
                         "<dummyObject id='1' name='hello' value='1.1' present='true'/>", directory.get(GlobModel.class));
         populate(sqlConnection, streamToWrite);
-        sqlConnection.getDeleteRequest(DummyObject.TYPE).run();
+        sqlConnection.getDeleteRequest(DummyObject.TYPE).apply();
         assertEquals(0, sqlConnection.getQueryBuilder(DummyObject.TYPE).withKeys().getQuery().executeAsGlobs().size());
     }
 
@@ -35,7 +35,7 @@ public class SqlDeleteBuilderTest extends DbServicesTestCase {
         populate(sqlConnection, XmlGlobStreamReader.parse(
                 "<dummyObject2 id='1' label='hello'/>", directory.get(GlobModel.class)));
         Constraint constraint = Constraints.equal(DummyObject.NAME, "hello");
-        sqlConnection.getDeleteRequest(DummyObject.TYPE, constraint).run();
+        sqlConnection.getDeleteRequest(DummyObject.TYPE, constraint).apply();
         List<Glob> globs = sqlConnection.getQueryBuilder(DummyObject.TYPE)
                 .withKeys()
                 .getQuery().executeAsGlobs();

@@ -117,7 +117,7 @@ public abstract class DbServicesTestCase {
         }
         SqlRequest request = createBuilder.getRequest();
         while (stream.next()) {
-            request.run();
+            request.apply();
         }
         connection.commit();
     }

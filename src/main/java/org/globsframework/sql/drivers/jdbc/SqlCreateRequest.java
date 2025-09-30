@@ -7,10 +7,12 @@ import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.collections.Pair;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.json.GSonUtils;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
 import org.globsframework.sql.drivers.jdbc.request.GeneratedKeyAccessor;
+import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.utils.PrettyWriter;
 import org.globsframework.sql.utils.StringPrettyWriter;
 import org.slf4j.Logger;
@@ -25,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SqlCreateRequest implements SqlRequest {
+public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
     static private final Logger LOGGER = LoggerFactory.getLogger(SqlCreateRequest.class);
     private PreparedStatement preparedStatement;
     private List<Pair<Field, Accessor>> fields;
@@ -82,14 +84,9 @@ public class SqlCreateRequest implements SqlRequest {
         return writer.toString();
     }
 
-    public int run() {
+    public int apply() {
         try {
-            int index = 0;
-            for (Pair<Field, Accessor> pair : fields) {
-                Object value = pair.getSecond().getObjectValue();
-                sqlValueVisitor.setValue(value, ++index);
-                pair.getFirst().safeAccept(sqlValueVisitor);
-            }
+            updateStatement();
             final int result = preparedStatement.executeUpdate();
             if (generatedKeyAccessor != null) {
                 ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
@@ -107,6 +104,27 @@ public class SqlCreateRequest implements SqlRequest {
         }
     }
 
+    @Override
+    public void addBatch() throws SqlException {
+        try {
+            updateStatement();
+            preparedStatement.addBatch();
+        } catch (SQLException e) {
+            String debugRequest = getDebugRequest();
+            LOGGER.error("In run " + debugRequest, e);
+            throw jdbcConnection.getTypedException(debugRequest, e);
+        }
+    }
+
+    private void updateStatement() {
+        int index = 0;
+        for (Pair<Field, Accessor> pair : fields) {
+            Object value = pair.getSecond().getObjectValue();
+            sqlValueVisitor.setValue(value, ++index);
+            pair.getFirst().safeAccept(sqlValueVisitor);
+        }
+    }
+
     public void close() {
         try {
             preparedStatement.close();
@@ -114,6 +132,18 @@ public class SqlCreateRequest implements SqlRequest {
             LOGGER.error("In close", e);
             throw new UnexpectedApplicationState("In close", e);
         }
+    }
+
+    public int[] applyBatch() {
+        final int[] results;
+        try {
+            results = preparedStatement.executeBatch();
+        } catch (SQLException e) {
+            String debugRequest = getDebugRequest();
+            LOGGER.error("In run " + debugRequest, e);
+            throw jdbcConnection.getTypedException(debugRequest, e);
+        }
+        return results;
     }
 
     private String getDebugRequest() {

@@ -2,12 +2,12 @@ package org.globsframework.sql.drivers.oracle;
 
 import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
-import org.globsframework.core.metamodel.annotations.MaxSize;
 import org.globsframework.core.metamodel.fields.DoubleField;
 import org.globsframework.core.metamodel.fields.LongField;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.annotations.DbMaxCharSize;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
@@ -48,10 +48,10 @@ public class OracleConnection extends JdbcConnection {
 
             @Override
             public void visitString(StringField field) throws Exception {
-                Glob annotation = field.findAnnotation(MaxSize.KEY);
+                Glob annotation = field.findAnnotation(DbMaxCharSize.KEY);
                 int maxSize = 255;
                 if (annotation != null) {
-                    maxSize = annotation.get(MaxSize.VALUE, 255);
+                    maxSize = annotation.get(DbMaxCharSize.SIZE, 255);
                     if (maxSize == -1) {
                         add(getLongStringType(), field);
                         return;

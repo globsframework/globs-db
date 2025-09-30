@@ -5,14 +5,13 @@ import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.streams.accessors.utils.*;
-import org.globsframework.sql.BulkDbRequest;
+import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.UpdateBuilder;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.SqlUpdateRequest;
-import org.globsframework.sql.exceptions.SqlException;
 
 import java.sql.Connection;
 import java.time.LocalDate;
@@ -21,12 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SqlUpdateBuilder implements UpdateBuilder {
-    private Map<Field, Accessor> values = new HashMap<Field, Accessor>();
-    private Connection connection;
-    private GlobType globType;
-    private SqlService sqlService;
-    private Constraint constraint;
-    private BlobUpdater blobUpdater;
+    private final Map<Field, FieldWithAccessor> values = new HashMap<>();
+    private final Connection connection;
+    private final GlobType globType;
+    private final SqlService sqlService;
+    private final Constraint constraint;
+    private final BlobUpdater blobUpdater;
 
     public SqlUpdateBuilder(Connection connection, GlobType globType, SqlService sqlService,
                             Constraint constraint, BlobUpdater blobUpdater) {
@@ -36,6 +35,8 @@ public class SqlUpdateBuilder implements UpdateBuilder {
         this.sqlService = sqlService;
         this.constraint = constraint;
     }
+
+    public record FieldWithAccessor(Field field, Accessor accessor) {}
 
     public UpdateBuilder updateUntyped(Field field, final Object value) {
         field.safeAccept(new FieldVisitor.AbstractWithErrorVisitor() {
@@ -83,12 +84,12 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder updateUntyped(Field field, Accessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(IntegerField field, IntegerAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -97,7 +98,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(LongField field, LongAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -106,7 +107,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(DoubleField field, DoubleAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -115,12 +116,12 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(StringField field, StringAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(StringArrayField field, StringArrayAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -137,12 +138,16 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(DateTimeField field, DateTimeAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
+    private void addToMap(Field f, Accessor accessor) {
+        values.put(f, new FieldWithAccessor(f, accessor));
+    }
+
     public UpdateBuilder update(DateField field, DateAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -151,7 +156,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(BooleanField field, BooleanAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
@@ -164,71 +169,53 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     }
 
     public UpdateBuilder update(BlobField field, BlobAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(GlobField field, GlobAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor) {
-        values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(GlobField field, Glob value) {
-        values.put(field, new ValueGlobAccessor(value));
+        addToMap(field, new ValueGlobAccessor(value));
         return this;
     }
 
     public UpdateBuilder update(GlobArrayField field, Glob[] values) {
-        this.values.put(field, new ValueGlobsAccessor(values));
+        addToMap(field, new ValueGlobsAccessor(values));
         return this;
     }
 
     public UpdateBuilder update(LongArrayField field, LongArrayAccessor accessor) {
-        this.values.put(field, accessor);
+        addToMap(field, accessor);
         return this;
     }
 
     public UpdateBuilder update(LongArrayField field, long[] values) {
-        this.values.put(field, new ValueLongArrayAccessor(values));
+        addToMap(field, new ValueLongArrayAccessor(values));
         return this;
     }
 
     public SqlRequest getRequest() {
         try {
-            if (this.values.isEmpty()) {
-                return new SqlRequest() {
-                    public int run() throws SqlException {
-                        return 0;
-                    }
-
-                    public void close() {
-                    }
-                };
-            }
-            return new SqlUpdateRequest(globType, constraint, values, connection, sqlService, blobUpdater);
+            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService, blobUpdater);
         } finally {
             values.clear();
         }
     }
 
-    public BulkDbRequest getBulkRequest() {
-        SqlRequest request = getRequest();
-        return new BulkDbRequest() {
-            public void flush() {
-            }
-
-            public int run() throws SqlException {
-                return request.run();
-            }
-
-            public void close() {
-                request.close();
-            }
-        };
+    public BatchSqlRequest getBulkRequest() {
+        try {
+            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService, blobUpdater);
+        } finally {
+            values.clear();
+        }
     }
 }

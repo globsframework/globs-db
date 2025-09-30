@@ -58,7 +58,7 @@ public class SqlDeleteBuilder implements SqlRequest {
 
     }
 
-    public int run() {
+    public int apply() {
         if (constraint != null) {
             constraint.accept(new ValueConstraintVisitor(preparedStatement, blobUpdater));
         }

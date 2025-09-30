@@ -3,11 +3,11 @@ package org.globsframework.sql.drivers.jdbc.impl;
 import org.globsframework.core.metamodel.annotations.AutoIncrement;
 import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
-import org.globsframework.core.metamodel.annotations.MaxSize;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.annotations.DbIsNullable;
+import org.globsframework.sql.annotations.DbMaxCharSize;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.utils.StringPrettyWriter;
 
@@ -51,10 +51,10 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
     }
 
     public void visitString(StringField field) throws Exception {
-        Glob annotation = field.findAnnotation(MaxSize.KEY);
+        Glob annotation = field.findAnnotation(DbMaxCharSize.KEY);
         int maxSize = 255;
         if (annotation != null) {
-            maxSize = annotation.get(MaxSize.VALUE, 255);
+            maxSize = annotation.get(DbMaxCharSize.SIZE, 255);
             if (maxSize == -1) {
                 add(getLongStringType(), field);
                 return;
