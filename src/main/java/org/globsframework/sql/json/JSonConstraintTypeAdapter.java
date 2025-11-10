@@ -617,7 +617,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             }
         }
 
-        public void visitBlob(BlobField field, byte[] value) throws Exception {
+        public void visitBytes(BytesField field, byte[] value) throws Exception {
             if (value != null) {
                 jsonWriter.value(Base64.getEncoder().encodeToString(value));
             }
@@ -662,7 +662,7 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             value = context.getAsLong();
         }
 
-        public void visitBlob(BlobField field, JsonElement context) throws Exception {
+        public void visitBytes(BytesField field, JsonElement context) throws Exception {
             value = Base64.getDecoder().decode(context.getAsString());
         }
 

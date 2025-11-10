@@ -45,9 +45,9 @@ public interface UpdateBuilder {
 
     UpdateBuilder update(BooleanField field, Boolean value);
 
-    UpdateBuilder update(BlobField field, byte[] value);
+    UpdateBuilder update(BytesField field, byte[] value);
 
-    UpdateBuilder update(BlobField field, BlobAccessor accessor);
+    UpdateBuilder update(BytesField field, BytesAccessor accessor);
 
     UpdateBuilder update(GlobField field, GlobAccessor accessor);
 

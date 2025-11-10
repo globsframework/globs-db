@@ -301,7 +301,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
                     case Types.VARBINARY:
                     case Types.LONGVARBINARY:
                     case Types.BLOB: {
-                        Field field = this.globTypeBuilder.declareBlobField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
+                        Field field = this.globTypeBuilder.declareBytesField(columnName, sqlType, nullable, sqlName, sqlIndex, keyInfo.invoke(columnName));
                         break;
                     }
                     case Types.DATE: {

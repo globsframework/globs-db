@@ -38,7 +38,7 @@ public class DummyObject {
     @IsDateTime_
     public static LongField CREATED_AT;
 
-    public static BlobField PASSWORD;
+    public static BytesField PASSWORD;
 
     public static DateTimeField REAL_DATE_TIME;
 

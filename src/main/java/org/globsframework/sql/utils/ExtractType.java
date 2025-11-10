@@ -95,7 +95,7 @@ public class ExtractType {
                     case Types.VARBINARY:
                     case Types.LONGVARBINARY:
                     case Types.BLOB: {
-                        globTypeBuilder.declareBlobField(columnName, sqlType, nullable, sqlName, sqlIndex);
+                        globTypeBuilder.declareBytesField(columnName, sqlType, nullable, sqlName, sqlIndex);
                         break;
                     }
                     case Types.DATE: {

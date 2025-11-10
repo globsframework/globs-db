@@ -104,8 +104,8 @@ public class SqlCreateBuilder implements CreateBuilder {
                 setObject(field, new ValueGlobsAccessor((Glob[]) value));
             }
 
-            public void visitBlob(BlobField field) {
-                setObject(field, new ValueBlobAccessor((byte[]) value));
+            public void visitBytes(BytesField field) {
+                setObject(field, new ValueBytesAccessor((byte[]) value));
             }
 
         });
@@ -136,12 +136,12 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, accessor);
     }
 
-    public CreateBuilder set(BlobField field, BlobAccessor accessor) {
+    public CreateBuilder set(BytesField field, BytesAccessor accessor) {
         return setObject(field, accessor);
     }
 
-    public CreateBuilder set(BlobField field, byte[] values) {
-        return setObject(field, new ValueBlobAccessor(values));
+    public CreateBuilder set(BytesField field, byte[] values) {
+        return setObject(field, new ValueBytesAccessor(values));
     }
 
     public CreateBuilder set(StringField field, String value) {

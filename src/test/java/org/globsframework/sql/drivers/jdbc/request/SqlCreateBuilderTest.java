@@ -45,7 +45,7 @@ public class SqlCreateBuilderTest extends DbServicesTestCase {
                 .set(DummyObject.ID, new ValueIntegerAccessor(1))
                 .set(DummyObject.NAME, new ValueStringAccessor("hello"))
                 .set(DummyObject.ALIAS, new ValueStringArrayAccessor(new String[]{"hello", "world"}))
-                .set(DummyObject.PASSWORD, new ValueBlobAccessor("world".getBytes()))
+                .set(DummyObject.PASSWORD, new ValueBytesAccessor("world".getBytes()))
                 .set(DummyObject.CREATED_AT, 4324L)
                 .set(DummyObject.REAL_DATE_TIME, dateTime)
                 .getRequest()

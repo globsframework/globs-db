@@ -131,12 +131,12 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.11.0</version>
+            <version>4.14.1</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-gson</artifactId>
-            <version>4.2.0</version>
+            <version>4.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.11.0</version>
+            <version>4.14.1</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-xml</artifactId>
-            <version>4.2.0</version>
+            <version>4.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

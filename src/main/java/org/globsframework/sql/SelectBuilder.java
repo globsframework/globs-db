@@ -30,7 +30,7 @@ public interface SelectBuilder {
 
     SelectBuilder select(DateField field, Ref<DateAccessor> accessor);
 
-    SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor);
+    SelectBuilder select(BytesField field, Ref<BytesAccessor> accessor);
 
     SelectBuilder select(GlobField field, Ref<GlobAccessor> accessor);
 
@@ -89,7 +89,7 @@ public interface SelectBuilder {
 
     DateAccessor retrieve(DateField field);
 
-    BlobAccessor retrieve(BlobField field);
+    BytesAccessor retrieve(BytesField field);
 
     StringArrayAccessor retrieve(StringArrayField field);
 

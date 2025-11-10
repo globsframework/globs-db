@@ -93,7 +93,7 @@ public class PostgresqlConnection extends JdbcConnection {
             }
 
             @Override
-            public void visitBlob(BlobField field) throws Exception {
+            public void visitBytes(BytesField field) throws Exception {
                 add("BYTEA", field);
             }
 

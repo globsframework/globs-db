@@ -60,7 +60,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
                 update(field, (Boolean) value);
             }
 
-            public void visitBlob(BlobField field) {
+            public void visitBytes(BytesField field) {
                 update(field, (byte[]) value);
             }
 
@@ -164,11 +164,11 @@ public class SqlUpdateBuilder implements UpdateBuilder {
         return update(field, new ValueBooleanAccessor(value));
     }
 
-    public UpdateBuilder update(BlobField field, byte[] value) {
-        return update(field, new ValueBlobAccessor(value));
+    public UpdateBuilder update(BytesField field, byte[] value) {
+        return update(field, new ValueBytesAccessor(value));
     }
 
-    public UpdateBuilder update(BlobField field, BlobAccessor accessor) {
+    public UpdateBuilder update(BytesField field, BytesAccessor accessor) {
         addToMap(field, accessor);
         return this;
     }

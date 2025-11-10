@@ -32,7 +32,7 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
-    public CreateBuilder set(BlobField field, byte[] value) {
+    public CreateBuilder set(BytesField field, byte[] value) {
         createBuilders.get(field.getGlobType()).set(field, value);
         return this;
     }
@@ -107,7 +107,7 @@ public class MultiCreateBuilder implements CreateBuilder {
         return this;
     }
 
-    public CreateBuilder set(BlobField field, BlobAccessor accessor) {
+    public CreateBuilder set(BytesField field, BytesAccessor accessor) {
         createBuilders.get(field.getGlobType()).set(field, accessor);
         return this;
     }

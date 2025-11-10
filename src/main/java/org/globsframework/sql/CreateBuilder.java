@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 public interface CreateBuilder {
     CreateBuilder set(IntegerField field, Integer value);
 
-    CreateBuilder set(BlobField field, byte[] value);
+    CreateBuilder set(BytesField field, byte[] value);
 
     CreateBuilder set(StringField field, String value);
 
@@ -48,7 +48,7 @@ public interface CreateBuilder {
 
     CreateBuilder set(BooleanField field, BooleanAccessor accessor);
 
-    CreateBuilder set(BlobField field, BlobAccessor accessor);
+    CreateBuilder set(BytesField field, BytesAccessor accessor);
 
     CreateBuilder set(GlobField field, GlobAccessor accessor);
 

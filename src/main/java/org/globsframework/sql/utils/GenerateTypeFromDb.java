@@ -86,7 +86,7 @@ public class GenerateTypeFromDb {
                         "import org.globsframework.metamodel.fields.BigDecimalArrayField;\n" +
                         "import org.globsframework.metamodel.fields.DateField;\n" +
                         "import org.globsframework.metamodel.fields.DateTimeField;\n" +
-                        "import org.globsframework.metamodel.fields.BlobField;\n" +
+                        "import org.globsframework.metamodel.fields.BytesField;\n" +
                         "import org.globsframework.metamodel.annotations.FieldNameAnnotation;\n" +
                         "import org.globsframework.model.Key;\n" +
                         "\n" +
@@ -171,8 +171,8 @@ public class GenerateTypeFromDb {
                 fieldType = "DateTimeField";
             }
 
-            public void visitBlob(BlobField field) throws Exception {
-                fieldType = "BlobField";
+            public void visitBytes(BytesField field) throws Exception {
+                fieldType = "BytesField";
             }
 
             public void visitGlob(GlobField field) throws Exception {

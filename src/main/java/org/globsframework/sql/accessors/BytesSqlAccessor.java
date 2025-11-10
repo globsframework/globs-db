@@ -1,8 +1,8 @@
 package org.globsframework.sql.accessors;
 
-import org.globsframework.core.streams.accessors.BlobAccessor;
+import org.globsframework.core.streams.accessors.BytesAccessor;
 
-public class BlobSqlAccessor extends SqlAccessor implements BlobAccessor {
+public class BytesSqlAccessor extends SqlAccessor implements BytesAccessor {
     public Object getObjectValue() {
         return getValue();
     }

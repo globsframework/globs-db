@@ -231,7 +231,7 @@ public class SqlQueryBuilder implements SelectBuilder {
         return this;
     }
 
-    public SelectBuilder select(BlobField field, Ref<BlobAccessor> accessor) {
+    public SelectBuilder select(BytesField field, Ref<BytesAccessor> accessor) {
         accessor.set(retrieve(field));
         return this;
     }
@@ -341,8 +341,8 @@ public class SqlQueryBuilder implements SelectBuilder {
         return (DoubleAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new DoubleSqlAccessor());
     }
 
-    public BlobSqlAccessor retrieve(BlobField field) {
-        return (BlobSqlAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new BlobSqlAccessor());
+    public BytesSqlAccessor retrieve(BytesField field) {
+        return (BytesSqlAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new BytesSqlAccessor());
     }
 
     public Accessor retrieveUnTyped(Field field) {
@@ -661,7 +661,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
-        public void visitBlob(BlobField field) {
+        public void visitBytes(BytesField field) {
             accessor = retrieve(field);
         }
 

@@ -192,7 +192,7 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
             convertValue = value.toString();
         }
 
-        public void visitBlob(BlobField field) {
+        public void visitBytes(BytesField field) {
             convertValue = "'" + value.toString() + "'";
         }
 

@@ -83,7 +83,7 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         add("BOOLEAN", field);
     }
 
-    public void visitBlob(BlobField field) throws Exception {
+    public void visitBytes(BytesField field) throws Exception {
         add("BLOB", field);
     }
 

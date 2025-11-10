@@ -1,7 +1,7 @@
 package org.globsframework.sql.drivers.hsqldb;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.fields.BlobField;
+import org.globsframework.core.metamodel.fields.BytesField;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.SqlService;
@@ -39,7 +39,7 @@ public class HsqlConnection extends JdbcConnection {
                 return "IDENTITY";
             }
 
-            public void visitBlob(BlobField field) {
+            public void visitBytes(BytesField field) {
                 add("LONGVARBINARY", field);
             }
 
