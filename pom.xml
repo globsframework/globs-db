@@ -37,7 +37,6 @@
         <connection>scm:git:git@github.com:globsframework/globs-db</connection>
         <developerConnection>scm:git:git@github.com:globsframework/globs-db</developerConnection>
         <url>https://github.com/globsframework/globs-db</url>
-      <tag>4.2.0</tag>
   </scm>
 
     <profiles>

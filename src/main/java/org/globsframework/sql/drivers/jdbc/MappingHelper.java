@@ -8,7 +8,7 @@ public class MappingHelper {
         return switch (dbType) {
             case postgresql -> new ToPostgreCaseNamingMapping();
             case hsqldb -> new HsqlDbNamingMapping();
-            case mysql, mariadb -> new DefaultNamingMapping();
+            case mysql, mariadb, oracle -> new DefaultNamingMapping();
         };
     }
 }

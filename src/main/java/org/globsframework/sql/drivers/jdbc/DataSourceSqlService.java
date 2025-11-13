@@ -3,6 +3,7 @@ package org.globsframework.sql.drivers.jdbc;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sql.drivers.mysql.MysqlConnection;
+import org.globsframework.sql.drivers.oracle.OracleConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
 import org.globsframework.sql.utils.AbstractSqlService;
 
@@ -42,6 +43,15 @@ public class DataSourceSqlService extends AbstractSqlService {
                     Connection connection = dataSource.getConnection();
                     connection.setAutoCommit(autoCommit);
                     return new MysqlConnection(autoCommit, connection, DataSourceSqlService.this);
+                } catch (SQLException e) {
+                    throw new UnexpectedApplicationState(e);
+                }
+            };
+            case oracle -> autoCommit -> {
+                try {
+                    Connection connection = dataSource.getConnection();
+                    connection.setAutoCommit(autoCommit);
+                    return new OracleConnection(autoCommit, connection, DataSourceSqlService.this);
                 } catch (SQLException e) {
                     throw new UnexpectedApplicationState(e);
                 }

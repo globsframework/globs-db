@@ -4,7 +4,8 @@ public enum DbType {
     postgresql,
     hsqldb,
     mysql,
-    mariadb;
+    mariadb,
+    oracle;
 
     public static DbType fromString(String dbType) {
         if (dbType.contains("postgresql")) {
@@ -18,6 +19,9 @@ public enum DbType {
         }
         else if (dbType.contains("mysql")) {
             return DbType.mysql;
+        }
+        else if (dbType.contains("oracle")) {
+            return DbType.oracle;
         }
         else {
             throw new IllegalArgumentException("Unknown database type: " + dbType);
