@@ -19,7 +19,7 @@ public class SchemaTest {
 
         GlobTypeBuilder typeBuilderF1 = DefaultGlobTypeBuilder.init("TOTO");
         typeBuilderF1.declareStringField("F1");
-        GlobType t1 = typeBuilderF1.get();
+        GlobType t1 = typeBuilderF1.build();
 
         JdbcConnection db = sqlService.getDb();
         db.createTable(t1);
@@ -28,7 +28,7 @@ public class SchemaTest {
         typeBuilderF2.declareStringField("F1");
         Field f2 = typeBuilderF2.declareStringField("F2");
         Field f3 = typeBuilderF2.declareStringField("F3");
-        GlobType t2 = typeBuilderF2.get();
+        GlobType t2 = typeBuilderF2.build();
         db.addColumn(f2, f3);
 
         GlobTypeExtractor globTypeExtractor = db.extractType(sqlService.getTableName(t2, true));

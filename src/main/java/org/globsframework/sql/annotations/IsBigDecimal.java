@@ -21,13 +21,13 @@ public class IsBigDecimal {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("IsBigDecimal");
-        TYPE = typeBuilder.unCompleteType();
-        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> getUnique());
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
         UNIQUE = TYPE.instantiate();
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> UNIQUE);
-//        GlobTypeLoaderFactory.create(IsBigDecimal.class, "IsBigDecimal")
-//                .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
-//                .load();
+    }
+
+    private static Glob getUnique() {
+        return UNIQUE;
     }
 }

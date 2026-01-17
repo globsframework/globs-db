@@ -1,7 +1,9 @@
 package org.globsframework.sql.model;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
@@ -22,6 +24,10 @@ public class DummyObjectWithGlob {
     public static GlobArrayField arrayField;
 
     static {
-        GlobTypeLoaderFactory.create(DummyObjectWithGlob.class, true).load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("DummyObjectWithGlob");
+        ID = builder.declareIntegerField("ID", KeyField.ZERO);
+        simple = builder.declareGlobField("simple", () -> DummyObjectWithGlob.TYPE);
+        arrayField = builder.declareGlobArrayField("arrayField", () -> DummyObjectWithGlob.TYPE);
+        TYPE = builder.build();
     }
 }

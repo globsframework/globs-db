@@ -37,7 +37,7 @@ public class OracleTest {
         DoubleField f2 = globTypeBuilder.declareDoubleField("f2");
         LongField f3 = globTypeBuilder.declareLongField("f3", IsTimestamp.UNIQUE);
 
-        GlobType globType = globTypeBuilder.get();
+        GlobType globType = globTypeBuilder.build();
 
         final long epochMilli = ZonedDateTime.now().toInstant().toEpochMilli();
         MutableGlob data = globType.instantiate()

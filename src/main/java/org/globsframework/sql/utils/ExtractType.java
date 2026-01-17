@@ -112,7 +112,7 @@ public class ExtractType {
                 }
             }
 
-            return globTypeBuilder.get();
+            return globTypeBuilder.build();
         } catch (SQLException e) {
             throw new RuntimeException("Fail to retrieve data from request", e);
         }

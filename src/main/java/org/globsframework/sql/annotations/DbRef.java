@@ -24,14 +24,10 @@ public class DbRef {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbRef");
-        TYPE = typeBuilder.unCompleteType();
         TO = typeBuilder.declareStringField("to");
-        typeBuilder.complete();
         typeBuilder.register(GlobCreateFromAnnotation.class, DbRef::create);
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbRef.class, "DbRef")
-//                .register(GlobCreateFromAnnotation.class, DbRef::create)
-//                .load();
     }
 
     private static MutableGlob create(Annotation annotation) {

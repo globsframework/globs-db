@@ -21,13 +21,13 @@ public class IsTimestamp {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("IsTimestamp");
-        TYPE = typeBuilder.unCompleteType();
-        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> getUnique());
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
         UNIQUE = TYPE.instantiate();
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> UNIQUE);
-//        GlobTypeLoaderFactory.create(IsTimestamp.class, "IsTimestamp")
-//                .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
-//                .load();
+    }
+
+    private static Glob getUnique() {
+        return UNIQUE;
     }
 }

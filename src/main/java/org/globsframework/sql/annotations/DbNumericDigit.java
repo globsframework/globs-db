@@ -19,12 +19,9 @@ public class DbNumericDigit {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbNumericDigit");
-        TYPE = typeBuilder.unCompleteType();
         SIZE = typeBuilder.declareIntegerField("size");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbNumericDigit.class, "DbNumericDigit")
-//                .load();
     }
 
     public static MutableGlob create(int size) {

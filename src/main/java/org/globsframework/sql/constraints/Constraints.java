@@ -6,6 +6,7 @@ import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.constraints.impl.*;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 public class Constraints {
@@ -38,6 +39,10 @@ public class Constraints {
 
     public static Constraint equalsObject(Field field, Object value) {
         return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
+    public static Constraint equals(DateField field, LocalDate localDate) {
+        return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, localDate));
     }
 
     public static Constraint equalsObject(Field field, Accessor accessor) {

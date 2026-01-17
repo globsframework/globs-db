@@ -19,13 +19,9 @@ public class DbNumericPrecision {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbNumericPrecision");
-        TYPE = typeBuilder.unCompleteType();
         SIZE = typeBuilder.declareIntegerField("size");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-
-//        GlobTypeLoaderFactory.create(DbNumericPrecision.class, "DbNumericPrecision")
-//                .load();
     }
 
     public static MutableGlob create(int size) {

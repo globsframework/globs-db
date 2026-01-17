@@ -66,7 +66,7 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
         if (!completeGlobTypeBuilder()) {
             return null;
         }
-        return globTypeBuilder.get();
+        return globTypeBuilder.build();
     }
 
     private boolean completeGlobTypeBuilder() {

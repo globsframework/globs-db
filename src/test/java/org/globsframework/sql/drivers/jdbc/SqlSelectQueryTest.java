@@ -2,8 +2,9 @@ package org.globsframework.sql.drivers.jdbc;
 
 import org.globsframework.core.metamodel.GlobModel;
 import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.annotations.Targets;
@@ -35,6 +36,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.globsframework.sql.constraints.Constraints.and;
@@ -561,8 +563,8 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
 
     @Test
     public void selectOnUnknownFieldThrowAnError() {
-        GlobType obj_1 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").addStringField("B").get();
-        GlobType obj_2 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").get();
+        GlobType obj_1 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").addStringField("B").build();
+        GlobType obj_2 = GlobTypeBuilderFactory.create("OBJ").addStringField("A").build();
         sqlConnection.createTable(obj_2);
         sqlConnection.populate(List.of(obj_2.instantiate().setValue(obj_2.getField("A"), "a")));
         SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(obj_1);
@@ -626,7 +628,10 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static DoubleField VALUE;
 
         static {
-            GlobTypeLoaderFactory.create(ValueType.class, true).load();
+            GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("valueType");
+            DATE = typeBuilder.declareIntegerField("date");
+            VALUE = typeBuilder.declareDoubleField("value");
+            TYPE = typeBuilder.build();
         }
     }
 
@@ -638,7 +643,10 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static IntegerField VALUE;
 
         static {
-            GlobTypeLoaderFactory.create(ValueType2.class, true).load();
+            GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("ValueType2");
+            DATE = typeBuilder.declareIntegerField("date");
+            VALUE = typeBuilder.declareIntegerField("value");
+            TYPE = typeBuilder.build();
         }
     }
 
@@ -661,7 +669,13 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static GlobArrayUnionField ANY_TYPES;
 
         static {
-            GlobTypeLoaderFactory.create(GlobWithGlobType.class, true).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("GlobWithGlobType");
+            ID = builder.declareIntegerField("id", KeyField.ZERO);
+            VALUE = builder.declareGlobField("value", () -> ValueType.TYPE);
+            VALUES__2 = builder.declareGlobArrayField("values__2", () -> ValueType.TYPE);
+            ANY_TYPE = builder.declareGlobUnionField("anyType", new Supplier[]{ () -> ValueType.TYPE, () -> ValueType2.TYPE});
+            ANY_TYPES = builder.declareGlobUnionArrayField("anyTypes", new Supplier[]{() -> ValueType.TYPE, () -> ValueType2.TYPE});
+            TYPE = builder.build();
         }
     }
 
@@ -671,7 +685,9 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static LongArrayField longs;
 
         static {
-            GlobTypeLoaderFactory.create(DummyObjectWithArray.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("DummyObjectWithArray");
+            longs = builder.declareLongArrayField("longs");
+            TYPE = builder.build();
         }
     }
 }

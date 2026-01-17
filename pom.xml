@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <artifactId>globs-sql</artifactId>
     <name>db access</name>
-    <version>4.7-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
 
     <developers>
         <developer>
@@ -131,12 +131,12 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.14.1</version>
+            <version>5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-gson</artifactId>
-            <version>4.5.0</version>
+            <version>5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>4.14.1</version>
+            <version>5.0-SNAPSHOT</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>saxstack</artifactId>
-            <version>4.1.1</version>
+            <version>5.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -19,12 +19,9 @@ public class DbFieldIndex {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbFieldIndex");
-        TYPE = typeBuilder.unCompleteType();
         INDEX = typeBuilder.declareIntegerField("index");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbFieldIndex.class, "DbFieldIndex")
-//                .load();
     }
 
     public static MutableGlob create(int fieldIndex) {

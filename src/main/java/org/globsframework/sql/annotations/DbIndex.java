@@ -37,15 +37,11 @@ public class DbIndex {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbIndex");
-        TYPE = typeBuilder.unCompleteType();
         NAME = typeBuilder.declareStringField("name");
         FIELDS = typeBuilder.declareStringArrayField("fields");
         IS_UNIQUE = typeBuilder.declareBooleanField("isUnique");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-
-//        GlobTypeLoaderFactory.create(DbIndex.class, "DbIndex")
-//                .load();
     }
 
     static public Index createIndex(GlobType globType, Glob index) {

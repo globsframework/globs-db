@@ -19,13 +19,9 @@ public class DbSqlType {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbSqlType");
-        TYPE = typeBuilder.unCompleteType();
         SQL_TYPE = typeBuilder.declareIntegerField("sqlType");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         UNIQUE_KEY = KeyBuilder.newEmptyKey(TYPE);
-
-//        GlobTypeLoaderFactory.create(DbSqlType.class, "DbSqlType")
-//                .load();
     }
 
     public static MutableGlob create(int sqlFieldType) {

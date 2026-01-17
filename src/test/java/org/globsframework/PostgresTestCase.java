@@ -112,7 +112,7 @@ public class PostgresTestCase {
         Glob idDateTime = IsDateTime.TYPE.instantiate();
         LongField f3 = globTypeBuilder.declareLongField("f3", idDateTime);
 
-        GlobType globType = globTypeBuilder.get();
+        GlobType globType = globTypeBuilder.build();
 
         MutableGlob data = globType.instantiate()
                 .set(f1, "ééé")

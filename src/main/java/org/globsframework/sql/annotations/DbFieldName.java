@@ -23,14 +23,10 @@ public class DbFieldName {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbFieldName");
-        TYPE = typeBuilder.unCompleteType();
         NAME = typeBuilder.declareStringField("name");
-        typeBuilder.complete();
         typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation));
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbFieldName.class, "DbFieldName")
-//                .register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation))
-//                .load();
     }
 
     private static MutableGlob create(DbFieldName_ annotation) {

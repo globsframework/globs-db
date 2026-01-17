@@ -23,15 +23,10 @@ public class DbTableName {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbTableName");
-        TYPE = typeBuilder.unCompleteType();
         NAME = typeBuilder.declareStringField("name");
-        typeBuilder.complete();
         typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()));
+        TYPE = typeBuilder.build();
         UNIQUE_KEY = KeyBuilder.newEmptyKey(TYPE);
-
-//        GlobTypeLoaderFactory.create(DbTableName.class, "DbTableName")
-//                .register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()))
-//                .load();
     }
 
     public static Glob get(Annotations annotations) {

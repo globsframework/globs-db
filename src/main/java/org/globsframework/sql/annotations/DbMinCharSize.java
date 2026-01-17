@@ -19,12 +19,9 @@ public class DbMinCharSize {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbMinCharSize");
-        TYPE = typeBuilder.unCompleteType();
         SIZE = typeBuilder.declareIntegerField("size");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbMinCharSize.class, "DbMinCharSize")
-//                .load();
     }
 
     public static MutableGlob create(int size) {

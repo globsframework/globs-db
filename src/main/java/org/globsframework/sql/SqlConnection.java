@@ -4,7 +4,7 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.constraints.Constraint;
-import org.globsframework.sql.exceptions.DbConstraintViolation;
+import org.globsframework.sql.exceptions.ConstraintViolation;
 import org.globsframework.sql.exceptions.RollbackFailed;
 
 import java.util.Arrays;
@@ -25,9 +25,9 @@ public interface SqlConnection {
 
     SqlRequest getDeleteRequest(GlobType globType, Constraint constraint);
 
-    void commit() throws RollbackFailed, DbConstraintViolation;
+    void commit() throws RollbackFailed, ConstraintViolation;
 
-    void commitAndClose() throws RollbackFailed, DbConstraintViolation;
+    void commitAndClose() throws RollbackFailed, ConstraintViolation;
 
     void rollbackAndClose();
 
@@ -54,6 +54,6 @@ public interface SqlConnection {
     }
 
     default void emptyTable(GlobType... types) {
-        Arrays.stream(types).forEach(this::createTable);
+        Arrays.stream(types).forEach(this::emptyTable);
     }
 }

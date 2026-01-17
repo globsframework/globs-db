@@ -19,12 +19,9 @@ public class DbMaxCharSize {
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbMaxCharSize");
-        TYPE = typeBuilder.unCompleteType();
         SIZE = typeBuilder.declareIntegerField("size");
-        typeBuilder.complete();
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoaderFactory.create(DbMaxCharSize.class, "DbMaxCharSize")
-//                .load();
     }
 
     public static MutableGlob create(int size) {
