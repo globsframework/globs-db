@@ -6,9 +6,9 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.MutableGlob;
 import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
-import org.globsframework.core.utils.Check;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class AccessorGlobBuilder {
     private Field[] fields;
@@ -30,7 +30,7 @@ public class AccessorGlobBuilder {
             }
             globType = type;
             this.fields[i] = field;
-            this.accessors[i] = Check.requireNonNull(fieldAccessor.get(field), field);
+            this.accessors[i] = Objects.requireNonNull(fieldAccessor.get(field), field.getFullName());
             ++i;
         }
         if (globType == null) {
