@@ -9,7 +9,6 @@ import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.sql.annotations.IsTimestamp;
-import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -24,13 +23,11 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
     private static Gson gson = new Gson();
     private static final TypeAdapter adapter = gson.getAdapter(TypeToken.getArray(String.class));
     private PreparedStatement preparedStatement;
-    private BlobUpdater blobUpdater;
     private Object value;
     private int index;
 
-    public SqlValueFieldVisitor(PreparedStatement preparedStatement, BlobUpdater blobUpdater) {
+    public SqlValueFieldVisitor(PreparedStatement preparedStatement) {
         this.preparedStatement = preparedStatement;
-        this.blobUpdater = blobUpdater;
     }
 
     public void setValue(Object value, int index) {
@@ -172,9 +169,9 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
 
     public void visitBytes(BytesField field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, blobUpdater.getBlobType());
+            preparedStatement.setNull(index, Types.BINARY);
         } else {
-            blobUpdater.setBlob(preparedStatement, index, ((byte[]) value));
+            preparedStatement.setBytes(index, (byte[]) value);
         }
     }
 }

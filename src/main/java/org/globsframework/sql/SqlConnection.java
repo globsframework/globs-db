@@ -27,6 +27,8 @@ public interface SqlConnection {
 
     void commit() throws RollbackFailed, ConstraintViolation;
 
+    void rollback() throws RollbackFailed, ConstraintViolation;
+
     void commitAndClose() throws RollbackFailed, ConstraintViolation;
 
     void rollbackAndClose();

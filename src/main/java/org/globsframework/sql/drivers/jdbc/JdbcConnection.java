@@ -34,30 +34,28 @@ public abstract class JdbcConnection implements SqlConnection {
     private final boolean autoCommit;
     protected SqlService sqlService;
     private Connection connection;
-    protected BlobUpdater blobUpdater;
     private DbChecker checker;
 
-    public JdbcConnection(boolean autoCommit, Connection connection, SqlService sqlService, BlobUpdater blobUpdater) {
+    public JdbcConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         this.autoCommit = autoCommit;
         this.connection = connection;
         this.sqlService = sqlService;
-        this.blobUpdater = blobUpdater;
         checker = new DbChecker(sqlService, this);
     }
 
     public SelectBuilder getQueryBuilder(GlobType globType) {
         checkConnectionIsNotClosed();
-        return new SqlQueryBuilder(connection, globType, null, sqlService, blobUpdater);
+        return new SqlQueryBuilder(connection, globType, null, sqlService);
     }
 
     public SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint) {
         checkConnectionIsNotClosed();
-        return new SqlQueryBuilder(connection, globType, constraint, sqlService, blobUpdater);
+        return new SqlQueryBuilder(connection, globType, constraint, sqlService);
     }
 
     public UpdateBuilder getUpdateBuilder(GlobType globType, Constraint constraint) {
         checkConnectionIsNotClosed();
-        return new SqlUpdateBuilder(connection, globType, sqlService, constraint, blobUpdater);
+        return new SqlUpdateBuilder(connection, globType, sqlService, constraint);
     }
 
     protected void checkConnectionIsNotClosed() {
@@ -71,6 +69,18 @@ public abstract class JdbcConnection implements SqlConnection {
         try {
             if (!autoCommit) {
                 connection.commit();
+            }
+        } catch (SQLException e) {
+            throw getTypedException(null, e);
+        }
+    }
+
+    @Override
+    public void rollback() throws RollbackFailed, ConstraintViolation {
+        checkConnectionIsNotClosed();
+        try {
+            if (!autoCommit) {
+                connection.rollback();
             }
         } catch (SQLException e) {
             throw getTypedException(null, e);
@@ -94,7 +104,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public CreateBuilder getCreateBuilder(GlobType globType) {
-        return new SqlCreateBuilder(connection, globType, sqlService, blobUpdater, this);
+        return new SqlCreateBuilder(connection, globType, sqlService, this);
     }
 
     public void createTable(GlobType globType) {
@@ -238,11 +248,11 @@ public abstract class JdbcConnection implements SqlConnection {
     abstract protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter);
 
     public SqlRequest getDeleteRequest(GlobType globType) {
-        return new SqlDeleteBuilder(globType, null, connection, sqlService, blobUpdater);
+        return new SqlDeleteBuilder(globType, null, connection, sqlService);
     }
 
     public SqlRequest getDeleteRequest(GlobType globType, Constraint constraint) {
-        return new SqlDeleteBuilder(globType, constraint, connection, sqlService, blobUpdater);
+        return new SqlDeleteBuilder(globType, constraint, connection, sqlService);
     }
 
     public Connection getConnection() {

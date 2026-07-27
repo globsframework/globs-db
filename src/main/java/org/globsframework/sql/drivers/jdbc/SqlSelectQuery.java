@@ -31,7 +31,6 @@ public class SqlSelectQuery implements SelectQuery {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlSelectQuery.class);
     protected final Set<GlobType> globTypes = new HashSet<GlobType>();
     private final Constraint constraint;
-    private final BlobUpdater blobUpdater;
     private final boolean autoClose;
     private final Map<Field, SqlAccessor> fieldToAccessorHolder;
     protected final SqlService sqlService;
@@ -41,6 +40,7 @@ public class SqlSelectQuery implements SelectQuery {
     private PreparedStatement preparedStatement;
     private final String sql;
     private boolean shouldInitAccessorWithMetadata;
+    private final List<SqlAccessor> additionalAccessor;
 
     public SqlSelectQuery(SqlService sqlService, Connection connection, String sql,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, GlobType fallBackType) {
@@ -50,7 +50,6 @@ public class SqlSelectQuery implements SelectQuery {
         sqlOperations = List.of();
         distinct = Set.of();
         constraint = null;
-        blobUpdater = null;
         autoClose = true;
         this.sql = sql;
         NanoChrono nanoChrono = NanoChrono.start();
@@ -64,16 +63,16 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw new SqlException(message, e);
         }
+        additionalAccessor = List.of();
         shouldInitAccessorWithMetadata = true;
     }
 
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
-                          BlobUpdater blobUpdater, boolean autoClose, List<SqlQueryBuilder.Order> orders,
+                          boolean autoClose, List<SqlQueryBuilder.Order> orders,
                           List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations,
                           GlobType fallBackType) {
         this.constraint = constraint;
-        this.blobUpdater = blobUpdater;
         this.autoClose = autoClose;
         this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
         this.sqlService = sqlService;
@@ -92,6 +91,7 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw new SqlException(message, e);
         }
+        additionalAccessor = sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList());
         shouldInitAccessorWithMetadata = false;
     }
 
@@ -256,7 +256,7 @@ public class SqlSelectQuery implements SelectQuery {
         }
         try {
             if (constraint != null) {
-                constraint.accept(new ValueConstraintVisitor(preparedStatement, blobUpdater));
+                constraint.accept(new ValueConstraintVisitor(preparedStatement));
             }
             NanoChrono nanoChrono = NanoChrono.start();
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -267,8 +267,7 @@ public class SqlSelectQuery implements SelectQuery {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Execution of " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
             }
-            return new SqlGlobStream(resultSet, fieldToAccessorHolder,
-                    sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList()), this);
+            return new SqlGlobStream(resultSet, fieldToAccessorHolder, additionalAccessor, this);
         } catch (SQLException e) {
             String message = "for request : " + sql;
             LOGGER.error(message, e);

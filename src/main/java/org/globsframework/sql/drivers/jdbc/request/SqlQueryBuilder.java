@@ -28,30 +28,28 @@ import java.util.*;
 public class SqlQueryBuilder implements SelectBuilder {
     protected final List<Order> orders = new ArrayList<>();
     protected Connection connection;
-    private GlobType globType;
-    protected Constraint constraint;
-    protected SqlService sqlService;
-    protected BlobUpdater blobUpdater;
+    private final GlobType globType;
+    protected final Constraint constraint;
+    protected final SqlService sqlService;
     protected boolean autoClose = true;
     protected Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
     protected int top = -1;
     protected int skip = -1;
-    protected Set<Field> distinct = new HashSet<>();
-    protected List<SqlOperation> sqlOperations = new ArrayList<>();
-    protected List<Field> groupBy = new ArrayList<>();
+    protected final Set<Field> distinct = new HashSet<>();
+    protected final List<SqlOperation> sqlOperations = new ArrayList<>();
+    protected final List<Field> groupBy = new ArrayList<>();
     protected GlobType fallBackType = null;
 
-    public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService, BlobUpdater blobUpdater) {
+    public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService) {
         this.connection = connection;
         this.globType = globType;
         this.constraint = constraint;
         this.sqlService = sqlService;
-        this.blobUpdater = blobUpdater;
     }
 
     public SelectQuery getQuery() {
         try {
-            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, blobUpdater, autoClose,
+            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
                     orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
         } finally {
             fieldToAccessorHolder.clear();

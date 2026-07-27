@@ -5,7 +5,6 @@ import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
-import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -17,15 +16,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 public class SqlDeleteBuilder implements SqlRequest {
-    private Constraint constraint;
-    private BlobUpdater blobUpdater;
-    private String sqlStatement;
-    private PreparedStatement preparedStatement;
+    private final Constraint constraint;
+    private final String sqlStatement;
+    private final PreparedStatement preparedStatement;
 
     public SqlDeleteBuilder(GlobType globType, Constraint constraint, Connection connection,
-                            SqlService sqlService, BlobUpdater blobUpdater) {
+                            SqlService sqlService) {
         this.constraint = constraint;
-        this.blobUpdater = blobUpdater;
         StringPrettyWriter prettyWriter = new StringPrettyWriter();
         prettyWriter.append("DELETE ")
                 .append(" FROM ");
@@ -60,7 +57,7 @@ public class SqlDeleteBuilder implements SqlRequest {
 
     public int apply() {
         if (constraint != null) {
-            constraint.accept(new ValueConstraintVisitor(preparedStatement, blobUpdater));
+            constraint.accept(new ValueConstraintVisitor(preparedStatement));
         }
         try {
             return preparedStatement.executeUpdate();

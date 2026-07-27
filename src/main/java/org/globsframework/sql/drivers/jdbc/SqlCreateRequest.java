@@ -39,7 +39,7 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
 
     public SqlCreateRequest(List<Pair<Field, Accessor>> fields, GeneratedKeyAccessor generatedKeyAccessor,
                             Connection connection,
-                            GlobType globType, SqlService sqlService, BlobUpdater blobUpdater, JdbcConnection jdbcConnection) {
+                            GlobType globType, SqlService sqlService, JdbcConnection jdbcConnection) {
         this.generatedKeyAccessor = generatedKeyAccessor;
         this.fields = fields;
         this.globType = globType;
@@ -60,7 +60,7 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("In prepareStatement for request : " + sql, e);
         }
-        this.sqlValueVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
+        this.sqlValueVisitor = new SqlValueFieldVisitor(preparedStatement);
     }
 
     private String prepareRequest(List<Pair<Field, Accessor>> fields, GlobType globType, Value value) {

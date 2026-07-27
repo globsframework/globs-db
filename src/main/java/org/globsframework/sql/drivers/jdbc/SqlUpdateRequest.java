@@ -27,20 +27,18 @@ import java.util.concurrent.TimeUnit;
 
 public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
     private final static Logger LOGGER = LoggerFactory.getLogger(SqlUpdateRequest.class);
-    private GlobType globType;
-    private Constraint constraint;
-    private BlobUpdater blobUpdater;
-    private SqlUpdateBuilder.FieldWithAccessor[] values;
-    private SqlService sqlService;
-    private PreparedStatement preparedStatement;
-    private SqlValueFieldVisitor sqlValueFieldVisitor;
-    private String sqlRequest;
+    private final GlobType globType;
+    private final Constraint constraint;
+    private final SqlUpdateBuilder.FieldWithAccessor[] values;
+    private final SqlService sqlService;
+    private final PreparedStatement preparedStatement;
+    private final SqlValueFieldVisitor sqlValueFieldVisitor;
+    private final String sqlRequest;
 
     public SqlUpdateRequest(GlobType globType, Constraint constraint, SqlUpdateBuilder.FieldWithAccessor[] values,
-                            Connection connection, SqlService sqlService, BlobUpdater blobUpdater) {
+                            Connection connection, SqlService sqlService) {
         this.globType = globType;
         this.constraint = constraint;
-        this.blobUpdater = blobUpdater;
         this.values = values;
         this.sqlService = sqlService;
         sqlRequest = createRequest();
@@ -53,7 +51,7 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
             LOGGER.error(message, e);
             throw new UnexpectedApplicationState(message, e);
         }
-        sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement, blobUpdater);
+        sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement);
     }
 
     public int apply() {
@@ -77,7 +75,7 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
             sqlValueFieldVisitor.setValue(values[i].accessor().getObjectValue(), i + 1);
             values[i].field().safeAccept(sqlValueFieldVisitor);
         }
-        constraint.accept(new ValueConstraintVisitor(preparedStatement, values.length, blobUpdater));
+        constraint.accept(new ValueConstraintVisitor(preparedStatement, values.length));
     }
 
     public void close() {
@@ -86,17 +84,6 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("In close", e);
         }
-    }
-
-    public void execute(Key key) {
-        GlobType globType = key.getGlobType();
-        Field[] list = globType.getKeyFields();
-        Constraint constraint = null;
-        for (Field field : list) {
-            constraint = Constraints.and(constraint, Constraints.equalsObject(field, key.getValue(field)));
-        }
-        this.constraint = Constraints.and(this.constraint, constraint);
-        apply();
     }
 
     private String createRequest() {

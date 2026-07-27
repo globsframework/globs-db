@@ -6,7 +6,6 @@ import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
 import org.globsframework.sql.constraints.OperandVisitor;
 import org.globsframework.sql.constraints.impl.*;
-import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +15,12 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     private static final Logger LOGGER = LoggerFactory.getLogger(ValueConstraintVisitor.class);
     private int index = 0;
 
-    public ValueConstraintVisitor(PreparedStatement preparedStatement, BlobUpdater blobUpdater) {
-        super(preparedStatement, blobUpdater);
+    public ValueConstraintVisitor(PreparedStatement preparedStatement) {
+        super(preparedStatement);
     }
 
-    public ValueConstraintVisitor(PreparedStatement preparedStatement, int index, BlobUpdater blobUpdater) {
-        super(preparedStatement, blobUpdater);
+    public ValueConstraintVisitor(PreparedStatement preparedStatement, int index) {
+        super(preparedStatement);
         this.index = index;
     }
 

@@ -10,7 +10,6 @@ import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.UpdateBuilder;
 import org.globsframework.sql.constraints.Constraint;
-import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.SqlUpdateRequest;
 
 import java.sql.Connection;
@@ -25,11 +24,9 @@ public class SqlUpdateBuilder implements UpdateBuilder {
     private final GlobType globType;
     private final SqlService sqlService;
     private final Constraint constraint;
-    private final BlobUpdater blobUpdater;
 
     public SqlUpdateBuilder(Connection connection, GlobType globType, SqlService sqlService,
-                            Constraint constraint, BlobUpdater blobUpdater) {
-        this.blobUpdater = blobUpdater;
+                            Constraint constraint) {
         this.connection = connection;
         this.globType = globType;
         this.sqlService = sqlService;
@@ -205,7 +202,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public SqlRequest getRequest() {
         try {
-            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService, blobUpdater);
+            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService);
         } finally {
             values.clear();
         }
@@ -213,7 +210,7 @@ public class SqlUpdateBuilder implements UpdateBuilder {
 
     public BatchSqlRequest getBulkRequest() {
         try {
-            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService, blobUpdater);
+            return new SqlUpdateRequest(globType, constraint, values.values().toArray(FieldWithAccessor[]::new), connection, sqlService);
         } finally {
             values.clear();
         }

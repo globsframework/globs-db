@@ -10,7 +10,6 @@ import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
-import org.globsframework.sql.drivers.jdbc.BlobUpdater;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.SqlCreateRequest;
 
@@ -24,21 +23,19 @@ import java.util.List;
 import java.util.Set;
 
 public class SqlCreateBuilder implements CreateBuilder {
-    private Connection connection;
-    private GlobType globType;
-    private SqlService sqlService;
-    private BlobUpdater blobUpdater;
-    private JdbcConnection jdbcConnection;
-    private List<Pair<Field, Accessor>> fields = new ArrayList<Pair<Field, Accessor>>();
-    private Set<Field> fieldSet = new HashSet<>();
+    private final Connection connection;
+    private final GlobType globType;
+    private final SqlService sqlService;
+    private final JdbcConnection jdbcConnection;
+    private final List<Pair<Field, Accessor>> fields = new ArrayList<Pair<Field, Accessor>>();
+    private final Set<Field> fieldSet = new HashSet<>();
     protected DelegateGeneratedKeyAccessor generatedKeyAccessor;
 
     public SqlCreateBuilder(Connection connection, GlobType globType, SqlService sqlService,
-                            BlobUpdater blobUpdater, JdbcConnection jdbcConnection) {
+                            JdbcConnection jdbcConnection) {
         this.connection = connection;
         this.globType = globType;
         this.sqlService = sqlService;
-        this.blobUpdater = blobUpdater;
         this.jdbcConnection = jdbcConnection;
     }
 
@@ -229,11 +226,11 @@ public class SqlCreateBuilder implements CreateBuilder {
     }
 
     public SqlRequest getRequest() {
-        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, jdbcConnection);
     }
 
     public BatchSqlRequest getBulkRequest() {
-        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, blobUpdater, jdbcConnection);
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, jdbcConnection);
     }
 
     private static class DelegateGeneratedKeyAccessor implements GeneratedKeyAccessor {
