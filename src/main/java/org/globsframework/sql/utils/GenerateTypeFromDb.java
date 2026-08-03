@@ -175,11 +175,11 @@ public class GenerateTypeFromDb {
                 fieldType = "BytesField";
             }
 
-            public void visitGlob(GlobField field) throws Exception {
+            public void visitGlob(GlobField<?> field) throws Exception {
                 fieldType = "GlobField";
             }
 
-            public void visitGlobArray(GlobArrayField field) throws Exception {
+            public void visitGlobArray(GlobArrayField<?> field) throws Exception {
                 fieldType = "GlobArrayField";
             }
 

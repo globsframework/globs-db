@@ -28,9 +28,9 @@ public interface CreateBuilder {
 
     CreateBuilder set(DateField field, LocalDate value);
 
-    CreateBuilder set(GlobField field, Glob value);
+    CreateBuilder set(GlobField<?> field, Glob value);
 
-    CreateBuilder set(GlobArrayField field, Glob[] values);
+    CreateBuilder set(GlobArrayField<?> field, Glob[] values);
 
     CreateBuilder set(GlobUnionField field, Glob value);
 
@@ -50,9 +50,9 @@ public interface CreateBuilder {
 
     CreateBuilder set(BytesField field, BytesAccessor accessor);
 
-    CreateBuilder set(GlobField field, GlobAccessor accessor);
+    CreateBuilder set(GlobField<?> field, GlobAccessor accessor);
 
-    CreateBuilder set(GlobArrayField field, GlobsAccessor accessor);
+    CreateBuilder set(GlobArrayField<?> field, GlobsAccessor accessor);
 
     CreateBuilder set(GlobUnionField field, GlobAccessor accessor);
 

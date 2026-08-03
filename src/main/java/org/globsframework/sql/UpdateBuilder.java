@@ -49,13 +49,13 @@ public interface UpdateBuilder {
 
     UpdateBuilder update(BytesField field, BytesAccessor accessor);
 
-    UpdateBuilder update(GlobField field, GlobAccessor accessor);
+    UpdateBuilder update(GlobField<?> field, GlobAccessor accessor);
 
-    UpdateBuilder update(GlobField field, Glob value);
+    UpdateBuilder update(GlobField<?> field, Glob value);
 
-    UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor);
+    UpdateBuilder update(GlobArrayField<?> field, GlobsAccessor accessor);
 
-    UpdateBuilder update(GlobArrayField field, Glob[] values);
+    UpdateBuilder update(GlobArrayField<?> field, Glob[] values);
 
     UpdateBuilder update(LongArrayField field, LongArrayAccessor accessor);
 

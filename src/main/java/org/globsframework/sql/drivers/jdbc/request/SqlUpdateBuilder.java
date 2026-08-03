@@ -61,11 +61,11 @@ public class SqlUpdateBuilder implements UpdateBuilder {
                 update(field, (byte[]) value);
             }
 
-            public void visitGlob(GlobField field) {
+            public void visitGlob(GlobField<?> field) {
                 update(field, (Glob) value);
             }
 
-            public void visitGlobArray(GlobArrayField field) {
+            public void visitGlobArray(GlobArrayField<?> field) {
                 update(field, (Glob[]) value);
             }
 
@@ -170,22 +170,22 @@ public class SqlUpdateBuilder implements UpdateBuilder {
         return this;
     }
 
-    public UpdateBuilder update(GlobField field, GlobAccessor accessor) {
+    public UpdateBuilder update(GlobField<?> field, GlobAccessor accessor) {
         addToMap(field, accessor);
         return this;
     }
 
-    public UpdateBuilder update(GlobArrayField field, GlobsAccessor accessor) {
+    public UpdateBuilder update(GlobArrayField<?> field, GlobsAccessor accessor) {
         addToMap(field, accessor);
         return this;
     }
 
-    public UpdateBuilder update(GlobField field, Glob value) {
+    public UpdateBuilder update(GlobField<?> field, Glob value) {
         addToMap(field, new ValueGlobAccessor(value));
         return this;
     }
 
-    public UpdateBuilder update(GlobArrayField field, Glob[] values) {
+    public UpdateBuilder update(GlobArrayField<?> field, Glob[] values) {
         addToMap(field, new ValueGlobsAccessor(values));
         return this;
     }

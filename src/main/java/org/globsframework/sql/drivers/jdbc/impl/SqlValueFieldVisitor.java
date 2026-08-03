@@ -135,7 +135,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         }
     }
 
-    public void visitGlob(GlobField field) throws Exception {
+    public void visitGlob(GlobField<?> field) throws Exception {
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {
@@ -143,7 +143,7 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
         }
     }
 
-    public void visitGlobArray(GlobArrayField field) throws Exception {
+    public void visitGlobArray(GlobArrayField<?> field) throws Exception {
         if (value == null) {
             preparedStatement.setNull(index, Types.VARCHAR);
         } else {

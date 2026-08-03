@@ -87,11 +87,11 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         add("BLOB", field);
     }
 
-    public void visitGlob(GlobField field) throws Exception {
+    public void visitGlob(GlobField<?> field) throws Exception {
         add(getLongStringType(), field);
     }
 
-    public void visitGlobArray(GlobArrayField field) throws Exception {
+    public void visitGlobArray(GlobArrayField<?> field) throws Exception {
         add(getLongStringType(), field);
     }
 

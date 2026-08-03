@@ -18,10 +18,10 @@ public class DummyObjectWithGlob {
     public static IntegerField ID;
 
     @Target(DummyObjectWithGlob.class)
-    public static GlobField simple;
+    public static GlobField<DummyObjectWithGlob> simple;
 
     @Target(DummyObjectWithGlob.class)
-    public static GlobArrayField arrayField;
+    public static GlobArrayField<DummyObjectWithGlob> arrayField;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("DummyObjectWithGlob");

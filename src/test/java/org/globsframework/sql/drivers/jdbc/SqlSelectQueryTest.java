@@ -657,10 +657,10 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
         public static IntegerField ID;
 
         @Target(ValueType.class)
-        public static GlobField VALUE;
+        public static GlobField<ValueType> VALUE;
 
         @Target(ValueType.class)
-        public static GlobArrayField VALUES__2;
+        public static GlobArrayField<ValueType> VALUES__2;
 
         @Targets({ValueType.class, ValueType2.class})
         public static GlobUnionField ANY_TYPE;

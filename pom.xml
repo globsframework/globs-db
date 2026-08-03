@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>5.6.0</version>
+            <version>5.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
@@ -167,7 +167,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>5.6.0</version>
+            <version>5.9.0</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
@@ -186,7 +186,7 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>saxstack</artifactId>
-            <version>4.1.1</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

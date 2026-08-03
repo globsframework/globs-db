@@ -201,11 +201,11 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
         }
 
 
-        public void visitGlob(GlobField field) {
+        public void visitGlob(GlobField<?> field) {
             convertValue = GSonUtils.encode((Glob) value, true);
         }
 
-        public void visitGlobArray(GlobArrayField field) {
+        public void visitGlobArray(GlobArrayField<?> field) {
             convertValue = GSonUtils.encode((Glob[]) value, true);
         }
 

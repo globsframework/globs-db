@@ -234,12 +234,12 @@ public class SqlQueryBuilder implements SelectBuilder {
         return this;
     }
 
-    public SelectBuilder select(GlobField field, Ref<GlobAccessor> accessor) {
+    public SelectBuilder select(GlobField<?> field, Ref<GlobAccessor> accessor) {
         accessor.set(retrieve(field));
         return this;
     }
 
-    public SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor) {
+    public SelectBuilder select(GlobArrayField<?> field, Ref<GlobsAccessor> accessor) {
         accessor.set(retrieve(field));
         return this;
     }
@@ -353,7 +353,7 @@ public class SqlQueryBuilder implements SelectBuilder {
         return (StringArrayAccessor) fieldToAccessorHolder.computeIfAbsent(field, x -> new StringArraySqlAccessor(new StringSqlAccessor()));
     }
 
-    public GlobAccessor retrieve(GlobField field) {
+    public GlobAccessor retrieve(GlobField<?> field) {
         return (GlobAccessor) fieldToAccessorHolder.computeIfAbsent(field,
                 x -> new GlobSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetType())));
     }
@@ -363,7 +363,7 @@ public class SqlQueryBuilder implements SelectBuilder {
                 x -> new GlobSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetTypes())));
     }
 
-    public GlobsAccessor retrieve(GlobArrayField field) {
+    public GlobsAccessor retrieve(GlobArrayField<?> field) {
         return (GlobsAccessor) fieldToAccessorHolder.computeIfAbsent(field,
                 x -> new GlobsSqlAccessor(new StringSqlAccessor(), GlobTypeResolver.from(field.getTargetType())));
     }
@@ -695,7 +695,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
-        public void visitGlob(GlobField field) throws Exception {
+        public void visitGlob(GlobField<?> field) throws Exception {
             accessor = retrieve(field);
         }
 
@@ -703,7 +703,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             accessor = retrieve(field);
         }
 
-        public void visitGlobArray(GlobArrayField field) throws Exception {
+        public void visitGlobArray(GlobArrayField<?> field) throws Exception {
             accessor = retrieve(field);
         }
 

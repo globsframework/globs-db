@@ -32,9 +32,9 @@ public interface SelectBuilder {
 
     SelectBuilder select(BytesField field, Ref<BytesAccessor> accessor);
 
-    SelectBuilder select(GlobField field, Ref<GlobAccessor> accessor);
+    SelectBuilder select(GlobField<?> field, Ref<GlobAccessor> accessor);
 
-    SelectBuilder select(GlobArrayField field, Ref<GlobsAccessor> accessor);
+    SelectBuilder select(GlobArrayField<?> field, Ref<GlobsAccessor> accessor);
 
 
     SelectBuilder select(LongArrayField field, Ref<LongArrayAccessor> accessor);
@@ -101,11 +101,11 @@ public interface SelectBuilder {
 
     BooleanArrayAccessor retrieve(BooleanArrayField field);
 
-    GlobAccessor retrieve(GlobField field);
+    GlobAccessor retrieve(GlobField<?> field);
 
     GlobAccessor retrieve(GlobUnionField field);
 
-    GlobsAccessor retrieve(GlobArrayField field);
+    GlobsAccessor retrieve(GlobArrayField<?> field);
 
     GlobsAccessor retrieve(GlobArrayUnionField field);
 

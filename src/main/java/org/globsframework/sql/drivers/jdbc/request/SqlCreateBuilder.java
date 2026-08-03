@@ -81,11 +81,11 @@ public class SqlCreateBuilder implements CreateBuilder {
                 setObject(field, new ValueBooleanAccessor((Boolean) value));
             }
 
-            public void visitGlob(GlobField field) throws Exception {
+            public void visitGlob(GlobField<?> field) throws Exception {
                 setObject(field, new ValueGlobAccessor((Glob) value));
             }
 
-            public void visitGlobArray(GlobArrayField field) throws Exception {
+            public void visitGlobArray(GlobArrayField<?> field) throws Exception {
                 setObject(field, new ValueGlobsAccessor((Glob[]) value));
             }
 
@@ -173,11 +173,11 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, new ValueDateAccessor(value));
     }
 
-    public CreateBuilder set(GlobField field, Glob value) {
+    public CreateBuilder set(GlobField<?> field, Glob value) {
         return setObject(field, new ValueGlobAccessor(value));
     }
 
-    public CreateBuilder set(GlobArrayField field, Glob[] values) {
+    public CreateBuilder set(GlobArrayField<?> field, Glob[] values) {
         return setObject(field, new ValueGlobsAccessor(values));
     }
 
@@ -189,11 +189,11 @@ public class SqlCreateBuilder implements CreateBuilder {
         return setObject(field, new ValueGlobsAccessor(values));
     }
 
-    public CreateBuilder set(GlobField field, GlobAccessor accessor) {
+    public CreateBuilder set(GlobField<?> field, GlobAccessor accessor) {
         return setObject(field, accessor);
     }
 
-    public CreateBuilder set(GlobArrayField field, GlobsAccessor accessor) {
+    public CreateBuilder set(GlobArrayField<?> field, GlobsAccessor accessor) {
         return setObject(field, accessor);
     }
 
