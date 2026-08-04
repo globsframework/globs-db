@@ -57,6 +57,8 @@ public interface SelectBuilder {
 
     LongAccessor count(Field field);
 
+    LongAccessor count();
+
     default LongAccessor count(IntegerField field) {
         return count(((Field) field));
     }

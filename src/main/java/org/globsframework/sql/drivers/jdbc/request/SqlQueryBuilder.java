@@ -28,7 +28,7 @@ import java.util.*;
 public class SqlQueryBuilder implements SelectBuilder {
     protected final List<Order> orders = new ArrayList<>();
     protected Connection connection;
-    private final GlobType globType;
+    protected final GlobType globType;
     protected final Constraint constraint;
     protected final SqlService sqlService;
     protected boolean autoClose = true;
@@ -104,6 +104,11 @@ public class SqlQueryBuilder implements SelectBuilder {
         return singleCount(field, "COUNT");
     }
 
+    @Override
+    public LongAccessor count() {
+        return singleCount(null, "COUNT");
+    }
+
     public LongAccessor sum(IntegerField field) {
         return singleLongOp(field, "SUM");
     }
@@ -149,7 +154,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     }
 
     private LongAccessor singleCount(Field field, String op) {
-        if (fallBackType == null) {
+        if (fallBackType == null && field != null) {
             fallBackType = field.getGlobType();
         }
         LongAccessor accessor = new LongSqlAccessor();
@@ -160,7 +165,7 @@ public class SqlQueryBuilder implements SelectBuilder {
             }
 
             public String toSqlOpe(ToSqlName toSqlName) {
-                return op + "(" + toSqlName.toSqlName(field) + ")";
+                return op + "(" + (field == null ? "1" : toSqlName.toSqlName(field)) + ")";
             }
         });
         return accessor;

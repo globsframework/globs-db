@@ -17,7 +17,7 @@ public class PostgreSqlQueryBuilder extends SqlQueryBuilder {
     public SelectQuery getQuery() {
         try {
             return new PostgreSqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
+                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }

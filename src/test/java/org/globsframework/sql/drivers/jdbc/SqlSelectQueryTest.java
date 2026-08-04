@@ -536,6 +536,16 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                     .sum();
             Assert.assertEquals(6, sum);
         }
+        {
+            SelectBuilder queryBuilder = sqlConnection.getQueryBuilder(DummyObject.TYPE);
+            LongAccessor max = queryBuilder
+                    .groupBy(DummyObject.NAME)
+                    .count();
+            final long sum = queryBuilder.getQuery().executeAsStream()
+                    .mapToLong(v -> max.getValue(0))
+                    .sum();
+            Assert.assertEquals(6, sum);
+        }
     }
 
     @Test

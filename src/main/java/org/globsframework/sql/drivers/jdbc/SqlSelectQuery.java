@@ -169,6 +169,9 @@ public class SqlSelectQuery implements SelectQuery {
         }
 
         prettyWriter.append(" from ");
+        if (globTypes.isEmpty()) {
+            globTypes.add(fallBackType);
+        }
         for (Iterator<GlobType> it = globTypes.iterator(); it.hasNext(); ) {
             GlobType globType = it.next();
             prettyWriter.append(sqlService.getTableName(globType, true))

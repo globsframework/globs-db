@@ -18,7 +18,7 @@ public class HsqldbSqlQueryBuilder extends SqlQueryBuilder {
     public SelectQuery getQuery() {
         try {
             return new HsqldbSqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
+                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
         } finally {
             fieldToAccessorHolder.clear();
         }
