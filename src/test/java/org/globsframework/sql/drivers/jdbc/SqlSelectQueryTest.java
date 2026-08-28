@@ -5,9 +5,6 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.KeyField;
-import org.globsframework.core.metamodel.annotations.KeyField_;
-import org.globsframework.core.metamodel.annotations.Target;
-import org.globsframework.core.metamodel.annotations.Targets;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.model.Glob;
@@ -663,19 +660,14 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
     public static class GlobWithGlobType {
         public static GlobType TYPE;
 
-        @KeyField_
         public static IntegerField ID;
 
-        @Target(ValueType.class)
         public static GlobField<ValueType> VALUE;
 
-        @Target(ValueType.class)
         public static GlobArrayField<ValueType> VALUES__2;
 
-        @Targets({ValueType.class, ValueType2.class})
         public static GlobUnionField ANY_TYPE;
 
-        @Targets({ValueType.class, ValueType2.class})
         public static GlobArrayUnionField ANY_TYPES;
 
         static {

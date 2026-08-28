@@ -4,8 +4,6 @@ import org.globsframework.core.metamodel.Annotations;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
-import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
@@ -18,13 +16,11 @@ public class DbTableName {
 
     public static final StringField NAME;
 
-    @InitUniqueKey
     public static final Key UNIQUE_KEY;
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbTableName");
         NAME = typeBuilder.declareStringField("name");
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create(((DbTableName_) annotation).value()));
         TYPE = typeBuilder.build();
         UNIQUE_KEY = KeyBuilder.newEmptyKey(TYPE);
     }

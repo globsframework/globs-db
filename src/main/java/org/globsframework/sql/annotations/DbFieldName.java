@@ -3,8 +3,6 @@ package org.globsframework.sql.annotations;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
-import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Key;
@@ -18,19 +16,13 @@ public class DbFieldName {
 
     public static final StringField NAME;
 
-    @InitUniqueKey
     public static final Key KEY;
 
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbFieldName");
         NAME = typeBuilder.declareStringField("name");
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create((DbFieldName_) annotation));
         TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
-    }
-
-    private static MutableGlob create(DbFieldName_ annotation) {
-        return TYPE.instantiate().set(NAME, annotation.value());
     }
 
     public static Optional<String> getOptName(Field field) {

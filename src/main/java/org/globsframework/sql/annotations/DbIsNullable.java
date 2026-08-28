@@ -3,8 +3,6 @@ package org.globsframework.sql.annotations;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.GlobCreateFromAnnotation;
-import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.BooleanField;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
@@ -24,7 +22,6 @@ public class DbIsNullable {
         return notNullable;
     }
 
-    @InitUniqueKey
     public static final Key KEY;
 
     public static final Glob nullable;
@@ -34,7 +31,6 @@ public class DbIsNullable {
     static {
         GlobTypeBuilder typeBuilder = GlobTypeBuilderFactory.create("DbIsNullable");
         IS_NULLABLE = typeBuilder.declareBooleanField("isNullable");
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> create(true));
         TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
         nullable = create(true);

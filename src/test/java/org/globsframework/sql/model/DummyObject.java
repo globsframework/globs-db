@@ -15,11 +15,8 @@ public class DummyObject {
 
     public static final GlobType TYPE;
 
-    @KeyField_
-    @AutoIncrement_
     public static IntegerField ID;
 
-    @NamingField_
     public static StringField NAME;
 
     public static StringArrayField ALIAS;
@@ -28,27 +25,22 @@ public class DummyObject {
 
     public static DoubleField VALUE;
 
-    @DbIsNullable_
     public static IntegerField COUNT;
 
     public static BooleanField PRESENT;
 
-    @IsDate_
     public static IntegerField DATE;
 
-    @IsDateTime_
     public static LongField CREATED_AT;
 
     public static BytesField PASSWORD;
 
     public static DateTimeField REAL_DATE_TIME;
 
-    @ContainmentLink_
     public static IntegerField LINK_ID;
 
     public static DirectLink LINK;
 
-    @Target(DummyObject2.class)
     public static IntegerField LINK2_ID;
 
     public static DirectLink LINK2;

@@ -3,7 +3,6 @@ package org.globsframework.sql.annotations;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.InitUniqueKey;
 import org.globsframework.core.metamodel.fields.IntegerField;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.KeyBuilder;
@@ -14,7 +13,6 @@ public class DbNumericDigit {
 
     public static final IntegerField SIZE;
 
-    @InitUniqueKey
     public static final Key KEY;
 
     static {

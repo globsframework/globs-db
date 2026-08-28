@@ -5,6 +5,7 @@ import org.globsframework.sql.drivers.hsqldb.HsqlConnection;
 import org.globsframework.sql.drivers.mysql.MysqlConnection;
 import org.globsframework.sql.drivers.oracle.OracleConnection;
 import org.globsframework.sql.drivers.postgresql.PostgresqlConnection;
+import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.utils.AbstractSqlService;
 
 import javax.sql.DataSource;
@@ -26,7 +27,7 @@ public class DataSourceSqlService extends AbstractSqlService {
                     connection.setAutoCommit(autoCommit);
                     return new PostgresqlConnection(autoCommit, connection, DataSourceSqlService.this);
                 } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
+                    throw new SqlException(e);
                 }
             };
             case hsqldb -> (autoCommit) -> {
@@ -35,7 +36,7 @@ public class DataSourceSqlService extends AbstractSqlService {
                     connection.setAutoCommit(autoCommit);
                     return new HsqlConnection(autoCommit, connection, DataSourceSqlService.this);
                 } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
+                    throw new SqlException(e);
                 }
             };
             case mysql, mariadb -> (autoCommit) -> {
@@ -44,7 +45,7 @@ public class DataSourceSqlService extends AbstractSqlService {
                     connection.setAutoCommit(autoCommit);
                     return new MysqlConnection(autoCommit, connection, DataSourceSqlService.this);
                 } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
+                    throw new SqlException(e);
                 }
             };
             case oracle -> autoCommit -> {
@@ -53,7 +54,7 @@ public class DataSourceSqlService extends AbstractSqlService {
                     connection.setAutoCommit(autoCommit);
                     return new OracleConnection(autoCommit, connection, DataSourceSqlService.this);
                 } catch (SQLException e) {
-                    throw new UnexpectedApplicationState(e);
+                    throw new SqlException(e);
                 }
             };
         };
