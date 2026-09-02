@@ -206,13 +206,20 @@ public class SqlSelectQuery implements SelectQuery {
             }
             prettyWriter.removeLast(2);
         }
+        appendTopAndSkip(prettyWriter, top, skip);
+        return prettyWriter.toString();
+    }
+
+    /**
+     * Appends the row limiting clause. Overridden by drivers whose dialect does not know LIMIT/OFFSET.
+     */
+    protected void appendTopAndSkip(StringPrettyWriter prettyWriter, int top, int skip) {
         if (top != -1) {
             prettyWriter.append(" LIMIT " + top);
         }
         if (skip != -1) {
             prettyWriter.append(" OFFSET " + skip);
         }
-        return prettyWriter.toString();
     }
 
     public Stream<?> executeAsStream() {

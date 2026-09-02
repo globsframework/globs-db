@@ -4,13 +4,17 @@ import org.globsframework.core.metamodel.annotations.IsDate;
 import org.globsframework.core.metamodel.annotations.IsDateTime;
 import org.globsframework.core.metamodel.fields.DoubleField;
 import org.globsframework.core.metamodel.fields.LongField;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.model.Glob;
+import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.annotations.DbMaxCharSize;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.impl.SqlFieldCreationVisitor;
+import org.globsframework.sql.drivers.oracle.request.OracleSqlQueryBuilder;
 import org.globsframework.sql.utils.StringPrettyWriter;
 
 import java.sql.Connection;
@@ -19,6 +23,18 @@ import java.sql.Connection;
 public class OracleConnection extends JdbcConnection {
     public OracleConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService);
+    }
+
+    @Override
+    public SelectBuilder getQueryBuilder(GlobType globType) {
+        checkConnectionIsNotClosed();
+        return new OracleSqlQueryBuilder(getConnection(), globType, null, sqlService);
+    }
+
+    @Override
+    public SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint) {
+        checkConnectionIsNotClosed();
+        return new OracleSqlQueryBuilder(getConnection(), globType, constraint, sqlService);
     }
 
     @Override
