@@ -84,7 +84,7 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
         prettyWriter.append(")");
     }
 
-    public void visitContains(Field field, String value, boolean contains, boolean startWith, boolean ignoreCase) {
+    public void visitContains(Field field, String value, ContainType containType, boolean contains, boolean ignoreCase) {
         if (ignoreCase) {
             final String likeIgnoreCase = sqlService.getLikeIgnoreCase();
             if (likeIgnoreCase != null) {
@@ -101,7 +101,6 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
             prettyWriter.append(" NOT ");
         }
 
-//        prettyWriter.append(" LIKE '" + (startWith ? "" : "%") + value + "%'");
         if (ignoreCase) {
             final String likeIgnoreCase = sqlService.getLikeIgnoreCase();
             if (likeIgnoreCase != null) {

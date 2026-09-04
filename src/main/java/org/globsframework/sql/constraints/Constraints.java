@@ -218,39 +218,59 @@ public class Constraints {
     }
 
     public static Constraint contains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, true, false);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.contains, true, false);
     }
 
     public static Constraint containsIgnoreCase(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, true, true);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.contains, true, true);
     }
 
     public static Constraint notContains(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, false, false);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.contains, false, false);
     }
 
     public static Constraint notContainsIgnoreCase(StringField field, String value) {
-        return new ContainsConstraint(field, value, false, false, true);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.contains, false, true);
     }
 
     public static Constraint startWith(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, true, false);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.startWith, true, false);
     }
 
     public static Constraint startWithIgnoreCase(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, true, true);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.startWith, true, true);
     }
 
     public static Constraint startWith(StringArrayField field, String[] value) {
-        return new ContainsConstraint(field, String.join(",", value), true, true, false);
+        return new ContainsConstraint(field, String.join(",", value), ConstraintVisitor.ContainType.startWith, true, false);
     }
 
     public static Constraint notStartWith(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, false, false);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.startWith, false, false);
     }
 
     public static Constraint notStartWithIgnoreCase(StringField field, String value) {
-        return new ContainsConstraint(field, value, true, false, true);
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.startWith, false, true);
+    }
+
+    public static Constraint endWith(StringField field, String value) {
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.endWith, true, false);
+    }
+
+    public static Constraint endWithIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.endWith, true, true);
+    }
+
+    public static Constraint endWith(StringArrayField field, String[] value) {
+        return new ContainsConstraint(field, String.join(",", value), ConstraintVisitor.ContainType.endWith, true, false);
+    }
+
+    public static Constraint notEndWith(StringField field, String value) {
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.endWith, false, false);
+    }
+
+    public static Constraint notEndWithIgnoreCase(StringField field, String value) {
+        return new ContainsConstraint(field, value, ConstraintVisitor.ContainType.endWith, false, true);
     }
 
     public static Constraint regularExpressionCaseSensitive(StringField field, String value) {

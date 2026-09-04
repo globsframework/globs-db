@@ -84,17 +84,15 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     }
 
     public void visitNotIn(NotInConstraint constraint) {
-
     }
 
-    public void visitContains(Field field, String value, boolean contains, boolean startWith, boolean ignoreCase) {
-        if (contains) {
-            setValue("%" + value + "%", ++index);
-        } else if (startWith) {
-            setValue(value + "%", ++index);
-        } else {
-            setValue(value, ++index);
-        }
+    public void visitContains(Field field, String value, ContainType containType, boolean contains, boolean ignoreCase) {
+        final String pattern = switch (containType) {
+            case contains -> "%" + value + "%";
+            case startWith -> value + "%";
+            case endWith -> "%" + value;
+        };
+        setValue(pattern, ++index);
         field.safeAccept(this);
     }
 

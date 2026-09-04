@@ -26,7 +26,11 @@ public interface ConstraintVisitor {
 
     void visitNotIn(NotInConstraint constraint);
 
-    void visitContains(Field field, String value, boolean contains, boolean startWith, boolean ignoreCase);
+    enum ContainType {
+        startWith, endWith, contains
+    }
+
+    void visitContains(Field field, String value, ContainType containType, boolean contains, boolean ignoreCase);
 
     void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not);
 }

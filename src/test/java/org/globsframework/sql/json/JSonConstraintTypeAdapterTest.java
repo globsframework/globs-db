@@ -164,6 +164,28 @@ public class JSonConstraintTypeAdapterTest {
         Assert.assertTrue(constraint1 instanceof RegularExpressionConstraint);
     }
 
+    @Test
+    public void startAndEndWith() {
+        checkRoundTrip(Constraints.startWith(DummyObject.NAME, "abc"), "start");
+        checkRoundTrip(Constraints.startWithIgnoreCase(DummyObject.NAME, "abc"), "startIgnoreCase");
+        checkRoundTrip(Constraints.notStartWith(DummyObject.NAME, "abc"), "notStart");
+        checkRoundTrip(Constraints.notStartWithIgnoreCase(DummyObject.NAME, "abc"), "notStartIgnoreCase");
+        checkRoundTrip(Constraints.endWith(DummyObject.NAME, "abc"), "end");
+        checkRoundTrip(Constraints.endWithIgnoreCase(DummyObject.NAME, "abc"), "endIgnoreCase");
+        checkRoundTrip(Constraints.notEndWith(DummyObject.NAME, "abc"), "notEnd");
+        checkRoundTrip(Constraints.notEndWithIgnoreCase(DummyObject.NAME, "abc"), "notEndIgnoreCase");
+    }
+
+    private void checkRoundTrip(Constraint constraint, String expectedOperator) {
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"" + expectedOperator + "\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"},\"value\":\"abc\"}}", s);
+        Constraint reread = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(reread instanceof ContainsConstraint);
+        // the re-read constraint must serialize back to the same operator
+        assertEquivalent(s, gson.toJson(reread));
+    }
+
     public static void assertEquivalent(String expected, String actual) {
         JsonElement expectedTree = JsonParser.parseReader(new StringReader(expected));
         JsonElement actualTree = JsonParser.parseReader(new StringReader(actual));

@@ -7,20 +7,20 @@ import org.globsframework.sql.constraints.ConstraintVisitor;
 public class ContainsConstraint implements Constraint {
     public final Field field;
     public final String value;
-    public final boolean startWith;
+    private final ConstraintVisitor.ContainType containType;
     private final boolean contains;
     private final boolean ignoreCase;
 
-    public ContainsConstraint(Field field, String value, boolean startWith, boolean contains, boolean ignoreCase) {
+    public ContainsConstraint(Field field, String value, ConstraintVisitor.ContainType containType, boolean contains, boolean ignoreCase) {
         this.field = field;
         this.value = value;
-        this.startWith = startWith;
+        this.containType = containType;
         this.contains = contains;
         this.ignoreCase = ignoreCase;
     }
 
     public <T extends ConstraintVisitor> T accept(T visitor) {
-        visitor.visitContains(field, value, contains, startWith, ignoreCase);
+        visitor.visitContains(field, value, containType, contains, ignoreCase);
         return visitor;
     }
 

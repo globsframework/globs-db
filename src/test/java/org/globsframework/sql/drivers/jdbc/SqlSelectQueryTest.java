@@ -358,18 +358,68 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
 
     @Test
     public void startWith() {
+        populateForLike();
+        assertNames(Constraints.startWith(DummyObject.NAME, "world"), "world", "worldwide");
+    }
+
+    @Test
+    public void endWith() {
+        populateForLike();
+        assertNames(Constraints.endWith(DummyObject.NAME, "world"), "helloworld", "world");
+    }
+
+    @Test
+    public void containsInTheMiddle() {
+        populateForLike();
+        assertNames(Constraints.contains(DummyObject.NAME, "world"), "helloworld", "world", "worldwide");
+    }
+
+    @Test
+    public void notStartWith() {
+        populateForLike();
+        assertNames(Constraints.notStartWith(DummyObject.NAME, "world"), "helloworld", "planet");
+    }
+
+    @Test
+    public void notEndWith() {
+        populateForLike();
+        assertNames(Constraints.notEndWith(DummyObject.NAME, "world"), "planet", "worldwide");
+    }
+
+    @Test
+    public void notContains() {
+        populateForLike();
+        assertNames(Constraints.notContains(DummyObject.NAME, "world"), "planet");
+    }
+
+    @Test
+    public void endWithIgnoreCase() {
+        populateForLike();
+        assertNames(Constraints.endWithIgnoreCase(DummyObject.NAME, "WORLD"), "helloworld", "world");
+    }
+
+    @Test
+    public void notEndWithIgnoreCase() {
+        populateForLike();
+        assertNames(Constraints.notEndWithIgnoreCase(DummyObject.NAME, "WORLD"), "planet", "worldwide");
+    }
+
+    // 'worldwide' and 'helloworld' make prefix, suffix and infix matches distinguishable
+    private void populateForLike() {
         populate(sqlConnection,
                 XmlGlobStreamReader.parse(
-                        "<dummyObject id='1' name='hello' value='1.1' present='true'/>" +
-                                "<dummyObject id='3' name='world' value='2.2' present='false'/>" +
-                                "<dummyObject id='4' name='world' value='2.2' present='false'/>" +
-                                "<dummyObject id='5' name='planet' value='2.2' present='false'/>" +
-                                "<dummyObject id='6' name='world' value='2.2' present='false'/>" +
-                                "<dummyObject id='7' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
-        List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, Constraints.startWith(DummyObject.NAME, "world"))
+                        "<dummyObject id='1' name='world' value='1.1' present='true'/>" +
+                                "<dummyObject id='2' name='worldwide' value='2.2' present='false'/>" +
+                                "<dummyObject id='3' name='helloworld' value='2.2' present='false'/>" +
+                                "<dummyObject id='4' name='planet' value='2.2' present='false'/>", directory.get(GlobModel.class)));
+    }
+
+    private void assertNames(Constraint constraint, String... expected) {
+        List<Glob> list = ((SqlQueryBuilder) sqlConnection.getQueryBuilder(DummyObject.TYPE, constraint)
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
-        assertEquals(3, list.size());
+        String[] actual = list.stream().map(DummyObject.NAME).sorted().toArray(String[]::new);
+        assertArrayEquals(expected, actual);
     }
 
     @Test
@@ -386,6 +436,7 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                 .select(DummyObject.NAME))
                 .getQuery().executeAsGlobs();
         assertEquals(3, list.size());
+        assertTrue(list.stream().map(DummyObject.NAME).noneMatch("planet"::equals));
     }
 
     @Test
