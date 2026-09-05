@@ -43,6 +43,14 @@ public interface SqlConnection extends AutoCloseable {
 
     void createTable(GlobType globType);
 
+    /**
+     * Creates the indexes the type declares — {@code GlobType.getIndices()} plus any {@code DbIndex}
+     * annotation — skipping those the table already carries. {@link #createTable} calls this when it
+     * actually creates the table; call it yourself to add indexes to a table that already exists,
+     * where building one may be long and locking and so should not happen behind your back.
+     */
+    void createIndexes(GlobType globType);
+
     void addColumn(Field... column);
 
     void emptyTable(GlobType globType);

@@ -26,4 +26,20 @@ public class MysqlSelectQuery extends SqlSelectQuery {
     protected WhereClauseConstraintVisitor getWhereConstraintVisitor(StringPrettyWriter where) {
         return new MysqlWhereClauseConstraintVisitor(where, sqlService, globTypes);
     }
+
+    /**
+     * MySQL and MariaDB reject an OFFSET that is not preceded by a LIMIT, so a skip() without a
+     * top() has to name a limit anyway. 2^64-1 is the value their own documentation gives for
+     * "all the rows from here on".
+     */
+    protected void appendTopAndSkip(StringPrettyWriter prettyWriter, int top, int skip) {
+        if (top != -1) {
+            prettyWriter.append(" LIMIT " + top);
+        } else if (skip != -1) {
+            prettyWriter.append(" LIMIT 18446744073709551615");
+        }
+        if (skip != -1) {
+            prettyWriter.append(" OFFSET " + skip);
+        }
+    }
 }

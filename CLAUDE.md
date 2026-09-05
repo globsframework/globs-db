@@ -160,6 +160,18 @@ equivalent: they are stored as **JSON text** in a long-string column, encoded/de
 `SqlValueFieldVisitor` and the accessor-creation code in `SqlQueryBuilder` — miss one and values round-trip
 as raw numbers.
 
+### Indexes and foreign keys
+
+`createTable` ends with `createIndexes(globType)`, which reads `globType.getIndices()` (core's index model)
+*and* any `DbIndex` annotation, and creates what `DatabaseMetaData.getIndexInfo` says is missing — so it is
+idempotent, and `createIndexes` is public for adding indexes to a table that already exists. Index names are
+qualified with the table (`<table>_<declared name>`) because Postgres and HSQLDB scope index names to the
+schema, not the table.
+
+`DbRef` remains dead: it carries only a target type name, with no column mapping, and core keeps links in a
+separate `GlobLinkModel` that a `GlobType` does not expose. Generating foreign keys needs that gap closed
+first, plus an answer for creation order and for existing dangling rows. Don't wire it up casually.
+
 ### Annotations
 
 Same pair convention as the rest of the workspace (`DbFieldName.java` Glob type + `DbFieldName_.java`

@@ -3,12 +3,15 @@ package org.globsframework.sql.drivers.jdbc;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.annotations.AutoIncrement;
 import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.index.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.utils.collections.MultiMap;
 import org.globsframework.core.utils.exceptions.GlobsException;
 import org.globsframework.core.utils.exceptions.OperationDenied;
+import org.globsframework.core.streams.accessors.utils.ValueAccessor;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.*;
+import org.globsframework.sql.annotations.DbIndex;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sql.drivers.jdbc.request.SqlCreateBuilder;
@@ -25,12 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
+    private static final int BATCH_SIZE = 1000;
     private final boolean autoCommit;
     protected SqlService sqlService;
     private Connection connection;
@@ -170,6 +178,101 @@ public abstract class JdbcConnection implements SqlConnection {
             LOGGER.error(message);
             throw new UnexpectedApplicationState(message, e);
         }
+        createIndexes(globType);
+    }
+
+    public void createIndexes(GlobType globType) {
+        checkConnectionIsNotClosed();
+        List<Index> indexes = declaredIndexes(globType);
+        if (indexes.isEmpty()) {
+            return;
+        }
+        Set<String> known = existingIndexNames(globType);
+        for (Index index : indexes) {
+            String name = indexName(globType, index);
+            if (!known.add(sqlService.getColumnName(name, false))) {
+                continue;
+            }
+            StringPrettyWriter writer = new StringPrettyWriter();
+            writer.append("CREATE ");
+            writer.appendIf("UNIQUE ", isUnique(index));
+            writer.append("INDEX ")
+                    .append(sqlService.getColumnName(name, true))
+                    .append(" ON ")
+                    .append(sqlService.getTableName(globType, true))
+                    .append(" (");
+            List<Field> fields = index.fields().toList();
+            for (int i = 0; i < fields.size(); i++) {
+                writer.append(sqlService.getColumnName(fields.get(i), true))
+                        .appendIf(", ", i + 1 < fields.size());
+            }
+            writer.append(")");
+            endOfRequest(writer);
+            try (PreparedStatement statement = connection.prepareStatement(writer.toString())) {
+                statement.executeUpdate();
+                LOGGER.info("sql create index request : " + writer);
+            } catch (SQLException e) {
+                String message = "Invalid index creation request: " + writer;
+                LOGGER.error(message);
+                throw new UnexpectedApplicationState(message, e);
+            }
+        }
+    }
+
+    /**
+     * Indexes declared on the type itself, plus those carried by a DbIndex annotation.
+     */
+    private static List<Index> declaredIndexes(GlobType globType) {
+        List<Index> indexes = new ArrayList<>(globType.getIndices());
+        globType.streamAnnotations(DbIndex.TYPE)
+                .map(annotation -> DbIndex.createIndex(globType, annotation))
+                .forEach(indexes::add);
+        return indexes;
+    }
+
+    /**
+     * An index name is unique per schema on PostgreSQL and HSQLDB, not per table, so the declared
+     * name is qualified by the table it belongs to.
+     */
+    private String indexName(GlobType globType, Index index) {
+        return sqlService.getTableName(globType, false) + "_" + index.getName();
+    }
+
+    private Set<String> existingIndexNames(GlobType globType) {
+        Set<String> names = new HashSet<>();
+        try (ResultSet indexInfo = connection.getMetaData().getIndexInfo(connection.getCatalog(), null,
+                sqlService.getTableName(globType, false), false, true)) {
+            while (indexInfo.next()) {
+                String name = indexInfo.getString("INDEX_NAME");
+                if (name != null) {
+                    names.add(name);
+                }
+            }
+        } catch (SQLException e) {
+            // not fatal: at worst an index we already have is created again and the DDL fails loudly
+            LOGGER.warn("Could not list the indexes of " + globType.getName(), e);
+        }
+        return names;
+    }
+
+    private static boolean isUnique(Index index) {
+        boolean[] unique = new boolean[1];
+        index.visit(new IndexVisitor() {
+            public void visitUniqueIndex(UniqueIndex index) {
+                unique[0] = true;
+            }
+
+            public void visitNotUniqueIndex(NotUniqueIndex index) {
+            }
+
+            public void visitNotUnique(MultiFieldNotUniqueIndex index) {
+            }
+
+            public void visitUnique(MultiFieldUniqueIndex index) {
+                unique[0] = true;
+            }
+        });
+        return unique[0];
     }
 
     public void endOfRequest(StringPrettyWriter writer) {
@@ -255,17 +358,79 @@ public abstract class JdbcConnection implements SqlConnection {
     public void showDb() {
     }
 
+    /**
+     * Inserts every glob, one prepared statement per shape rather than one per row — a shape being a
+     * type together with the columns actually written, which an unset auto-increment key makes vary
+     * inside a single type. Batches are flushed every {@value BATCH_SIZE} rows so a large collection
+     * does not pile up in the driver.
+     */
     public void populate(Collection<Glob> all) {
-        for (Glob glob : all) {
-            CreateBuilder createBuilder = getCreateBuilder(glob.getType());
-            for (Field field : glob.getType().getFields()) {
-                if (!field.hasAnnotation(AutoIncrement.KEY) || glob.isSet(field)) {
-                    createBuilder.setObject(field, glob.getValue(field));
-                }
+        checkConnectionIsNotClosed();
+        Map<Shape, BatchPopulate> batches = new LinkedHashMap<>();
+        try {
+            for (Glob glob : all) {
+                Shape shape = new Shape(glob.getType(), columnsToWrite(glob));
+                batches.computeIfAbsent(shape, s -> new BatchPopulate(getCreateBuilder(s.type()), s.columns()))
+                        .add(glob);
             }
-            try (SqlRequest request = createBuilder.getRequest()) {
-                request.apply();
+            for (BatchPopulate batch : batches.values()) {
+                batch.flush();
             }
+        } finally {
+            for (BatchPopulate batch : batches.values()) {
+                batch.close();
+            }
+        }
+    }
+
+    private static List<Field> columnsToWrite(Glob glob) {
+        List<Field> columns = new ArrayList<>();
+        for (Field field : glob.getType().getFields()) {
+            if (!field.hasAnnotation(AutoIncrement.KEY) || glob.isSet(field)) {
+                columns.add(field);
+            }
+        }
+        return columns;
+    }
+
+    private record Shape(GlobType type, List<Field> columns) {
+    }
+
+    private static class BatchPopulate {
+        private final List<Field> columns;
+        private final ValueAccessor[] accessors;
+        private final BatchSqlRequest request;
+        private int pending;
+
+        BatchPopulate(CreateBuilder createBuilder, List<Field> columns) {
+            this.columns = columns;
+            this.accessors = new ValueAccessor[columns.size()];
+            for (int i = 0; i < columns.size(); i++) {
+                accessors[i] = new ValueAccessor();
+                createBuilder.setObject(columns.get(i), accessors[i]);
+            }
+            this.request = createBuilder.getBulkRequest();
+        }
+
+        void add(Glob glob) {
+            for (int i = 0; i < columns.size(); i++) {
+                accessors[i].setValue(glob.getValue(columns.get(i)));
+            }
+            request.addBatch();
+            if (++pending == BATCH_SIZE) {
+                flush();
+            }
+        }
+
+        void flush() {
+            if (pending != 0) {
+                request.applyBatch();
+                pending = 0;
+            }
+        }
+
+        void close() {
+            request.close();
         }
     }
 

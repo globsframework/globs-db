@@ -107,8 +107,31 @@ sqlConnection.createTable(StudentType.TYPE);
 ```
 
 The annotations, all with the usual Glob + `@interface` pair, live in `annotations/`: `DbTableName`,
-`DbFieldName`, `DbMaxCharSize` / `DbMinCharSize`, `DbIsNullable`, `DbIndex` / `DbFieldIndex`, `DbRef`,
-`DbNumericPrecision` / `DbNumericDigit`, `DbSqlType`, `IsDbKey`, `IsTimestamp`, `IsBigDecimal`.
+`DbFieldName`, `DbMaxCharSize` / `DbMinCharSize`, `DbIsNullable`, `DbIndex` / `DbFieldIndex`,
+`DbNumericPrecision` / `DbNumericDigit`, `DbSqlType`, `IsDbKey`, `IsTimestamp`, `IsBigDecimal`. `DbRef` is
+declared and registered but nothing reads it — see [Indexes](#indexes).
+
+### Indexes
+
+`createTable` also creates the indexes the type declares, whether they come from the metamodel
+(`addUniqueIndex` / `addNotUniqueIndex` on the builder, single or multi field) or from a `DbIndex`
+annotation:
+
+```java
+typeBuilder.addNotUniqueIndex("byName", firstName);
+sqlConnection.createTable(StudentType.TYPE);          // CREATE TABLE, then CREATE INDEX
+```
+
+An index name has to be unique per schema on PostgreSQL and HSQLDB, not per table, so the declared name is
+qualified with the table: `byName` on `students` becomes `students_byName`. Only a table `createTable`
+actually creates gets its indexes; on a table that already exists, call `createIndexes(type)` yourself,
+because building an index there can be long and take locks. It skips the indexes the table already carries,
+so it is safe to call twice.
+
+**Foreign keys are not generated.** `DbRef` names a target type and nothing else — no column mapping — and
+core keeps links in a separate `GlobLinkModel` rather than on the `GlobType`, so there is no source of truth
+to generate a `REFERENCES` clause from. Generating them would also make `createTable` order-dependent and
+would reject existing rows with dangling references. It needs a design decision, not a patch.
 
 Date and time are annotation-driven, not type-driven: an `IntegerField` or `LongField` carrying `IsDate`,
 `IsDateTime` (core) or `IsTimestamp` becomes a `DATE` / `DATETIME` / `TIMESTAMP` column.
@@ -143,6 +166,10 @@ try (SqlRequest insert = createBuilder.getRequest()) {
 
 `CreateBuilder` and `UpdateBuilder` take either a **value** or an **accessor** per field — an accessor turns
 the request into a prepared statement fed from a stream, which is what `BatchSqlRequest` is for.
+
+`populate(Collection<Glob>)` does that for you: it groups the globs by shape — the type together with the
+columns actually written, which an unset auto-increment key makes vary inside one type — and batches each
+group, flushing every 1000 rows. One prepared statement per shape, not per row.
 
 ## Querying
 
