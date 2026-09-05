@@ -5,6 +5,8 @@ import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.constraints.Constraint;
+import org.globsframework.sql.exceptions.SqlException;
+import org.globsframework.sql.exceptions.SqlExceptions;
 import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -19,10 +21,12 @@ public class SqlDeleteBuilder implements SqlRequest {
     private final Constraint constraint;
     private final String sqlStatement;
     private final PreparedStatement preparedStatement;
+    private final SqlService sqlService;
 
     public SqlDeleteBuilder(GlobType globType, Constraint constraint, Connection connection,
                             SqlService sqlService) {
         this.constraint = constraint;
+        this.sqlService = sqlService;
         StringPrettyWriter prettyWriter = new StringPrettyWriter();
         prettyWriter.append("DELETE ")
                 .append(" FROM ");
@@ -59,10 +63,17 @@ public class SqlDeleteBuilder implements SqlRequest {
         if (constraint != null) {
             constraint.accept(new ValueConstraintVisitor(preparedStatement));
         }
+        long start = System.nanoTime();
         try {
-            return preparedStatement.executeUpdate();
+            int count = preparedStatement.executeUpdate();
+            sqlService.getListener().onStatement(sqlStatement, System.nanoTime() - start, count, null);
+            return count;
         } catch (SQLException e) {
-            throw new UnexpectedApplicationState("For delete request " + sqlStatement, e);
+            // used to be an UnexpectedApplicationState: a delete refused by a foreign key is a
+            // ForeignKeyViolation, not an application state problem
+            SqlException typed = SqlExceptions.typed("For delete request " + sqlStatement, e);
+            sqlService.getListener().onStatement(sqlStatement, System.nanoTime() - start, -1, typed);
+            throw typed;
         }
     }
 

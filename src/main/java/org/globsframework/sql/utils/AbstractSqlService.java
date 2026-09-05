@@ -3,11 +3,15 @@ package org.globsframework.sql.utils;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.utils.Strings;
+import org.globsframework.sql.RetryPolicy;
+import org.globsframework.sql.SqlListener;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.NamingMapping;
 
 public abstract class AbstractSqlService implements SqlService {
     private NamingMapping namingMapping;
+    private RetryPolicy retryPolicy = RetryPolicy.NONE;
+    private SqlListener listener = SqlListener.NONE;
 
     private static final String[] RESERVED_KEYWORDS = {
             "COUNT", "WHERE", "FROM", "SELECT", "ORDER"
@@ -34,6 +38,25 @@ public abstract class AbstractSqlService implements SqlService {
 
     public NamingMapping getNamingMapping() {
         return namingMapping;
+    }
+
+    public RetryPolicy getRetryPolicy() {
+        return retryPolicy;
+    }
+
+    /**
+     * Applied by the inTransaction/read templates. Off by default — see {@link RetryPolicy}.
+     */
+    public void setRetryPolicy(RetryPolicy retryPolicy) {
+        this.retryPolicy = retryPolicy == null ? RetryPolicy.NONE : retryPolicy;
+    }
+
+    public SqlListener getListener() {
+        return listener;
+    }
+
+    public void setListener(SqlListener listener) {
+        this.listener = listener == null ? SqlListener.NONE : listener;
     }
 
     public String getTableName(GlobType globType, boolean escaped) {

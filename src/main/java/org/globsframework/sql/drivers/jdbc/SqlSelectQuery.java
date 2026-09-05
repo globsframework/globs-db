@@ -17,6 +17,7 @@ import org.globsframework.sql.drivers.jdbc.impl.ValueConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
 import org.globsframework.sql.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sql.exceptions.SqlException;
+import org.globsframework.sql.exceptions.SqlExceptions;
 import org.globsframework.sql.utils.StringPrettyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,24 +266,25 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw new SqlException(message);
         }
+        if (constraint != null) {
+            constraint.accept(new ValueConstraintVisitor(preparedStatement));
+        }
+        long start = System.nanoTime();
         try {
-            if (constraint != null) {
-                constraint.accept(new ValueConstraintVisitor(preparedStatement));
-            }
-            NanoChrono nanoChrono = NanoChrono.start();
             ResultSet resultSet = preparedStatement.executeQuery();
             if (shouldInitAccessorWithMetadata) {
                 initIndexFromMetadata(resultSet.getMetaData(), fieldToAccessorHolder, sqlService);
                 shouldInitAccessorWithMetadata = false;
             }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Execution of " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
-            }
+            // the rows have not been walked yet, so there is no count to report
+            sqlService.getListener().onStatement(sql, System.nanoTime() - start, -1, null);
             return new SqlGlobStream(resultSet, fieldToAccessorHolder, additionalAccessor, this);
         } catch (SQLException e) {
             String message = "for request : " + sql;
             LOGGER.error(message, e);
-            throw new SqlException(message, e);
+            SqlException typed = SqlExceptions.typed(message, e);
+            sqlService.getListener().onStatement(sql, System.nanoTime() - start, -1, typed);
+            throw typed;
         }
     }
 

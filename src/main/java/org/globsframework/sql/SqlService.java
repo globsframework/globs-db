@@ -4,6 +4,10 @@ import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.exceptions.SqlException;
 
+import java.time.Duration;
+import java.util.Optional;
+import java.util.function.Supplier;
+
 public interface SqlService extends AutoCloseable {
 
     SqlConnection getDb();
@@ -21,22 +25,32 @@ public interface SqlService extends AutoCloseable {
     String getLikeIgnoreCase();
 
     /**
+     * The policy the templates below apply when a transaction fails. {@link RetryPolicy#NONE} by
+     * default: replaying the caller's lambda is only safe when it does nothing outside the database,
+     * which this library cannot know.
+     */
+    default RetryPolicy getRetryPolicy() {
+        return RetryPolicy.NONE;
+    }
+
+    /**
+     * Notified after every statement. {@link SqlListener#NONE} by default.
+     */
+    default SqlListener getListener() {
+        return SqlListener.NONE;
+    }
+
+    /**
      * Runs the work in a transaction: commit on normal return, rollback on any exception, and the
      * connection is released either way. This is the recommended entry point — it makes it
      * impossible to leak a connection on an error path.
      */
     default <T> T inTransaction(SqlFunction<T> work) {
-        SqlConnection connection = getDb();
-        try {
-            T result = work.apply(connection);
-            connection.commit();
-            return result;
-        } catch (Exception e) {
-            throw asUnchecked(e);
-        } finally {
-            // no-op once the commit above went through, rollback otherwise
-            connection.close();
-        }
+        return inTransaction(work, getRetryPolicy());
+    }
+
+    default <T> T inTransaction(SqlFunction<T> work, RetryPolicy retryPolicy) {
+        return attempt(this::getDb, true, work, retryPolicy);
     }
 
     default void runInTransaction(SqlConsumer work) {
@@ -51,14 +65,7 @@ public interface SqlService extends AutoCloseable {
      * do not need a transaction.
      */
     default <T> T read(SqlFunction<T> work) {
-        SqlConnection connection = getAutoCommitDb();
-        try {
-            return work.apply(connection);
-        } catch (Exception e) {
-            throw asUnchecked(e);
-        } finally {
-            connection.close();
-        }
+        return attempt(this::getAutoCommitDb, false, work, getRetryPolicy());
     }
 
     default void runRead(SqlConsumer work) {
@@ -66,6 +73,46 @@ public interface SqlService extends AutoCloseable {
             work.accept(connection);
             return null;
         });
+    }
+
+    private <T> T attempt(Supplier<SqlConnection> source, boolean commit, SqlFunction<T> work,
+                          RetryPolicy retryPolicy) {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return runOnce(source, commit, work);
+            } catch (SqlException e) {
+                Optional<Duration> delay = retryPolicy.nextDelay(e, attempt);
+                if (delay.isEmpty()) {
+                    throw e;
+                }
+                sleep(delay.get());
+            }
+        }
+    }
+
+    private <T> T runOnce(Supplier<SqlConnection> source, boolean commit, SqlFunction<T> work) {
+        SqlConnection connection = source.get();
+        try {
+            T result = work.apply(connection);
+            if (commit) {
+                connection.commit();
+            }
+            return result;
+        } catch (Exception e) {
+            throw asUnchecked(e);
+        } finally {
+            // no-op once the commit above went through, rollback otherwise
+            connection.close();
+        }
+    }
+
+    private static void sleep(Duration delay) {
+        try {
+            Thread.sleep(delay.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SqlException("Interrupted while waiting to retry", e);
+        }
     }
 
     /**

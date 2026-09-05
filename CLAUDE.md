@@ -102,6 +102,26 @@ Consequences that bite:
 - `getQuery(String sql)` runs raw SQL and resolves accessor column indexes from `ResultSetMetaData` instead
   of from the generated SQL.
 
+### Failure classification, retry, listener
+
+`SqlExceptions.typed(sql, e)` is the single place that maps a `SQLException` onto this library's hierarchy:
+SQLState first, vendor error code to refine it where a database lumps failures under one state (MySQL and
+Oracle both use 23000 for every integrity violation; MySQL reports a deadlock as 40001 like a serialization
+failure). The split that matters is `ConstraintViolation` (the data is at fault, a retry fails identically)
+versus `TransientSqlException` (concurrency or infrastructure, a retry may work) — `RetryPolicy` keys on the
+latter. Unknown states stay a plain `SqlException`; adding a state means one line in `SqlExceptions.kindOf`
+plus a case in `SqlExceptionsTest`.
+
+`JdbcConnection.getTypedException` delegates there and is still overridable per dialect. Watch for execution
+sites that bypass it: `SqlUpdateRequest`, `SqlDeleteBuilder` and `SqlSelectQuery` used to throw
+`UnexpectedApplicationState` or a bare `SqlException`, which hid constraint violations behind a type nobody
+catches. They all go through `SqlExceptions` now.
+
+Only the `SqlService` templates apply a `RetryPolicy`, because only they know the failed attempt was rolled
+back. `SqlListener` is fetched from `sqlService` at each execution — no constructor plumbing — and notified
+in both the success and the failure path of `SqlSelectQuery.execute`, `SqlCreateRequest.apply`/`applyBatch`,
+`SqlUpdateRequest.apply` and `SqlDeleteBuilder.apply`. A new execution path should notify it too.
+
 ### Constraints
 
 `Constraints` is a factory of immutable `Constraint` trees (`constraints/impl/`), overloaded per field type

@@ -8,6 +8,8 @@ import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.SqlRequest;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.exceptions.SqlException;
+import org.globsframework.sql.exceptions.SqlExceptions;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
@@ -56,17 +58,19 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
 
     public int apply() {
         updateStatement();
+        long start = System.nanoTime();
         try {
-            NanoChrono nanoChrono = NanoChrono.start();
             final int count = preparedStatement.executeUpdate();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Update request " + sqlRequest + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
-            }
+            sqlService.getListener().onStatement(sqlRequest, System.nanoTime() - start, count, null);
             return count;
         } catch (SQLException e) {
             String message = "For request : " + sqlRequest;
             LOGGER.error(message, e);
-            throw new UnexpectedApplicationState(message, e);
+            // used to be an UnexpectedApplicationState, which hid a constraint violation behind a
+            // type nobody catches
+            SqlException typed = SqlExceptions.typed(message, e);
+            sqlService.getListener().onStatement(sqlRequest, System.nanoTime() - start, -1, typed);
+            throw typed;
         }
     }
 

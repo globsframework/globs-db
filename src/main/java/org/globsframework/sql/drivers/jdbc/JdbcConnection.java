@@ -19,6 +19,7 @@ import org.globsframework.sql.drivers.jdbc.request.SqlDeleteBuilder;
 import org.globsframework.sql.drivers.jdbc.request.SqlQueryBuilder;
 import org.globsframework.sql.drivers.jdbc.request.SqlUpdateBuilder;
 import org.globsframework.sql.exceptions.ConstraintViolation;
+import org.globsframework.sql.exceptions.SqlExceptions;
 import org.globsframework.sql.exceptions.RollbackFailed;
 import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.metadata.DbChecker;
@@ -452,15 +453,13 @@ public abstract class JdbcConnection implements SqlConnection {
         return connection;
     }
 
+    /**
+     * Classifies a driver exception. Only 23000 and 23505 used to be recognised, and everything else
+     * became an opaque SqlException — which left a caller no way to tell a duplicate key from a
+     * deadlock, and so no way to decide whether retrying made sense. See {@link SqlExceptions}.
+     */
     public SqlException getTypedException(String sql, SQLException e) {
-        if ("23000".equals(e.getSQLState()) || "23505".equals(e.getSQLState())) {
-            if (sql == null) {
-                return new ConstraintViolation(e);
-            } else {
-                return new ConstraintViolation(sql, e);
-            }
-        }
-        return new SqlException(e);
+        return SqlExceptions.typed(sql, e);
     }
 
     private void applyAndClose(DbFunctor db) {

@@ -76,6 +76,56 @@ List<Glob> students = sqlService.read(db ->                 // auto-commit, for 
 The work may throw a checked exception; anything that is not already unchecked is wrapped in a
 `SqlException` whose cause is the original.
 
+## Failures, and retrying them
+
+A driver exception is classified by its SQLState, refined by the vendor error code where a database lumps
+distinct failures together — MySQL and Oracle report every integrity violation as 23000. The hierarchy is
+what lets a caller decide what to do:
+
+```
+SqlException
+├── ConstraintViolation          the data is at fault: a retry fails identically
+│   ├── UniqueConstraintViolation      ├── NotNullViolation
+│   └── ForeignKeyViolation            └── CheckConstraintViolation
+├── TransientSqlException        concurrency or infrastructure: a retry may well work
+│   ├── SerializationFailure           ├── LockTimeout
+│   └── DeadlockDetected               └── ConnectionFailed
+└── QueryCanceled                the statement was cancelled or timed out
+```
+
+`ConstraintViolation` is still the parent of the four specific ones, so an existing `catch` keeps working.
+An unrecognised state stays a plain `SqlException` rather than being mislabelled.
+
+That split is what makes a retry policy possible. It is off by default — replaying the lambda is only safe
+when it does nothing outside the database, which this library cannot know:
+
+```java
+sqlService.setRetryPolicy(RetryPolicy.onTransientFailures(3, Duration.ofMillis(50)));
+
+// or for one call site
+sqlService.inTransaction(work, RetryPolicy.onTransientFailures(5, Duration.ofMillis(20)));
+```
+
+Only the `inTransaction` / `read` templates apply it, and only they can: they own the connection, so they
+know the failed attempt was rolled back and that the next one starts clean. The delay doubles each time and
+carries ±25% of jitter, so workers that collided once do not collide again in lockstep.
+
+## Watching what runs
+
+`SqlListener` is called after every statement, successful or not — the hook for a slow query log, a timing
+histogram or a tracing span, without this artifact depending on any of them:
+
+```java
+sqlService.setListener(SqlListener.logSlowerThan(Duration.ofMillis(200)));
+
+sqlService.setListener((sql, durationNanos, rowCount, error) ->
+        metrics.timer("sql", "outcome", error == null ? "ok" : "error").record(durationNanos, NANOSECONDS));
+```
+
+`rowCount` is the number of rows a DML statement touched, or -1 when it is not known — a SELECT reports -1,
+because at that point the result set has not been walked yet. The listener runs on the thread that executed
+the statement, inside the transaction: keep it cheap, and let nothing escape from it.
+
 ## Pooling
 
 `JdbcSqlService` pools its connections when HikariCP is on the classpath. Without it, and as before, each
