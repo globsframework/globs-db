@@ -568,9 +568,11 @@ public class SqlSelectQueryTest extends DbServicesTestCase {
                     .select(DummyObject.NAME, accessor)
                     .groupBy(DummyObject.NAME)
                     .count(DummyObject.COUNT);
+            // one 'hello' row and five 'world' ones; GROUP BY fixes no order, so both rows are
+            // checked against the count of whichever group they carry
             GlobStream execute = queryBuilder.getQuery().execute();
             Assert.assertTrue(execute.next());
-            Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 6, max.getLong().intValue());
+            Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 5, max.getLong().intValue());
             Assert.assertTrue(execute.next());
             Assert.assertEquals(accessor.get().getString().equals("hello") ? 1 : 5, max.getLong().intValue());
         }

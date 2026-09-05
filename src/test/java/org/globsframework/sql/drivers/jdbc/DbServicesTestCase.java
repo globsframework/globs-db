@@ -14,16 +14,21 @@ import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.model.DummyObject;
 import org.globsframework.sql.model.DummyObject2;
+import org.globsframework.sql.testdb.TestDb;
 import org.globsframework.sql.utils.MultiCreateBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class DbServicesTestCase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbServicesTestCase.class);
+
     protected JdbcSqlService sqlService;
     protected SqlConnection sqlConnection;
     protected DefaultGlobModel globModel;
@@ -41,16 +46,25 @@ public abstract class DbServicesTestCase {
 
     @After
     public void tearDown() throws Exception {
+        if (sqlService == null) {
+            // setUp did not get as far as a service: skipped backend, or a failure worth surfacing
+            // on its own rather than behind a NullPointerException from here
+            return;
+        }
         try {
+            if (sqlConnection != null) {
+                sqlConnection.commitAndClose();
+            }
+            sqlConnection = sqlService.getDb();
+            emptyTable();
             sqlConnection.commitAndClose();
         } catch (Exception e) {
+            LOGGER.warn("Cleanup failed", e);
+        } finally {
+            sqlConnection = null;
+            sqlService.close();
+            sqlService = null;
         }
-        sqlConnection = sqlService.getDb();
-        emptyTable();
-        sqlConnection.commitAndClose();
-        sqlConnection = null;
-        sqlService.close();
-        sqlService = null;
     }
 
     private void emptyTable() {
@@ -60,31 +74,10 @@ public abstract class DbServicesTestCase {
     }
 
     private SqlConnection initDb() {
-
         directory.add(GlobModel.class, globModel);
-
-        sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
-//        sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/glindaBackend", "glindaBackend", "glinda");
-//    sqlService = new JdbcDriverBasedSqlService("jdbc:mysql://Plone/test", "sa", "");
-// MB localtest HSQLDB
-// sqlService = new JdbcSqlService("jdbc:hsqldb:http://localhost/", "SA", "");
-// MB localtest postgree
-
-        /*
-            podman run --name test_glob \
-    -v ~/tmp/.testGlob/postgres:/var/lib/postgresql/data \
-    -e POSTGRES_USER=admin \
-    -e POSTGRES_PASSWORD=DevTeam! \
-    -p 5432:5432 \
-    postgres:16
-
--e POSTGRES_HOST_AUTH_METHOD=trust \
-
-         */
-// sqlService = new JdbcSqlService("jdbc:postgresql://127.0.0.1:5432/postgres", "admin", "DevTeam!");
-// MB localtest mysql
-// sqlService = new JdbcSqlService("jdbc:mysql://127.0.0.1:3306/sys", "root", "DevTeam!");
-
+        // HSQLDB in memory by default; -Dglobs.test.db=postgresql runs the same suite against a
+        // containerized PostgreSQL. See TestDb.
+        sqlService = TestDb.createService();
         directory.add(SqlService.class, sqlService);
         return sqlService.getDb();
     }

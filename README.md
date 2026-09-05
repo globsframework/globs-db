@@ -221,8 +221,37 @@ mvn -o test -Dtest=SqlSelectQueryTest#testTop
 ```
 
 `ERROR ... Unable to empty table` lines are expected noise on a green run — tests empty tables that do not
-exist yet. Real-backend tests are opt-in: `scripts/podman-postgres.sh start` / `scripts/podman-oracle.sh
-start`, then un-`@Ignore` the test and add the driver to `pom.xml`.
+exist yet.
+
+### Running against a real backend
+
+The whole suite runs against a PostgreSQL started by Testcontainers, no editing required:
+
+```bash
+mvn test -Dglobs.test.db=postgresql               # -Dglobs.test.db.image=postgres:17 to pin another one
+```
+
+The container is started once per JVM and shared. When no container runtime is reachable the tests that
+need one are skipped, not failed. `TestDb` holds the selection; HSQLDB stays the default, so a plain
+`mvn test` still needs nothing installed. The driver and Testcontainers are `test`-scoped, so the published
+artifact still ships no JDBC driver.
+
+With Podman, point Testcontainers at its API socket:
+
+```bash
+podman system service --time=0 unix:///run/user/$(id -u)/podman/podman.sock &
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true
+```
+
+**Four tests currently fail on PostgreSQL, all for the same reason**, which is why the PostgreSQL CI job is
+not blocking yet: unquoted identifiers are folded to lower case by PostgreSQL, while `JdbcSqlService` maps
+it to `DefaultNamingMapping` — which passes names through verbatim — rather than to
+`ToPostgreCaseNamingMapping`, which quotes a mixed-case name so its case survives. A type named
+`dummyObject` is therefore created as `dummyobject` and `extractType("dummyObject")` finds nothing
+(`MetadataTest.testSimple`, `SqlCreateBuilderTest.testSimpleCreate` and `createGlobInField`), and a query
+alias comes back lower-cased from `ResultSetMetaData` (`SqlSelectFromStringTest.name`). Changing the
+mapping would rename the tables of every existing PostgreSQL user, so it is a decision to take
+deliberately, not a patch.
 
 `CLAUDE.md` documents what a new dialect involves and the traps around identifier escaping.
 

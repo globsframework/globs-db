@@ -25,10 +25,9 @@ import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.annotations.AllSqlAnnotations;
-import org.globsframework.sql.annotations.DbIsNullable;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
+import org.globsframework.sql.testdb.TestDb;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -100,31 +99,40 @@ public class PostgresTestCase {
         }
     }
 
+    /**
+     * Round-trips a type declared on the fly — accented text, a double and a datetime — through
+     * createTable/populate on whichever backend the suite runs against. Used to be @Ignore'd against
+     * a hardcoded personal database.
+     */
     @Test
-    @Ignore
-    public void name() throws IOException {
-        SqlService sqlService = new JdbcSqlService("jdbc:postgresql://localhost/glindaBackend", "glindaBackend", "glinda");
-        SqlConnection db = sqlService.getDb();
-        GlobTypeBuilder globTypeBuilder = DefaultGlobTypeBuilder.init("TEST");
+    public void createTableAndPopulate() throws IOException {
+        GlobTypeBuilder globTypeBuilder = DefaultGlobTypeBuilder.init("TEST_POPULATE");
         StringField f1 = globTypeBuilder.declareStringField("f1");
         DoubleField f2 = globTypeBuilder.declareDoubleField("f2");
-        Glob nullable = DbIsNullable.create(true);
-        Glob idDateTime = IsDateTime.TYPE.instantiate();
-        LongField f3 = globTypeBuilder.declareLongField("f3", idDateTime);
-
+        LongField f3 = globTypeBuilder.declareLongField("f3", IsDateTime.TYPE.instantiate());
         GlobType globType = globTypeBuilder.build();
 
+        long now = ZonedDateTime.now().toInstant().toEpochMilli();
         MutableGlob data = globType.instantiate()
                 .set(f1, "ééé")
                 .set(f2, 3.3)
-                .set(f3, ZonedDateTime.now().toInstant().toEpochMilli());
+                .set(f3, now);
 
-        db.createTable(globType);
-        db.populate(List.of(data));
+        try (JdbcSqlService sqlService = TestDb.createService()) {
+            sqlService.runInTransaction(db -> {
+                db.createTable(globType);
+                db.getDeleteRequest(globType).apply();
+                db.populate(List.of(data));
+            });
 
-        db.commitAndClose();
+            Glob reloaded = sqlService.read(db -> db.getQueryBuilder(globType)
+                    .selectAll()
+                    .getQuery()
+                    .executeUnique());
 
-        Assert.assertTrue(true);
-
+            Assert.assertEquals("ééé", reloaded.get(f1));
+            Assert.assertEquals(3.3, reloaded.get(f2), 0.0001);
+            Assert.assertEquals(Long.valueOf(now), reloaded.get(f3));
+        }
     }
 }

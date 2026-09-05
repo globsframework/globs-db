@@ -6,8 +6,11 @@
         </Console>
     </Appenders>
     <Loggers>
-        <!-- the pool logs every connection it adds at debug, which drowns the test output -->
+        <!-- the pool and the container runtime log at debug, which drowns the test output -->
         <Logger name="com.zaxxer.hikari" level="warn"/>
+        <Logger name="org.testcontainers" level="info"/>
+        <Logger name="com.github.dockerjava" level="warn"/>
+        <Logger name="tc" level="info"/>
         <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>

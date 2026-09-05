@@ -33,16 +33,22 @@ mvn -s settings.xml -B package                # what CI runs (needs GH_MAVEN_REG
 Test-suite facts worth knowing before chasing a "failure":
 - ERROR lines like `Unable to empty table : DELETE FROM …` are expected noise — tests call `emptyTable` on
   tables that don't exist yet. A green run still prints them.
-- `MySqlExceptionTest` / `PostgresqlExceptionTest` are **abstract** (and `SqlExceptionTest` is their abstract
-  parent), so surefire never runs them; `OracleTest` and `PostgresTestCase` are `@Ignore`d. Real-DB coverage
-  is opt-in only.
-- To exercise a real backend: `scripts/podman-postgres.sh start` / `scripts/podman-oracle.sh start`, then
-  either un-`@Ignore` the test (Oracle reads `-Doracle.url/-Doracle.user/-Doracle.pwd`) or swap the JDBC URL
-  in `DbServicesTestCase.initDb()` — the alternative URLs are already there, commented out.
-- **JDBC drivers are not dependencies of this artifact** (all commented out in `pom.xml`; commit c880a39
-  removed them deliberately). `JdbcSqlService` loads the driver class *reflectively by name* based on the URL
-  prefix, so testing against MySQL/Postgres/Oracle means temporarily adding that driver to `pom.xml`, and
-  consuming apps must ship their own.
+- The backend is chosen by `-Dglobs.test.db` and served by `TestDb` (`src/test/.../sql/testdb/`): `hsqldb`
+  (default, in memory) or `postgresql`, started by Testcontainers and shared by every test class in the JVM.
+  `mvn test -Dglobs.test.db=postgresql` runs the *whole* suite against a real PostgreSQL; with no container
+  runtime reachable those tests skip rather than fail. `-Dglobs.test.db.image` pins another image.
+- **Four tests fail on PostgreSQL today**, all one root cause: `JdbcSqlService.getMapping()` gives Postgres
+  `DefaultNamingMapping` (verbatim names, so Postgres folds them to lower case) instead of
+  `ToPostgreCaseNamingMapping` (quotes mixed case). `extractType` then cannot find the table it just
+  created. Fixing it renames the tables of every existing Postgres user, so do not "fix" it casually — see
+  README. The Postgres CI job is `continue-on-error` until then.
+- `OracleTest` is still `@Ignore`d (reads `-Doracle.url/-Doracle.user/-Doracle.pwd`) and
+  `SqlExceptionTest.testConcurrentModification` is `@Ignore`d because it asserts a dirty read no backend
+  grants by default. `scripts/podman-postgres.sh` / `podman-oracle.sh` remain for a hand-driven database.
+- **JDBC drivers are not runtime dependencies of this artifact** (commit c880a39 removed them deliberately);
+  `JdbcSqlService` loads the driver class *reflectively by name* from the URL prefix, so consuming apps ship
+  their own. The PostgreSQL driver and Testcontainers are `test`-scoped here, which is what makes the
+  backend switch above work without editing `pom.xml`.
 - Tests are **JUnit 4**; most extend `DbServicesTestCase`, model types live in `src/test/.../sql/model/`
   (`DummyObject`, `DummyObject2`, `DummyWithDateTime`, …).
 

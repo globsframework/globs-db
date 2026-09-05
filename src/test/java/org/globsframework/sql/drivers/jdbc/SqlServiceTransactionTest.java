@@ -8,6 +8,7 @@ import org.globsframework.sql.drivers.jdbc.pool.ConnectionPools;
 import org.globsframework.sql.drivers.jdbc.pool.PoolConfig;
 import org.globsframework.sql.exceptions.SqlException;
 import org.globsframework.sql.model.DummyObject;
+import org.globsframework.sql.testdb.TestDb;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -120,7 +121,7 @@ public class SqlServiceTransactionTest extends DbServicesTestCase {
                 .withMinIdle(1)
                 .withConnectionTimeout(Duration.ofSeconds(2))
                 .withPoolName("returned-to-pool");
-        try (JdbcSqlService service = new JdbcSqlService("jdbc:hsqldb:.", "sa", "", config)) {
+        try (JdbcSqlService service = TestDb.createService(config)) {
             Assume.assumeTrue(service.isPooled());
             for (int i = 0; i < 20; i++) {
                 final int index = i;
@@ -132,7 +133,7 @@ public class SqlServiceTransactionTest extends DbServicesTestCase {
 
     @Test
     public void noPoolConfigFallsBackToDirectConnections() {
-        try (JdbcSqlService service = new JdbcSqlService("jdbc:hsqldb:.", "sa", "", PoolConfig.NO_POOL)) {
+        try (JdbcSqlService service = TestDb.createService(PoolConfig.NO_POOL)) {
             service.runInTransaction(connection -> insert(connection, "unpooled"));
             assertEquals(1, count("unpooled"));
         }
@@ -140,7 +141,7 @@ public class SqlServiceTransactionTest extends DbServicesTestCase {
 
     @Test
     public void aClosedServiceHandsOutNoMoreConnections() {
-        JdbcSqlService service = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
+        JdbcSqlService service = TestDb.createService();
         service.close();
         service.close();
 
