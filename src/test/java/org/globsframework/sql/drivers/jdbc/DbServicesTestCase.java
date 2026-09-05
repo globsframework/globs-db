@@ -49,6 +49,8 @@ public abstract class DbServicesTestCase {
         emptyTable();
         sqlConnection.commitAndClose();
         sqlConnection = null;
+        sqlService.close();
+        sqlService = null;
     }
 
     private void emptyTable() {

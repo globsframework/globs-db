@@ -17,6 +17,8 @@ The directory is `globs-db`; the artifact is **`globs-sql`**.
 - `org.globsframework:globs` and `globs-gson` (composite fields are stored as JSON)
 - **a JDBC driver of your own**: none is a dependency of this artifact. `JdbcSqlService` loads the driver
   class reflectively from the URL prefix, so the application ships the driver it needs.
+- optionally `com.zaxxer:HikariCP` — see [Pooling](#pooling). It is an *optional* dependency, so it is not
+  transitive: put it on your classpath and connections are pooled, leave it out and they are not.
 
 Dialects with a driver here: HSQLDB, MySQL/MariaDB, PostgreSQL, Oracle, MS SQL Server.
 
@@ -41,6 +43,56 @@ SqlService          per database  — JdbcSqlService(url, user, password) or Dat
 
 `getDb()` is transactional (`commit()`, `rollback()`, `commitAndClose()`); `getAutoCommitDb()` gives a
 connection where those are no-ops. A closed connection fails loudly rather than silently reconnecting.
+
+## Transactions
+
+`SqlConnection` is `AutoCloseable`. `close()` is idempotent, rolls back anything not committed, and never
+throws — so it can sit in a `finally` without masking the exception that is unwinding the block:
+
+```java
+try (SqlConnection db = sqlService.getDb()) {
+    db.getCreateBuilder(StudentType.TYPE).set(StudentType.name, "Ada").getRequest().apply();
+    db.commit();
+}   // rollback + release if commit was not reached
+```
+
+`SqlService` carries the same thing as a template, which is the recommended form — it makes leaking a
+connection on an error path impossible:
+
+```java
+int id = sqlService.inTransaction(db -> {          // commit on return, rollback on any exception
+    CreateBuilder create = db.getCreateBuilder(StudentType.TYPE);
+    IntegerAccessor key = create.getKeyGeneratedAccessor(StudentType.id);
+    create.set(StudentType.name, "Ada").getRequest().apply();
+    return key.getInteger();
+});
+
+sqlService.runInTransaction(db -> db.getDeleteRequest(StudentType.TYPE, constraint).apply());
+
+List<Glob> students = sqlService.read(db ->                 // auto-commit, for read-only work
+        db.getQueryBuilder(StudentType.TYPE).selectAll().getQuery().executeAsGlobs());
+```
+
+The work may throw a checked exception; anything that is not already unchecked is wrapped in a
+`SqlException` whose cause is the original.
+
+## Pooling
+
+`JdbcSqlService` pools its connections when HikariCP is on the classpath. Without it, and as before, each
+`getDb()` opens a physical connection — the library logs which of the two it does at startup, and
+`isPooled()` reports it.
+
+```java
+JdbcSqlService sqlService = new JdbcSqlService(url, user, password,
+        PoolConfig.DEFAULT.withMaxPoolSize(20)
+                          .withConnectionTimeout(Duration.ofSeconds(5))
+                          .withPoolName("orders"));
+...
+sqlService.close();     // the service owns the pool
+```
+
+`PoolConfig.NO_POOL` opts out. `SqlService` is `AutoCloseable`: a service that borrows its `DataSource` from
+its host (`DataSourceSqlService`) closes nothing, one that created its own pool closes it.
 
 ## Declaring a table
 

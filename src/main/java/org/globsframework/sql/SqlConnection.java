@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
-public interface SqlConnection {
+public interface SqlConnection extends AutoCloseable {
 
     SelectBuilder getQueryBuilder(GlobType globType);
 
@@ -32,6 +32,14 @@ public interface SqlConnection {
     void commitAndClose() throws RollbackFailed, ConstraintViolation;
 
     void rollbackAndClose();
+
+    /**
+     * Releases the connection. A transactional connection whose work has not been committed is
+     * rolled back first; on an already closed connection this is a no-op. Meant for
+     * try-with-resources, so a rollback that itself fails is logged rather than thrown: it must not
+     * mask the exception that caused the block to be left.
+     */
+    void close();
 
     void createTable(GlobType globType);
 

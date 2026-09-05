@@ -103,6 +103,32 @@ public abstract class JdbcConnection implements SqlConnection {
         });
     }
 
+    /**
+     * Idempotent release, for try-with-resources. Any uncommitted work is rolled back; a failing
+     * rollback is logged and swallowed so that it never masks the exception that is unwinding the
+     * try block. Use commitAndClose() when the outcome of the commit matters.
+     */
+    public void close() {
+        if (connection == null) {
+            return;
+        }
+        try {
+            if (!autoCommit) {
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            LOGGER.warn("Rollback failed on close", e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                LOGGER.warn("Failed to close connection", e);
+            } finally {
+                connection = null;
+            }
+        }
+    }
+
     public CreateBuilder getCreateBuilder(GlobType globType) {
         return new SqlCreateBuilder(connection, globType, sqlService, this);
     }
@@ -300,9 +326,8 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public GlobType extractFromQuery(String query) {
-        try {
-            final Connection c = getConnection();
-            final Statement statement = c.createStatement();
+        // the statement must be closed: on a pooled connection a dangling cursor outlives the call
+        try (Statement statement = getConnection().createStatement()) {
             statement.execute(query);
             final ResultSetMetaData metaData = statement.getResultSet().getMetaData();
             return ExtractType.createFromMetaData(metaData);

@@ -138,6 +138,15 @@
             <artifactId>globs-gson</artifactId>
             <version>5.4-SNAPSHOT</version>
         </dependency>
+        <!-- Optional: when HikariCP is on the application classpath, JdbcSqlService pools its
+             connections. Without it, it falls back to one physical connection per getDb().
+             Marked optional so it is not transitive for consumers. -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>6.0.0</version>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>

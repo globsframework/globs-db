@@ -62,6 +62,22 @@ SqlService          (per database: URL/credentials/DataSource + NamingMapping) �
 `Connection` field on close and every entry point calls `checkConnectionIsNotClosed()`, so a closed
 connection fails loudly rather than silently reconnecting.
 
+Both layers are `AutoCloseable`. `SqlConnection.close()` is idempotent, rolls back uncommitted work and
+logs rather than throws (it is meant for a `finally`, where throwing would mask the real exception);
+`commitAndClose()` stays the call to make when the outcome of the commit matters. `SqlService` has the
+transaction templates as `default` methods — `inTransaction` / `runInTransaction` (commit on return,
+rollback on exception, always released) and `read` / `runRead` on an auto-commit connection — so any
+implementation gets them; prefer them in new code over a hand-rolled try/finally.
+
+`JdbcSqlService` pools connections through `drivers/jdbc/pool/`. HikariCP is an **optional** Maven
+dependency: `ConnectionPools.isAvailable()` checks for it and `HikariConnectionPool` is the only class that
+references it, so it is only ever loaded once that check passed (the call is also guarded against
+`LinkageError`). No pool on the classpath, or `PoolConfig.NO_POOL`, means one physical connection per
+`getDb()` — the pre-pooling behaviour. The service owns its pool and must be `close()`d;
+`DataSourceSqlService` borrows its `DataSource` and closes nothing. `JdbcSqlService` now resolves its
+dialect through `DbType.fromString(url)`, so an unrecognised URL fails at construction instead of NPE-ing
+on the first `getDb()`.
+
 ### Accessors: why `select` and `retrieve` both exist
 
 Nothing here materializes rows into objects unless you ask for it. The builder registers a `SqlAccessor` per

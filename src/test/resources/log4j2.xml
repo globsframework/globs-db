@@ -6,6 +6,8 @@
         </Console>
     </Appenders>
     <Loggers>
+        <!-- the pool logs every connection it adds at debug, which drowns the test output -->
+        <Logger name="com.zaxxer.hikari" level="warn"/>
         <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>

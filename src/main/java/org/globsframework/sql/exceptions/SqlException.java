@@ -21,6 +21,11 @@ public class SqlException extends GlobsException {
         e = cause;
     }
 
+    public SqlException(String message, Throwable cause) {
+        super(message, cause);
+        e = cause instanceof SQLException sqlException ? sqlException : null;
+    }
+
     public String getSqlState() {
         if (e != null) {
             return e.getSQLState();
