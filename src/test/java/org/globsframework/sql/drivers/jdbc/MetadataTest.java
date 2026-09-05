@@ -18,13 +18,15 @@ public class MetadataTest extends DbServicesTestCase {
     @Test
     public void testSimple() throws Exception {
         JdbcConnection db = sqlService.getDb();
-        GlobType type = db.extractType(sqlService.getTableName(DummyObject.TYPE, true))
-                .forceType(sqlService.getColumnName(DummyObject.DATE, true), DataType.Integer)
-                .forceType(sqlService.getColumnName(DummyObject.CREATED_AT, true), DataType.Long)
+        // unescaped: extractType maps the name itself, and the extracted fields carry the column
+        // names as the database stores them, not as they are written into SQL
+        GlobType type = db.extractType(sqlService.getTableName(DummyObject.TYPE, false))
+                .forceType(sqlService.getColumnName(DummyObject.DATE, false), DataType.Integer)
+                .forceType(sqlService.getColumnName(DummyObject.CREATED_AT, false), DataType.Long)
                 .extract();
         assertEquals(DummyObject.TYPE.getFieldCount(), type.getFieldCount());
         for (Field field : DummyObject.TYPE.getFields()) {
-            Field actualField = type.findField(sqlService.getColumnName(field, true));
+            Field actualField = type.findField(sqlService.getColumnName(field, false));
             assertNotNull(field.getName(), actualField);
             if (field instanceof StringArrayField || field instanceof LongArrayField) {
                 assertTrue(actualField.getClass().getName() + " != " + StringField.class.getName(), StringField.class.isAssignableFrom(actualField.getClass()));

@@ -28,13 +28,9 @@ jobs:
         run: mvn -s settings.xml -B package
 
   # The same suite against a real PostgreSQL, started by Testcontainers on the runner's Docker.
-  # Not blocking yet: it currently reports four failures, all of them the same identifier
-  # case-folding problem described in README.md under "Running against a real backend". Drop
-  # continue-on-error once that is settled.
   postgresql:
 
     runs-on: ubuntu-latest
-    continue-on-error: true
     permissions:
       contents: read
       packages: read

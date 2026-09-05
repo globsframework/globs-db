@@ -42,7 +42,7 @@ public class JdbcSqlService extends AbstractSqlService {
     private volatile boolean closed;
 
     public JdbcSqlService(String dbName, String user, String password) {
-        this(dbName, user, password, DefaultNamingMapping.INSTANCE, PoolConfig.DEFAULT);
+        this(dbName, user, password, null, PoolConfig.DEFAULT);
     }
 
     public JdbcSqlService(String dbName, String user, String password, NamingMapping namingMapping) {
@@ -50,7 +50,7 @@ public class JdbcSqlService extends AbstractSqlService {
     }
 
     public JdbcSqlService(String dbName, String user, String password, PoolConfig poolConfig) {
-        this(dbName, user, password, DefaultNamingMapping.INSTANCE, poolConfig);
+        this(dbName, user, password, null, poolConfig);
     }
 
     public JdbcSqlService(String dbName, String user, String password, NamingMapping namingMapping,
@@ -71,18 +71,13 @@ public class JdbcSqlService extends AbstractSqlService {
         init(poolConfig);
     }
 
+    /**
+     * An explicit mapping wins — it used to be silently dropped for every recognised dialect, which
+     * left no way to override the default. Without one, the dialect decides, through the same
+     * MappingHelper that DataSourceSqlService uses; the two dispatches disagreed on PostgreSQL.
+     */
     static NamingMapping getMapping(String dbName, NamingMapping namingMapping) {
-        if (dbName.contains("hsqldb")) {
-            return new HsqlDbNamingMapping();
-        } else if (dbName.contains("mysql") || dbName.startsWith("jdbc:mariadb:")) {
-            return new DefaultNamingMapping();
-        } else if (dbName.startsWith("jdbc:postgresql:")) {
-            return new DefaultNamingMapping();
-        } else if (dbName.startsWith("jdbc:oracle:")) {
-            return new DefaultNamingMapping();
-        } else {
-            return namingMapping;
-        }
+        return namingMapping != null ? namingMapping : MappingHelper.get(DbType.fromString(dbName));
     }
 
     private void init(PoolConfig poolConfig) {

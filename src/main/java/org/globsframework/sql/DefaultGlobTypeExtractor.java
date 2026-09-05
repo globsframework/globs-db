@@ -27,6 +27,7 @@ import java.util.*;
 public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
     private SqlService sqlService;
+    private final JdbcConnection sharedConnection;
     private String tableName;
     private Set<String> columnToIgnore = new HashSet<>();
     private GlobTypeBuilder globTypeBuilder;
@@ -38,7 +39,18 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
     };
 
     public DefaultGlobTypeExtractor(SqlService sqlService, String tableName) {
+        this(sqlService, null, tableName);
+    }
+
+    /**
+     * @param connection the connection to read the metadata from, or null to open a dedicated
+     *                   auto-commit one. Reusing the caller's connection matters on a backend with
+     *                   transactional DDL: a table created and not yet committed is invisible to
+     *                   every other connection, PostgreSQL included.
+     */
+    public DefaultGlobTypeExtractor(SqlService sqlService, JdbcConnection connection, String tableName) {
         this.sqlService = sqlService;
+        this.sharedConnection = connection;
         this.tableName = tableName;
         globTypeBuilder = DefaultGlobTypeBuilder.init(tableName);
     }
@@ -75,15 +87,24 @@ public class DefaultGlobTypeExtractor implements GlobTypeExtractor {
             LOGGER.error(msg);
             throw new GlobsException(msg);
         }
+        if (sharedConnection != null) {
+            return extractFrom(sharedConnection);
+        }
         JdbcConnection db = (JdbcConnection) sqlService.getAutoCommitDb();
+        try {
+            return extractFrom(db);
+        } finally {
+            db.commitAndClose();
+        }
+    }
+
+    private boolean extractFrom(JdbcConnection db) {
         try {
             Connection connection = db.getConnection();
             return createFrom(connection, connection.getMetaData(), tableName);
         } catch (SQLException e) {
             LOGGER.error("sql error", e);
             throw db.getTypedException(null, e);
-        } finally {
-            db.commitAndClose();
         }
     }
 

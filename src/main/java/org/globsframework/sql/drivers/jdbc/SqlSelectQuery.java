@@ -113,7 +113,8 @@ public class SqlSelectQuery implements SelectQuery {
 
     private boolean updateSqlIndex(Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService, int i, String columnName) {
         for (Map.Entry<Field, SqlAccessor> fieldSqlAccessorEntry : fieldToAccessorHolder.entrySet()) {
-            if (sqlService.getColumnName(fieldSqlAccessorEntry.getKey(), true).equals(columnName)) {
+            // unescaped: ResultSetMetaData reports the name as the database stores it, never quoted
+            if (sqlService.getColumnName(fieldSqlAccessorEntry.getKey(), false).equals(columnName)) {
                 fieldSqlAccessorEntry.getValue().setIndex(i);
                 return true;
             }

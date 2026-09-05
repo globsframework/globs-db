@@ -37,11 +37,7 @@ Test-suite facts worth knowing before chasing a "failure":
   (default, in memory) or `postgresql`, started by Testcontainers and shared by every test class in the JVM.
   `mvn test -Dglobs.test.db=postgresql` runs the *whole* suite against a real PostgreSQL; with no container
   runtime reachable those tests skip rather than fail. `-Dglobs.test.db.image` pins another image.
-- **Four tests fail on PostgreSQL today**, all one root cause: `JdbcSqlService.getMapping()` gives Postgres
-  `DefaultNamingMapping` (verbatim names, so Postgres folds them to lower case) instead of
-  `ToPostgreCaseNamingMapping` (quotes mixed case). `extractType` then cannot find the table it just
-  created. Fixing it renames the tables of every existing Postgres user, so do not "fix" it casually — see
-  README. The Postgres CI job is `continue-on-error` until then.
+- The suite is green on both backends. `NamingMappingTest` pins which mapping each url resolves to.
 - `OracleTest` is still `@Ignore`d (reads `-Doracle.url/-Doracle.user/-Doracle.pwd`) and
   `SqlExceptionTest.testConcurrentModification` is `@Ignore`d because it asserts a dirty read no backend
   grants by default. `scripts/podman-postgres.sh` / `podman-oracle.sh` remain for a hand-driven database.
@@ -141,6 +137,17 @@ identifiers when `escaped` is true (Postgres folds unquoted names to lower case)
 `AbstractSqlService.toSqlName` upper-cases + mangles reserved words (`COUNT` → `COUNT__`, because HSQLDB > 1.8
 rejects leading underscores). Passing the wrong `escaped` value is the usual cause of "column not found" on
 Postgres only.
+
+**The rule: `escaped=true` is for text written into SQL, `escaped=false` for a name compared against what
+the database stores** — `ResultSetMetaData.getColumnName`, `DatabaseMetaData.getTables`, the field names of
+an extracted `GlobType`, anything handed to `extractType`. Getting that backwards is invisible on HSQLDB,
+whose mapping ignores `escaped` entirely, and breaks on Postgres only.
+
+Both dispatches now resolve the mapping through `MappingHelper.get(DbType)` — `JdbcSqlService.getMapping`
+used to hardcode its own, disagreeing with `MappingHelper` on Postgres. An explicit `NamingMapping` passed
+to `JdbcSqlService` wins over the dialect default (it used to be dropped for every recognised dialect); that
+is the opt-out for a database created before Postgres became case-aware, and the only reason
+`DefaultNamingMapping` is public.
 
 ### Composite / array fields
 

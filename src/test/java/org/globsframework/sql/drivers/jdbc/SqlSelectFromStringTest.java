@@ -41,7 +41,10 @@ public class SqlSelectFromStringTest extends DbServicesTestCase {
         Assert.assertEquals("all", actual.get(actual.getType().getField("NAME").asStringField()));
     }
 
+    // the alias goes through the naming mapping like any other identifier: unquoted, PostgreSQL
+    // folds it to lower case and ResultSetMetaData hands back a name the type no longer matches
     private String rename(Field field, String as) {
-        return sqlService.getTableName(field.getGlobType(), true) + "." + sqlService.getColumnName(field, true) + " as " + as;
+        return sqlService.getTableName(field.getGlobType(), true) + "." + sqlService.getColumnName(field, true)
+               + " as " + sqlService.getColumnName(as, true);
     }
 }

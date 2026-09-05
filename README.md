@@ -203,6 +203,32 @@ field type so completion offers the right value type. Rendering and value bindin
 serializes a tree to and from JSON, so a constraint can cross a network boundary (a `FieldResolver` maps
 `{type, name}` back to `Field`s).
 
+## Upgrading a PostgreSQL database
+
+**This is a breaking change for existing PostgreSQL databases.** `JdbcSqlService` used to give PostgreSQL
+`DefaultNamingMapping`, which writes identifiers unquoted — and PostgreSQL folds an unquoted identifier to
+lower case. A `GlobType` named `dummyObject` therefore became a table named `dummyobject`, and
+`extractType("dummyObject")` could not find it again. `DataSourceSqlService`, going through
+`MappingHelper`, did not agree: it already used `ToPostgreCaseNamingMapping`, which quotes a mixed-case
+name so its case survives. The two now agree on the case-aware one.
+
+New databases need nothing. For a database created by an earlier version, either rename the tables and
+columns whose `GlobType` name is not all lower case:
+
+```sql
+ALTER TABLE dummyobject RENAME TO "dummyObject";
+ALTER TABLE "dummyObject" RENAME COLUMN createdat TO "createdAt";
+```
+
+or keep the old behaviour by passing the mapping explicitly — an explicit `NamingMapping` is now honoured,
+where it used to be silently dropped for every recognised dialect:
+
+```java
+new JdbcSqlService(url, user, password, DefaultNamingMapping.INSTANCE);
+```
+
+A `GlobType` whose name and fields are already all lower case is unaffected either way.
+
 ## Reading a schema back
 
 ```java
@@ -243,15 +269,7 @@ podman system service --time=0 unix:///run/user/$(id -u)/podman/podman.sock &
 export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true
 ```
 
-**Four tests currently fail on PostgreSQL, all for the same reason**, which is why the PostgreSQL CI job is
-not blocking yet: unquoted identifiers are folded to lower case by PostgreSQL, while `JdbcSqlService` maps
-it to `DefaultNamingMapping` — which passes names through verbatim — rather than to
-`ToPostgreCaseNamingMapping`, which quotes a mixed-case name so its case survives. A type named
-`dummyObject` is therefore created as `dummyobject` and `extractType("dummyObject")` finds nothing
-(`MetadataTest.testSimple`, `SqlCreateBuilderTest.testSimpleCreate` and `createGlobInField`), and a query
-alias comes back lower-cased from `ResultSetMetaData` (`SqlSelectFromStringTest.name`). Changing the
-mapping would rename the tables of every existing PostgreSQL user, so it is a decision to take
-deliberately, not a patch.
+The suite is green on both backends.
 
 `CLAUDE.md` documents what a new dialect involves and the traps around identifier escaping.
 

@@ -185,12 +185,14 @@ public abstract class JdbcConnection implements SqlConnection {
             GlobType type = entry.getKey();
 
             String tableName = sqlService.getTableName(type, true);
-            GlobTypeExtractor globTypeExtractor = extractType(tableName);
+            // extractType maps the name itself, so it takes the unescaped one: handing it an escaped
+            // name means looking up a table whose name contains the quotes
+            GlobTypeExtractor globTypeExtractor = extractType(sqlService.getTableName(type, false));
 
             GlobType tableType = globTypeExtractor.extract();
 
             if (tableType == null) {
-                LOGGER.error(tableName + " not found.");
+                LOGGER.error(sqlService.getTableName(type, false) + " not found.");
             } else {
                 StringPrettyWriter writer = new StringPrettyWriter();
                 writer.append("ALTER TABLE ")
@@ -219,7 +221,7 @@ public abstract class JdbcConnection implements SqlConnection {
                     statement.executeUpdate();
                     statement.close();
                 } catch (SQLException e) {
-                    GlobTypeExtractor typeExtractor = extractType(tableName);
+                    GlobTypeExtractor typeExtractor = extractType(sqlService.getTableName(type, false));
                     GlobType newType = typeExtractor.extract();
                     if (entry.getValue().stream().allMatch(f -> newType.hasField(sqlService.getColumnName(f, true)))) {
                         LOGGER.info("Column already added.");
@@ -322,7 +324,7 @@ public abstract class JdbcConnection implements SqlConnection {
     }
 
     public GlobTypeExtractor extractType(String tableName) {
-        return new DefaultGlobTypeExtractor(sqlService, sqlService.getTableName(tableName, false));
+        return new DefaultGlobTypeExtractor(sqlService, this, sqlService.getTableName(tableName, false));
     }
 
     public GlobType extractFromQuery(String query) {
