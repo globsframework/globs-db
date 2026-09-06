@@ -20,6 +20,8 @@ import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.*;
 
+import java.time.Duration;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
@@ -39,18 +41,31 @@ public class SqlQueryBuilder implements SelectBuilder {
     protected final List<SqlOperation> sqlOperations = new ArrayList<>();
     protected final List<Field> groupBy = new ArrayList<>();
     protected GlobType fallBackType = null;
+    protected int fetchSize;
+    protected Duration queryTimeout;
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService) {
         this.connection = connection;
         this.globType = globType;
         this.constraint = constraint;
         this.sqlService = sqlService;
+        this.fetchSize = sqlService.getDefaultFetchSize();
+        this.queryTimeout = sqlService.getDefaultQueryTimeout();
+    }
+
+    /**
+     * Everything the query is built from, in one object, so that each dialect's getQuery() is one
+     * line and a new setting does not have to be threaded through five builders and five queries.
+     */
+    protected SelectQuerySpec spec() {
+        return new SelectQuerySpec(constraint, fieldToAccessorHolder, sqlService, autoClose, orders,
+                groupBy, top, skip, distinct, sqlOperations,
+                fallBackType == null ? globType : fallBackType, fetchSize, queryTimeout);
     }
 
     public SelectQuery getQuery() {
         try {
-            return new SqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
+            return new SqlSelectQuery(connection, spec());
         } finally {
             fieldToAccessorHolder.clear();
         }
@@ -58,10 +73,21 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectQuery getQuery(String sql) {
         try {
-            return new SqlSelectQuery(sqlService, connection, sql, fieldToAccessorHolder, fallBackType == null ? globType : fallBackType);
+            return new SqlSelectQuery(sqlService, connection, sql, fieldToAccessorHolder,
+                    fallBackType == null ? globType : fallBackType, fetchSize, queryTimeout);
         } finally {
             fieldToAccessorHolder.clear();
         }
+    }
+
+    public SelectBuilder fetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+        return this;
+    }
+
+    public SelectBuilder queryTimeout(Duration queryTimeout) {
+        this.queryTimeout = queryTimeout;
+        return this;
     }
 
     public SelectQuery getNotAutoCloseQuery() {

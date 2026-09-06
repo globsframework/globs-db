@@ -16,8 +16,7 @@ public class MysqlQueryBuilder extends SqlQueryBuilder {
 
     public SelectQuery getQuery() {
         try {
-            return new MysqlSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
+            return new MysqlSelectQuery(connection, spec());
         } finally {
             fieldToAccessorHolder.clear();
         }

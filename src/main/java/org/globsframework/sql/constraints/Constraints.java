@@ -201,7 +201,7 @@ public class Constraints {
         return OrConstraint.build(args);
     }
 
-    public static Constraint in(Field field, Set infos) {
+    public static Constraint in(Field field, Set<?> infos) {
         return new InConstraint(field, infos);
     }
 
@@ -213,7 +213,7 @@ public class Constraints {
         return new NotEqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
     }
 
-    public static Constraint notIn(Field field, Set infos) {
+    public static Constraint notIn(Field field, Set<?> infos) {
         return new NotInConstraint(field, infos);
     }
 

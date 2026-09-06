@@ -4,6 +4,8 @@ import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.Ref;
 
+import java.time.Duration;
+
 public interface SelectBuilder {
 
     SelectQuery getQuery();
@@ -48,6 +50,22 @@ public interface SelectBuilder {
     SelectBuilder top(int n);
 
     SelectBuilder skip(int n);
+
+    /**
+     * Rows the driver buffers per round trip. Left to the driver's own default when unset, or to the
+     * service-wide default when one is configured.
+     * <p>
+     * It is what makes a large result set streamable instead of materialised in the client — but on
+     * PostgreSQL only inside a transaction: on an auto-commit connection the driver reads every row
+     * whatever the fetch size, so {@code read(...)} and {@code getAutoCommitDb()} do not stream.
+     */
+    SelectBuilder fetchSize(int fetchSize);
+
+    /**
+     * How long the statement may run before the database cancels it, raising a
+     * {@code QueryCanceled}. JDBC counts whole seconds, so anything shorter is rounded up to one.
+     */
+    SelectBuilder queryTimeout(Duration queryTimeout);
 
     SelectBuilder withKeys();
 

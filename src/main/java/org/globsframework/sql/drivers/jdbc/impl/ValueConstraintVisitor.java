@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
+import java.util.Set;
 
 public class ValueConstraintVisitor extends SqlValueFieldVisitor implements ConstraintVisitor, OperandVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValueConstraintVisitor.class);
@@ -70,20 +71,41 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     }
 
     public void visitIn(InConstraint inConstraint) {
-        Field field = inConstraint.getField();
-        for (Object value : inConstraint.getValues()) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("at " + index + " value : " + value);
-            }
-            setValue(value, ++index);
-            field.safeAccept(this);
-        }
+        bindInValues(inConstraint.getField(), inConstraint.getValues());
     }
 
     public void visitIsOrNotNull(NullOrNotConstraint constraint) {
     }
 
     public void visitNotIn(NotInConstraint constraint) {
+        // this used to bind nothing at all, while the WHERE clause was written with one placeholder
+        // per value: every notIn constraint reached the database with unbound parameters
+        bindInValues(constraint.getField(), constraint.getValues());
+    }
+
+    private void bindInValues(Field field, Set<?> values) {
+        if (values.isEmpty()) {
+            // rendered as a constant predicate, so there is nothing to bind
+            return;
+        }
+        Object last = null;
+        int bound = 0;
+        for (Object value : values) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("at " + index + " value : " + value);
+            }
+            setValue(value, ++index);
+            field.safeAccept(this);
+            last = value;
+            bound++;
+        }
+        // the clause is written with a rounded up number of placeholders: pad by repeating a value
+        // already in the set, which changes neither IN nor NOT IN -- padding with NULL would, since
+        // "x NOT IN (1, NULL)" is never true
+        for (int i = bound; i < InClause.placeholderCount(bound); i++) {
+            setValue(last, ++index);
+            field.safeAccept(this);
+        }
     }
 
     public void visitContains(Field field, String value, ContainType containType, boolean contains, boolean ignoreCase) {

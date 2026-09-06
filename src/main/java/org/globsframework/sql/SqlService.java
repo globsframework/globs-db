@@ -41,6 +41,21 @@ public interface SqlService extends AutoCloseable {
     }
 
     /**
+     * Fetch size given to every query that does not set its own, 0 to leave the driver's default.
+     * See {@link SelectBuilder#fetchSize(int)} for the PostgreSQL caveat.
+     */
+    default int getDefaultFetchSize() {
+        return 0;
+    }
+
+    /**
+     * Timeout given to every query that does not set its own, null for no limit.
+     */
+    default Duration getDefaultQueryTimeout() {
+        return null;
+    }
+
+    /**
      * Runs the work in a transaction: commit on normal return, rollback on any exception, and the
      * connection is released either way. This is the recommended entry point — it makes it
      * impossible to leak a connection on an error path.

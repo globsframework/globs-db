@@ -6,6 +6,7 @@ import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.SqlAccessor;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.hsqldb.impl.HsqldbWhereClauseConstraintVisitor;
+import org.globsframework.sql.drivers.jdbc.SelectQuerySpec;
 import org.globsframework.sql.drivers.jdbc.SqlOperation;
 import org.globsframework.sql.drivers.jdbc.SqlSelectQuery;
 import org.globsframework.sql.drivers.jdbc.impl.WhereClauseConstraintVisitor;
@@ -19,8 +20,17 @@ import java.util.Set;
 
 public class HsqldbSqlSelectQuery extends SqlSelectQuery {
 
+    /**
+     * @deprecated superseded by the {@link SelectQuerySpec} constructor.
+     */
+    @Deprecated
     public HsqldbSqlSelectQuery(Connection connection, Constraint constraint, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService, boolean autoClose, List<SqlQueryBuilder.Order> orders, List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations, GlobType fallBackType) {
-        super(connection, constraint, fieldToAccessorHolder, sqlService, autoClose, orders, groupBy, top, skip, distinct, sqlOperations, fallBackType);
+        this(connection, new SelectQuerySpec(constraint, fieldToAccessorHolder, sqlService, autoClose,
+                orders, groupBy, top, skip, distinct, sqlOperations, fallBackType));
+    }
+
+    public HsqldbSqlSelectQuery(Connection connection, SelectQuerySpec spec) {
+        super(connection, spec);
     }
 
     protected WhereClauseConstraintVisitor getWhereConstraintVisitor(StringPrettyWriter where) {

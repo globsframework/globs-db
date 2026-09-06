@@ -130,13 +130,24 @@ visitors: `WhereClauseConstraintVisitor` writes the `WHERE` text, `ValueConstrai
 the `PreparedStatement`. `JSonConstraintTypeAdapter` serializes the tree to/from JSON so constraints can
 cross a network boundary (a `FieldResolver` maps `{type, name}` back to `Field`s).
 
+`InClause.placeholderCount` is shared by `WhereClauseConstraintVisitor` (which writes the placeholders) and
+`ValueConstraintVisitor` (which binds them): they have to agree or the statement goes out with unbound
+parameters, which is exactly what `visitNotIn` did — it wrote one placeholder per value and bound none.
+Padding repeats a value from the set rather than using NULL, because `x NOT IN (1, NULL)` is never true.
+
 **Adding a constraint kind touches five places**: the `impl` class, the `Constraints` factory overloads,
 `ConstraintVisitor`, every driver's `WhereClauseConstraintVisitor` subclass, and both directions of
 `JSonConstraintTypeAdapter` (plus a case in `JSonConstraintTypeAdapterTest`).
 
 ### Adding or fixing a dialect
 
-A driver is a small set of overrides, not a fork. For dialect `X`, `drivers/x/` holds:
+A driver is a small set of overrides, not a fork. Everything a SELECT is built from travels as one
+`SelectQuerySpec`, so a dialect's `SelectQuery` is a constructor forwarding it and a `getQuery()` of one
+line — and a new query setting is a component on the record plus the line in `SqlQueryBuilder.spec()` that
+fills it, not a new parameter in five query classes and five builders. The pre-record constructors are kept,
+deprecated, so a dialect written outside this repo still compiles.
+
+For dialect `X`, `drivers/x/` holds:
 
 | Piece | Purpose |
 | --- | --- |

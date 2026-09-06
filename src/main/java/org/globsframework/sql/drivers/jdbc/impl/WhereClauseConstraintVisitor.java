@@ -56,13 +56,7 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitIn(InConstraint inConstraint) {
-        visitFieldOperand(inConstraint.getField());
-        prettyWriter.append(" in (");
-        int length = inConstraint.getValues().size();
-        for (int i = 0; i < length; i++) {
-            prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
-        }
-        prettyWriter.append(")");
+        appendInClause(inConstraint.getField(), inConstraint.getValues(), false);
     }
 
     public void visitIsOrNotNull(NullOrNotConstraint constraint) {
@@ -75,11 +69,22 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitNotIn(NotInConstraint constraint) {
-        visitFieldOperand(constraint.getField());
-        prettyWriter.append(" NOT IN (");
-        int length = constraint.getValues().size();
-        for (int i = 0; i < length; i++) {
-            prettyWriter.append(" ? ").appendIf(", ", i < length - 1);
+        appendInClause(constraint.getField(), constraint.getValues(), true);
+    }
+
+    private void appendInClause(Field field, Set<?> values, boolean not) {
+        if (values.isEmpty()) {
+            // "x IN ()" is not valid SQL anywhere: an empty set matches no row, its complement every
+            // row. The table still has to reach the FROM clause.
+            globTypes.add(field.getGlobType());
+            prettyWriter.append(not ? " 1 = 1 " : " 1 = 0 ");
+            return;
+        }
+        visitFieldOperand(field);
+        prettyWriter.append(not ? " NOT IN (" : " in (");
+        int count = InClause.placeholderCount(values.size());
+        for (int i = 0; i < count; i++) {
+            prettyWriter.append(" ? ").appendIf(", ", i < count - 1);
         }
         prettyWriter.append(")");
     }

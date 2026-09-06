@@ -16,8 +16,7 @@ public class OracleSqlQueryBuilder extends SqlQueryBuilder {
 
     public SelectQuery getQuery() {
         try {
-            return new OracleSelectQuery(connection, constraint, fieldToAccessorHolder, sqlService, autoClose,
-                    orders, groupBy, top, skip, distinct, sqlOperations, fallBackType == null ? globType : fallBackType);
+            return new OracleSelectQuery(connection, spec());
         } finally {
             fieldToAccessorHolder.clear();
         }

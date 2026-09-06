@@ -8,9 +8,9 @@ import java.util.Set;
 
 public class NotInConstraint implements Constraint {
     private Field field;
-    private Set values;
+    private Set<?> values;
 
-    public NotInConstraint(Field field, Set values) {
+    public NotInConstraint(Field field, Set<?> values) {
         this.field = field;
         this.values = values;
     }
@@ -24,7 +24,7 @@ public class NotInConstraint implements Constraint {
         return field;
     }
 
-    public Set getValues() {
+    public Set<?> getValues() {
         return values;
     }
 }

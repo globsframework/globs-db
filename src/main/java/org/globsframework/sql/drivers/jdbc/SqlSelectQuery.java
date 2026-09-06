@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +46,12 @@ public class SqlSelectQuery implements SelectQuery {
 
     public SqlSelectQuery(SqlService sqlService, Connection connection, String sql,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, GlobType fallBackType) {
+        this(sqlService, connection, sql, fieldToAccessorHolder, fallBackType, 0, null);
+    }
+
+    public SqlSelectQuery(SqlService sqlService, Connection connection, String sql,
+                          Map<Field, SqlAccessor> fieldToAccessorHolder, GlobType fallBackType,
+                          int fetchSize, Duration queryTimeout) {
         this.sqlService = sqlService;
         this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
         this.fallBackType = fallBackType;
@@ -53,47 +60,61 @@ public class SqlSelectQuery implements SelectQuery {
         constraint = null;
         autoClose = true;
         this.sql = sql;
-        NanoChrono nanoChrono = NanoChrono.start();
-        try {
-            this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Preparing " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
-            }
-        } catch (SQLException e) {
-            String message = "for request " + sql;
-            LOGGER.error(message);
-            throw new SqlException(message, e);
-        }
+        this.preparedStatement = prepare(connection, sql, fetchSize, queryTimeout);
         additionalAccessor = List.of();
         shouldInitAccessorWithMetadata = true;
     }
 
+    /**
+     * @deprecated the arguments are a {@link SelectQuerySpec} now, so that a new setting does not
+     * mean a new parameter in every dialect's query class.
+     */
+    @Deprecated
     public SqlSelectQuery(Connection connection, Constraint constraint,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService,
                           boolean autoClose, List<SqlQueryBuilder.Order> orders,
                           List<Field> groupBy, int top, int skip, Set<Field> distinct, List<SqlOperation> sqlOperations,
                           GlobType fallBackType) {
-        this.constraint = constraint;
-        this.autoClose = autoClose;
-        this.fieldToAccessorHolder = new HashMap<>(fieldToAccessorHolder);
-        this.sqlService = sqlService;
-        this.distinct = distinct;
-        this.sqlOperations = sqlOperations;
-        this.fallBackType = fallBackType;
-        sql = prepareSqlRequest(top, skip, orders, groupBy);
+        this(connection, new SelectQuerySpec(constraint, fieldToAccessorHolder, sqlService, autoClose,
+                orders, groupBy, top, skip, distinct, sqlOperations, fallBackType));
+    }
+
+    public SqlSelectQuery(Connection connection, SelectQuerySpec spec) {
+        this.constraint = spec.constraint();
+        this.autoClose = spec.autoClose();
+        this.fieldToAccessorHolder = new HashMap<>(spec.fieldToAccessorHolder());
+        this.sqlService = spec.sqlService();
+        this.distinct = spec.distinct();
+        this.sqlOperations = spec.sqlOperations();
+        this.fallBackType = spec.fallBackType();
+        sql = prepareSqlRequest(spec.top(), spec.skip(), spec.orders(), spec.groupBy());
+        this.preparedStatement = prepare(connection, sql, spec.fetchSize(), spec.queryTimeout());
+        additionalAccessor = sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList());
+        shouldInitAccessorWithMetadata = false;
+    }
+
+    private static PreparedStatement prepare(Connection connection, String sql, int fetchSize,
+                                             Duration queryTimeout) {
         NanoChrono nanoChrono = NanoChrono.start();
         try {
-            this.preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            PreparedStatement statement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY);
+            if (fetchSize > 0) {
+                statement.setFetchSize(fetchSize);
+            }
+            if (queryTimeout != null) {
+                // JDBC counts seconds; anything shorter than a second would round down to "no limit"
+                statement.setQueryTimeout(Math.max(1, (int) Math.min(Integer.MAX_VALUE, queryTimeout.toSeconds())));
+            }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Preparing " + sql + " took " + nanoChrono.getElapsedTimeInMS() + " ms.");
             }
+            return statement;
         } catch (SQLException e) {
             String message = "for request " + sql;
             LOGGER.error(message);
-            throw new SqlException(message, e);
+            throw SqlExceptions.typed(message, e);
         }
-        additionalAccessor = sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList());
-        shouldInitAccessorWithMetadata = false;
     }
 
     private void initIndexFromMetadata(ResultSetMetaData metaData, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService) {

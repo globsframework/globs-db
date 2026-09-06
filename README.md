@@ -271,12 +271,35 @@ Two lifetimes to keep straight:
 
 `getQuery(String sql)` runs raw SQL, resolving the accessors' column indexes from `ResultSetMetaData`.
 
+### Streaming and timeouts
+
+```java
+sqlConnection.getQueryBuilder(BigTable.TYPE).selectAll()
+        .fetchSize(1000)                       // rows per round trip
+        .queryTimeout(Duration.ofSeconds(30))  // cancelled past that, raising QueryCanceled
+        .getQuery()
+        .executeAsGlobStream();
+```
+
+Both can be set once for the whole application with `setDefaultFetchSize` / `setDefaultQueryTimeout` on the
+service; a query that sets its own wins.
+
+**On PostgreSQL a fetch size only streams inside a transaction.** On an auto-commit connection the driver
+reads the whole result set whatever the value, so `read(...)` and `getAutoCommitDb()` do not stream —
+export a large table from `inTransaction`, not from `read`.
+
 ## Constraints
 
 `Constraints` is a factory of immutable trees — `equal` / `notEqual`, `less` / `greater` and their
 `strictly*` and `*Unchecked` variants, `in` / `notIn`, `isNull` / `isNotNull`, `contains`, `startWith`,
 `regularExpressionCaseSensitive`, `and` / `or`, and the field-to-field `fieldEqual` — each overloaded per
-field type so completion offers the right value type. Rendering and value binding are separate visitors, and `JSonConstraintTypeAdapter`
+field type so completion offers the right value type.
+
+An empty `in` matches no row and an empty `notIn` matches every row, rather than producing the `IN ()` that
+no database accepts. Above eight values the number of placeholders is rounded up — 9 values and 15 produce
+the same statement — so that a query fired with varying set sizes does not fill the database's plan cache
+with near-identical entries; the padding repeats a value already in the set, which is neutral for `IN` and
+for `NOT IN` alike. Rendering and value binding are separate visitors, and `JSonConstraintTypeAdapter`
 serializes a tree to and from JSON, so a constraint can cross a network boundary (a `FieldResolver` maps
 `{type, name}` back to `Field`s).
 

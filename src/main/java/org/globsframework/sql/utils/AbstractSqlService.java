@@ -8,10 +8,14 @@ import org.globsframework.sql.SqlListener;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.NamingMapping;
 
+import java.time.Duration;
+
 public abstract class AbstractSqlService implements SqlService {
     private NamingMapping namingMapping;
     private RetryPolicy retryPolicy = RetryPolicy.NONE;
     private SqlListener listener = SqlListener.NONE;
+    private int defaultFetchSize = 0;
+    private Duration defaultQueryTimeout = null;
 
     private static final String[] RESERVED_KEYWORDS = {
             "COUNT", "WHERE", "FROM", "SELECT", "ORDER"
@@ -57,6 +61,28 @@ public abstract class AbstractSqlService implements SqlService {
 
     public void setListener(SqlListener listener) {
         this.listener = listener == null ? SqlListener.NONE : listener;
+    }
+
+    public int getDefaultFetchSize() {
+        return defaultFetchSize;
+    }
+
+    /**
+     * Applied to every query that does not set its own fetch size.
+     */
+    public void setDefaultFetchSize(int defaultFetchSize) {
+        this.defaultFetchSize = defaultFetchSize;
+    }
+
+    public Duration getDefaultQueryTimeout() {
+        return defaultQueryTimeout;
+    }
+
+    /**
+     * Applied to every query that does not set its own timeout.
+     */
+    public void setDefaultQueryTimeout(Duration defaultQueryTimeout) {
+        this.defaultQueryTimeout = defaultQueryTimeout;
     }
 
     public String getTableName(GlobType globType, boolean escaped) {
