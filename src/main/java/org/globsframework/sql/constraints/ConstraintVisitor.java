@@ -47,4 +47,24 @@ public interface ConstraintVisitor {
                                         boolean not) {
         visitRegularExpression(field, value, caseInsensitive, not);
     }
+
+    // Constraint kinds added after this interface was published. They are default methods so that a
+    // visitor written elsewhere still compiles, and throw so that one meeting a node it cannot
+    // render fails loudly instead of dropping the condition.
+
+    default void visitNot(NotConstraint constraint) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not handle NOT");
+    }
+
+    default void visitBetween(BetweenConstraint constraint) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not handle BETWEEN");
+    }
+
+    default void visitExists(ExistsConstraint constraint) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not handle EXISTS");
+    }
+
+    default void visitInSubQuery(InSubQueryConstraint constraint) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not handle IN (subquery)");
+    }
 }

@@ -2,6 +2,7 @@ package org.globsframework.sql.drivers.jdbc.impl;
 
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
+import org.globsframework.sql.SubQuery;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
 import org.globsframework.sql.constraints.OperandVisitor;
@@ -157,5 +158,28 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     }
 
     public void visitFieldOperand(Field field) {
+    }
+
+    public void visitNot(NotConstraint constraint) {
+        constraint.getConstraint().accept(this);
+    }
+
+    public void visitBetween(BetweenConstraint constraint) {
+        constraint.getMin().visitOperand(this);
+        constraint.getMax().visitOperand(this);
+    }
+
+    public void visitExists(ExistsConstraint constraint) {
+        bindSubQuery(constraint.getSubQuery());
+    }
+
+    public void visitInSubQuery(InSubQueryConstraint constraint) {
+        bindSubQuery(constraint.getSubQuery());
+    }
+
+    private void bindSubQuery(SubQuery subQuery) {
+        if (subQuery.where() != null) {
+            subQuery.where().accept(this);
+        }
     }
 }

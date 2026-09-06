@@ -3,6 +3,7 @@ package org.globsframework.sql.drivers.jdbc.impl;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.SubQuery;
 import org.globsframework.sql.TableRef;
 import org.globsframework.sql.drivers.jdbc.ColumnQualifier;
 import org.globsframework.sql.constraints.Constraint;
@@ -149,6 +150,61 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     public void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not) {
         // default fallback to prevent WHERE
         prettyWriter.append(" 1=1");
+    }
+
+    public void visitNot(NotConstraint constraint) {
+        prettyWriter.append(" NOT (");
+        constraint.getConstraint().accept(this);
+        prettyWriter.append(")");
+    }
+
+    public void visitBetween(BetweenConstraint constraint) {
+        visitFieldOperand(constraint.getField(), constraint.getTable());
+        prettyWriter.append(" BETWEEN ");
+        constraint.getMin().visitOperand(this);
+        prettyWriter.append(" AND ");
+        constraint.getMax().visitOperand(this);
+    }
+
+    public void visitExists(ExistsConstraint constraint) {
+        prettyWriter.append(constraint.isNot() ? " NOT EXISTS (" : " EXISTS (");
+        appendSubQuery(constraint.getSubQuery());
+        prettyWriter.append(")");
+    }
+
+    public void visitInSubQuery(InSubQueryConstraint constraint) {
+        visitFieldOperand(constraint.getField(), constraint.getTable());
+        prettyWriter.append(constraint.isNot() ? " NOT IN (" : " IN (");
+        appendSubQuery(constraint.getSubQuery());
+        prettyWriter.append(")");
+    }
+
+    private void appendSubQuery(SubQuery subQuery) {
+        TableRef table = subQuery.table();
+        prettyWriter.append("SELECT ");
+        if (subQuery.selected() == null) {
+            prettyWriter.append("1");
+        } else {
+            prettyWriter.append(table.getAlias()).append(".")
+                    .append(sqlService.getColumnName(subQuery.selected(), true));
+        }
+        prettyWriter.append(" FROM ").append(sqlService.getTableName(table.getType(), true))
+                .append(" ").append(table.getAlias());
+        if (subQuery.where() == null) {
+            return;
+        }
+        prettyWriter.append(" WHERE ");
+        // inside the subquery a bare field of its own type means the subquery; anything else is a
+        // reference out to the enclosing query, which is what makes it correlated
+        ColumnQualifier enclosing = columnQualifier;
+        columnQualifier = (field, ref) -> ref != null ? ref.getAlias()
+                : field.getGlobType() == table.getType() ? table.getAlias()
+                : enclosing.qualify(field, null);
+        try {
+            subQuery.where().accept(this);
+        } finally {
+            columnQualifier = enclosing;
+        }
     }
 
     public void visitValueOperand(ValueOperand value) {

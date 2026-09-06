@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.globsframework.core.utils.Utils;
 import org.globsframework.sql.constraints.Constraint;
+import org.globsframework.sql.TableRef;
 import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.constraints.impl.*;
 import org.globsframework.sql.model.DummyObject;
@@ -174,6 +175,43 @@ public class JSonConstraintTypeAdapterTest {
         checkRoundTrip(Constraints.endWithIgnoreCase(DummyObject.NAME, "abc"), "endIgnoreCase");
         checkRoundTrip(Constraints.notEndWith(DummyObject.NAME, "abc"), "notEnd");
         checkRoundTrip(Constraints.notEndWithIgnoreCase(DummyObject.NAME, "abc"), "notEndIgnoreCase");
+    }
+
+    @Test
+    public void notRoundTrips() {
+        Constraint constraint = Constraints.not(Constraints.equal(DummyObject.NAME, "a name"));
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"not\":{\"equal\":{\"left\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"name\"}}," +
+                         "\"right\":{\"value\":\"a name\"}}}}", s);
+        Constraint decoded = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(decoded instanceof NotConstraint);
+        Assert.assertTrue(((NotConstraint) decoded).getConstraint() instanceof EqualConstraint);
+    }
+
+    @Test
+    public void betweenRoundTrips() {
+        Constraint constraint = Constraints.between(DummyObject.ID, 2, 7);
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+        String s = gson.toJson(constraint);
+        assertEquivalent("{\"between\":{\"field\":{\"type\":\"dummyObject\",\"name\":\"id\"}," +
+                         "\"min\":2,\"max\":7}}", s);
+        Constraint decoded = gson.fromJson(s, Constraint.class);
+        Assert.assertTrue(decoded instanceof BetweenConstraint);
+        Assert.assertEquals("id", ((BetweenConstraint) decoded).getField().getName());
+    }
+
+    @Test
+    public void aSubQueryIsRefusedRatherThanSerializedWrong() {
+        TableRef table = new TableRef(DummyObject.TYPE, "sub");
+        Constraint constraint = Constraints.exists(table, Constraints.equal(DummyObject.NAME, "x"));
+        Gson gson = JSonConstraintTypeAdapter.create(name -> DummyObject.TYPE);
+
+        // the alias only means something inside the query that created it, so there is nothing
+        // sensible to put on the wire
+        UnsupportedOperationException thrown = Assert.assertThrows(UnsupportedOperationException.class,
+                () -> gson.toJson(constraint));
+        Assert.assertTrue(thrown.getMessage(), thrown.getMessage().contains("subquery"));
     }
 
     private void checkRoundTrip(Constraint constraint, String expectedOperator) {

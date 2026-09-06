@@ -162,6 +162,19 @@ cross a network boundary (a `FieldResolver` maps `{type, name}` back to `Field`s
 parameters, which is exactly what `visitNotIn` did — it wrote one placeholder per value and bound none.
 Padding repeats a value from the set rather than using NULL, because `x NOT IN (1, NULL)` is never true.
 
+The kinds added after the interface was published — `NotConstraint`, `BetweenConstraint`,
+`ExistsConstraint`, `InSubQueryConstraint` — are `default` methods on `ConstraintVisitor` that **throw**.
+That keeps a visitor written elsewhere compiling, and makes one that meets a node it cannot render fail
+loudly rather than drop the condition and silently return the wrong rows. Follow that pattern for the next
+one rather than adding an abstract method.
+
+A subquery renders through `WhereClauseConstraintVisitor.appendSubQuery`, which swaps the `ColumnQualifier`
+for one where a bare field of the subquery's own type means the subquery and everything else delegates
+outwards — that delegation is what makes it correlated. Alias mode is now driven by
+`spec.rootTable() != null` rather than by the join list, since a subquery needs aliases without joining
+anything. `JSonConstraintTypeAdapter` refuses to serialize a subquery: its alias is meaningless outside the
+query that created it.
+
 **Adding a constraint kind touches five places**: the `impl` class, the `Constraints` factory overloads,
 `ConstraintVisitor`, every driver's `WhereClauseConstraintVisitor` subclass, and both directions of
 `JSonConstraintTypeAdapter` (plus a case in `JSonConstraintTypeAdapterTest`).

@@ -5,6 +5,8 @@ import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.ColumnRef;
+import org.globsframework.sql.SubQuery;
+import org.globsframework.sql.TableRef;
 import org.globsframework.sql.constraints.impl.*;
 
 import java.time.LocalDate;
@@ -373,6 +375,91 @@ public class Constraints {
     public static Constraint endWith(ColumnRef column, String value) {
         return new ContainsConstraint(column.field(), column.table(), value,
                 ConstraintVisitor.ContainType.endWith, true, false);
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Negation and range
+    // ------------------------------------------------------------------------------------------
+
+    /**
+     * Negates a whole subtree, which the per-operator negations (notEqual, notIn, notContains) could
+     * not do: an and/or had to be pushed through De Morgan by hand.
+     */
+    public static Constraint not(Constraint constraint) {
+        return new NotConstraint(constraint);
+    }
+
+    /**
+     * {@code column BETWEEN min AND max}, both bounds included.
+     */
+    public static Constraint betweenUnchecked(Field field, Object min, Object max) {
+        return new BetweenConstraint(field, null, new ValueOperand(field, min), new ValueOperand(field, max));
+    }
+
+    public static Constraint between(IntegerField field, Integer min, Integer max) {
+        return betweenUnchecked(field, min, max);
+    }
+
+    public static Constraint between(LongField field, Long min, Long max) {
+        return betweenUnchecked(field, min, max);
+    }
+
+    public static Constraint between(DoubleField field, Double min, Double max) {
+        return betweenUnchecked(field, min, max);
+    }
+
+    public static Constraint between(StringField field, String min, String max) {
+        return betweenUnchecked(field, min, max);
+    }
+
+    public static Constraint between(DateField field, LocalDate min, LocalDate max) {
+        return betweenUnchecked(field, min, max);
+    }
+
+    public static Constraint betweenUnchecked(ColumnRef column, Object min, Object max) {
+        return new BetweenConstraint(column.field(), column.table(),
+                new ValueOperand(column.field(), min), new ValueOperand(column.field(), max));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Subqueries. The table comes from the builder -- table(type) -- which is what gives it an
+    // alias distinct from the enclosing query's, so the condition can correlate the two.
+    // ------------------------------------------------------------------------------------------
+
+    /**
+     * {@code EXISTS (SELECT 1 FROM table alias WHERE where)}. The where normally compares a column of
+     * this table with a column of the enclosing query.
+     */
+    public static Constraint exists(TableRef table, Constraint where) {
+        return new ExistsConstraint(new SubQuery(table, null, where), false);
+    }
+
+    public static Constraint notExists(TableRef table, Constraint where) {
+        return new ExistsConstraint(new SubQuery(table, null, where), true);
+    }
+
+    /**
+     * {@code column IN (SELECT selected FROM ... WHERE where)} — the form of in whose values are not
+     * known when the query is built.
+     */
+    public static Constraint in(Field field, ColumnRef selected, Constraint where) {
+        return new InSubQueryConstraint(field, null,
+                new SubQuery(selected.table(), selected.field(), where), false);
+    }
+
+    public static Constraint in(ColumnRef column, ColumnRef selected, Constraint where) {
+        return new InSubQueryConstraint(column.field(), column.table(),
+                new SubQuery(selected.table(), selected.field(), where), false);
+    }
+
+    public static Constraint notIn(Field field, ColumnRef selected, Constraint where) {
+        return new InSubQueryConstraint(field, null,
+                new SubQuery(selected.table(), selected.field(), where), true);
+    }
+
+    public static Constraint notIn(ColumnRef column, ColumnRef selected, Constraint where) {
+        return new InSubQueryConstraint(column.field(), column.table(),
+                new SubQuery(selected.table(), selected.field(), where), true);
     }
 
     private static class ConstraintsFunctor implements FieldValues.Functor {

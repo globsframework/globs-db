@@ -41,6 +41,13 @@ public interface SelectBuilder {
      * @param on    the join condition, normally comparing a column of an already joined table with
      *              a column of this one
      */
+    /**
+     * Adds a condition to the query, ANDed with the one it was opened with. The way to use a
+     * constraint that needs a {@link TableRef} — a subquery, or a column of a named occurrence —
+     * since those only exist once the builder does.
+     */
+    SelectBuilder where(Constraint constraint);
+
     SelectBuilder innerJoin(TableRef table, Constraint on);
 
     SelectBuilder leftJoin(TableRef table, Constraint on);

@@ -100,7 +100,9 @@ public class SqlSelectQuery implements SelectQuery {
         this.rootTable = spec.rootTable();
         this.joins = spec.joins();
         this.columnTables = spec.columnTables();
-        this.columnQualifier = joins.isEmpty()
+        // asking the builder for a TableRef -- to join, or to correlate a subquery -- is what puts
+        // the query in alias mode; one that never does generates exactly the SQL it always did
+        this.columnQualifier = rootTable == null
                 ? ColumnQualifier.byTableName(sqlService, globTypes)
                 : aliasQualifier();
         sql = prepareSqlRequest(spec.top(), spec.skip(), spec.orders(), spec.groupBy());
@@ -242,7 +244,7 @@ public class SqlSelectQuery implements SelectQuery {
         }
 
         prettyWriter.append(" from ");
-        if (joins.isEmpty()) {
+        if (rootTable == null) {
             if (globTypes.isEmpty()) {
                 globTypes.add(fallBackType);
             }
@@ -281,7 +283,7 @@ public class SqlSelectQuery implements SelectQuery {
             prettyWriter.append(" ORDER BY ");
             // unqualified where a single table leaves no doubt, which is what it always did; with
             // several it is ambiguous, and a database is entitled to refuse it
-            boolean qualify = !joins.isEmpty() || globTypes.size() > 1;
+            boolean qualify = rootTable != null || globTypes.size() > 1;
             for (SqlQueryBuilder.Order order : orders) {
                 if (qualify) {
                     TableRef table = order.table != null ? order.table : columnTables.get(order.field);

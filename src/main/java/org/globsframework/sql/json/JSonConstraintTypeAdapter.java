@@ -53,6 +53,10 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
     public static final String STRICTLY_LESS_THAN = "strictlyLessThan";
     public static final String GREATER_THAN = "greaterThan";
     public static final String STRICTLY_GREATER_THAN = "strictlyGreaterThan";
+    public static final String NOT = "not";
+    public static final String BETWEEN = "between";
+    public static final String MIN = "min";
+    public static final String MAX = "max";
     public static final String VALUE = "value";
     public static final String VALUES = "values";
     public static final String FIELD = "field";
@@ -162,6 +166,18 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
                 Ref<Operand> rightOp = new Ref<>();
                 findField((JsonObject) entry.getValue(), leftOp, rightOp);
                 return new EqualConstraint(leftOp.get(), rightOp.get());
+            }
+            case NOT: {
+                return new NotConstraint(readConstraint((JsonObject) entry.getValue()));
+            }
+            case BETWEEN: {
+                JsonObject in = (JsonObject) entry.getValue();
+                Field field = readField(in);
+                JsonFieldValueReaderVisitor visitor = new JsonFieldValueReaderVisitor();
+                Object min = field.safeAccept(visitor, in.get(MIN)).value;
+                Object max = field.safeAccept(visitor, in.get(MAX)).value;
+                return new BetweenConstraint(field, null, new ValueOperand(field, min),
+                        new ValueOperand(field, max));
             }
             case CONTAINS: {
                 JsonObject in = (JsonObject) entry.getValue();
@@ -512,6 +528,43 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             }
         }
 
+        public void visitExists(ExistsConstraint constraint) {
+            throw new UnsupportedOperationException("A subquery cannot be serialized: its table alias "
+                                                    + "only means something inside the query that created it");
+        }
+
+        public void visitInSubQuery(InSubQueryConstraint constraint) {
+            throw new UnsupportedOperationException("A subquery cannot be serialized: its table alias "
+                                                    + "only means something inside the query that created it");
+        }
+
+        public void visitNot(NotConstraint constraint) {
+            try {
+                jsonWriter.name(NOT);
+                jsonWriter.beginObject();
+                constraint.getConstraint().accept(this);
+                jsonWriter.endObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public void visitBetween(BetweenConstraint constraint) {
+            try {
+                jsonWriter.name(BETWEEN);
+                jsonWriter.beginObject();
+                visitFieldOperand(constraint.getField());
+                // the operand visitors name the value themselves, so the bounds are written here
+                jsonWriter.name(MIN);
+                constraint.getField().safeAcceptValue(this, valueOf(constraint.getMin()));
+                jsonWriter.name(MAX);
+                constraint.getField().safeAcceptValue(this, valueOf(constraint.getMax()));
+                jsonWriter.endObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public void visitIsOrNotNull(NullOrNotConstraint constraint) {
             try {
                 if (constraint.checkNull()) {
@@ -600,6 +653,20 @@ public class JSonConstraintTypeAdapter extends TypeAdapter<Constraint> {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        /**
+         * The value an operand stands for. An accessor is read now, exactly as the other operand
+         * writers do: what crosses the wire is a value, never the accessor it came from.
+         */
+        private static Object valueOf(Operand operand) {
+            if (operand instanceof ValueOperand value) {
+                return value.getValue();
+            }
+            if (operand instanceof AccessorOperand accessor) {
+                return accessor.getAccessor().getObjectValue();
+            }
+            throw new UnsupportedOperationException("A BETWEEN bound cannot be a " + operand.getClass().getName());
         }
 
         public void visitFieldOperand(Field field) {

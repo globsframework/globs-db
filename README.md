@@ -365,6 +365,35 @@ export a large table from `inTransaction`, not from `read`.
 `regularExpressionCaseSensitive`, `and` / `or`, and the field-to-field `fieldEqual` — each overloaded per
 field type so completion offers the right value type.
 
+`not(...)` negates a whole subtree — the per-operator negations (`notEqual`, `notIn`, `notContains`) could
+not do that, so an `and`/`or` had to be pushed through De Morgan by hand. `between(field, min, max)` is a
+range with both bounds included, written as a real `BETWEEN`.
+
+`exists` and the `in` that takes a query rather than a set need a table to select from, and take it from the
+builder — `table(type)` gives it an alias distinct from the enclosing query's, which is what lets the
+condition correlate the two:
+
+```java
+SelectBuilder qb = db.getQueryBuilder(Order.TYPE);
+TableRef orders = qb.rootTable();
+TableRef lines = qb.table(OrderLine.TYPE);
+
+qb.where(Constraints.exists(lines, Constraints.equal(lines.column(OrderLine.orderId),
+                                                    orders.column(Order.id))));
+// or: orderId IN (SELECT id FROM order_line WHERE ...)
+qb.where(Constraints.in(Order.id, lines.column(OrderLine.orderId),
+                        Constraints.equalsObject(lines.column(OrderLine.status), "open")));
+```
+
+`where(...)` adds a condition to a query already opened, ANDed with the one it was built with — the way to
+use a constraint that needs a `TableRef`, since those only exist once the builder does. Inside a subquery a
+bare field of the subquery's own type means the subquery; anything else is a reference out to the enclosing
+query.
+
+A subquery **cannot be serialized**: `JSonConstraintTypeAdapter` refuses it rather than emitting something
+broken, because a table alias only means something inside the query that created it. Everything else,
+`not` and `between` included, round-trips.
+
 An empty `in` matches no row and an empty `notIn` matches every row, rather than producing the `IN ()` that
 no database accepts. Above eight values the number of placeholders is rounded up — 9 values and 15 produce
 the same statement — so that a query fired with varying set sizes does not fill the database's plan cache

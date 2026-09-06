@@ -21,6 +21,7 @@ import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.*;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.constraints.Constraint;
+import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.sql.drivers.jdbc.*;
 
 import java.time.Duration;
@@ -34,7 +35,7 @@ public class SqlQueryBuilder implements SelectBuilder {
     protected final List<Order> orders = new ArrayList<>();
     protected Connection connection;
     protected final GlobType globType;
-    protected final Constraint constraint;
+    protected Constraint constraint;
     protected final SqlService sqlService;
     protected boolean autoClose = true;
     protected Map<Field, SqlAccessor> fieldToAccessorHolder = new HashMap<Field, SqlAccessor>();
@@ -69,6 +70,12 @@ public class SqlQueryBuilder implements SelectBuilder {
                 groupBy, top, skip, distinct, sqlOperations,
                 fallBackType == null ? globType : fallBackType, fetchSize, queryTimeout,
                 rootTable, List.copyOf(joins), Map.copyOf(columnTables));
+    }
+
+    public SelectBuilder where(Constraint constraint) {
+        this.constraint = this.constraint == null ? constraint
+                : Constraints.and(this.constraint, constraint);
+        return this;
     }
 
     public TableRef rootTable() {
