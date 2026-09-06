@@ -257,6 +257,52 @@ List<Glob> all = sqlConnection.getQueryBuilder(StudentType.TYPE, Constraints.equ
         .executeAsGlobs();
 ```
 
+## Joins
+
+Without an explicit join a query names one table — or several, cross joined, if a constraint reaches across
+types. `INNER JOIN` and `LEFT JOIN` are written with a `TableRef`, which is one *occurrence* of a table: a
+`GlobType` says which table, a `TableRef` says which appearance of it, and that is what an alias is for.
+
+```java
+SelectBuilder qb = db.getQueryBuilder(Order.TYPE);
+TableRef orders = qb.rootTable();
+TableRef customers = qb.table(Customer.TYPE);
+qb.leftJoin(customers, Constraints.equal(orders.column(Order.customerId),
+                                         customers.column(Customer.id)));
+
+qb.select(orders.column(Order.id));                                  // into the globs
+Accessor name = qb.retrieveUnTyped(customers.column(Customer.name)); // through an accessor
+qb.orderAsc(orders.column(Order.id));
+```
+
+Since a `TableRef` is an occurrence and not a type, a table can be joined to itself:
+
+```java
+TableRef child = qb.rootTable();
+TableRef parent = qb.table(Employee.TYPE);
+qb.innerJoin(parent, Constraints.equal(child.column(Employee.managerId), parent.column(Employee.id)));
+Accessor childName = qb.retrieveUnTyped(child.column(Employee.name));
+Accessor managerName = qb.retrieveUnTyped(parent.column(Employee.name));
+```
+
+**A glob has one type and one value per field**, which bounds what it can carry out of a join: the columns
+of a *joined* table do not fit in it, and neither do both sides of a self join. Those are read through
+accessors — `retrieveUnTyped(ColumnRef)`, or the plain `retrieve` / `select(field, Ref)`, which a join
+changes nothing about. `executeAsGlobs` keeps returning globs of the query's own type.
+
+A bare `Field` still works and resolves to its type's single occurrence, so every existing query is
+unchanged — a query with no join generates the same SQL as before, alias-free. A field whose type appears
+twice has to be named through its `TableRef`, and says so:
+
+```
+dummyObject.id is ambiguous: dummyObject appears more than once in the query,
+name the occurrence with TableRef.column(...)
+```
+
+`Constraints` has `ColumnRef` overloads for what a join needs — column-to-column `equal` / `notEqual`, the
+comparisons, `isNull` / `isNotNull`, `in` / `notIn`, `contains` / `startWith` / `endWith` — alongside the
+`Field` ones. `groupBy`, `orderAsc` and `orderDesc` take either.
+
 `SelectQuery` also has `executeUnique()`, `executeOne()` (an `Optional`), `executeAsGlobStream()` and
 `executeAsFieldValuesStream()`. `SelectBuilder` carries the aggregates (`count`, `sum`, `min`, `max`),
 `groupBy`, `orderAsc` / `orderDesc`, `top`, `skip` and `withKeys`.

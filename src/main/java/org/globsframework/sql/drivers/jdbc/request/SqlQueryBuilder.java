@@ -12,7 +12,10 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.Ref;
 import org.globsframework.json.GSonUtils;
+import org.globsframework.sql.ColumnRef;
+import org.globsframework.sql.Join;
 import org.globsframework.sql.SelectBuilder;
+import org.globsframework.sql.TableRef;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.*;
@@ -43,6 +46,10 @@ public class SqlQueryBuilder implements SelectBuilder {
     protected GlobType fallBackType = null;
     protected int fetchSize;
     protected Duration queryTimeout;
+    protected final List<Join> joins = new ArrayList<>();
+    protected final Map<Field, TableRef> columnTables = new HashMap<>();
+    private TableRef rootTable;
+    private int aliasCount;
 
     public SqlQueryBuilder(Connection connection, GlobType globType, Constraint constraint, SqlService sqlService) {
         this.connection = connection;
@@ -60,7 +67,85 @@ public class SqlQueryBuilder implements SelectBuilder {
     protected SelectQuerySpec spec() {
         return new SelectQuerySpec(constraint, fieldToAccessorHolder, sqlService, autoClose, orders,
                 groupBy, top, skip, distinct, sqlOperations,
-                fallBackType == null ? globType : fallBackType, fetchSize, queryTimeout);
+                fallBackType == null ? globType : fallBackType, fetchSize, queryTimeout,
+                rootTable, List.copyOf(joins), Map.copyOf(columnTables));
+    }
+
+    public TableRef rootTable() {
+        if (rootTable == null) {
+            rootTable = newAlias(globType);
+        }
+        return rootTable;
+    }
+
+    public TableRef table(GlobType type) {
+        rootTable();
+        return newAlias(type);
+    }
+
+    private TableRef newAlias(GlobType type) {
+        return new TableRef(type, "t" + aliasCount++);
+    }
+
+    public SelectBuilder innerJoin(TableRef table, Constraint on) {
+        return join(table, on, Join.Kind.inner);
+    }
+
+    public SelectBuilder leftJoin(TableRef table, Constraint on) {
+        return join(table, on, Join.Kind.left);
+    }
+
+    private SelectBuilder join(TableRef table, Constraint on, Join.Kind kind) {
+        if (table == rootTable()) {
+            throw new IllegalArgumentException("The root table cannot be joined to the query, it is the query");
+        }
+        joins.add(new Join(table, on, kind));
+        return this;
+    }
+
+    public SelectBuilder select(ColumnRef column) {
+        rememberOccurrence(column);
+        return select(column.field());
+    }
+
+    private void rememberOccurrence(ColumnRef column) {
+        TableRef known = columnTables.putIfAbsent(column.field(), column.table());
+        if (known != null && known != column.table()) {
+            throw new IllegalArgumentException(column.field().getFullName() + " is already taken from "
+                    + known + ": a glob holds one value per field, use retrieveUnTyped(ColumnRef) to read "
+                    + "the same field from " + column.table() + " as well");
+        }
+    }
+
+    public Accessor retrieveUnTyped(ColumnRef column) {
+        SqlAccessor accessor = freshAccessor(column.field());
+        sqlOperations.add(new SqlOperation() {
+            public SqlAccessor getAccessor() {
+                return accessor;
+            }
+
+            public String toSqlOpe(ToSqlName toSqlName) {
+                return toSqlName.toSqlName(column.field(), column.table());
+            }
+        });
+        return accessor;
+    }
+
+    /**
+     * An accessor of the right kind for this field, not registered for glob building. The retrieve
+     * methods all build theirs into fieldToAccessorHolder, so the map is emptied around the call
+     * rather than the per-type construction being written a second time.
+     */
+    private SqlAccessor freshAccessor(Field field) {
+        Map<Field, SqlAccessor> selected = new HashMap<>(fieldToAccessorHolder);
+        fieldToAccessorHolder.clear();
+        try {
+            retrieveUnTyped(field);
+            return fieldToAccessorHolder.get(field);
+        } finally {
+            fieldToAccessorHolder.clear();
+            fieldToAccessorHolder.putAll(selected);
+        }
     }
 
     public SelectQuery getQuery() {
@@ -285,6 +370,11 @@ public class SqlQueryBuilder implements SelectBuilder {
         return this;
     }
 
+    public SelectBuilder groupBy(ColumnRef column) {
+        rememberOccurrence(column);
+        return groupBy(column.field());
+    }
+
     public SelectBuilder orderAsc(Field field) {
         orders.add(new Order(field, true));
         return this;
@@ -292,6 +382,16 @@ public class SqlQueryBuilder implements SelectBuilder {
 
     public SelectBuilder orderDesc(Field field) {
         orders.add(new Order(field, false));
+        return this;
+    }
+
+    public SelectBuilder orderAsc(ColumnRef column) {
+        orders.add(new Order(column.field(), column.table(), true));
+        return this;
+    }
+
+    public SelectBuilder orderDesc(ColumnRef column) {
+        orders.add(new Order(column.field(), column.table(), false));
         return this;
     }
 
@@ -423,9 +523,16 @@ public class SqlQueryBuilder implements SelectBuilder {
     public static class Order {
         public final Field field;
         public final boolean asc;
+        /** the occurrence to order on, null when the field names its type's only one */
+        public final TableRef table;
 
         public Order(Field field, boolean asc) {
+            this(field, null, asc);
+        }
+
+        public Order(Field field, TableRef table, boolean asc) {
             this.field = field;
+            this.table = table;
             this.asc = asc;
         }
     }

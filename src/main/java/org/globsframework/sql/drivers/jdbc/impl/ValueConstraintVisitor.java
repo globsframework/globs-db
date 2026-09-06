@@ -25,6 +25,14 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
         this.index = index;
     }
 
+    /**
+     * How many placeholders have been bound, so that the next clause can carry on from there — a
+     * join condition is bound before the WHERE it precedes in the statement.
+     */
+    public int getIndex() {
+        return index;
+    }
+
     public void visitEqual(EqualConstraint constraint) {
         visitBinary(constraint);
     }

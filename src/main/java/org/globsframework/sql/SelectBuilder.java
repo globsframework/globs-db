@@ -1,8 +1,10 @@
 package org.globsframework.sql;
 
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.Ref;
+import org.globsframework.sql.constraints.Constraint;
 
 import java.time.Duration;
 
@@ -17,6 +19,47 @@ public interface SelectBuilder {
     SelectBuilder select(Field field);
 
     SelectBuilder selectAll();
+
+    // ----------------------------------------------------------------------------------------
+    // Joins. Without them a query names one table -- or several, cross joined, if constraints
+    // reach across types -- and every column is written with its table name, as before.
+    // ----------------------------------------------------------------------------------------
+
+    /**
+     * The occurrence of the type this builder was opened on.
+     */
+    TableRef rootTable();
+
+    /**
+     * Declares a further occurrence of a table, with its own alias. Calling it twice on the same
+     * type gives two aliases, which is what a self join needs.
+     */
+    TableRef table(GlobType type);
+
+    /**
+     * @param table the occurrence to join, from {@link #table(GlobType)}
+     * @param on    the join condition, normally comparing a column of an already joined table with
+     *              a column of this one
+     */
+    SelectBuilder innerJoin(TableRef table, Constraint on);
+
+    SelectBuilder leftJoin(TableRef table, Constraint on);
+
+    /**
+     * Selects a column of a named occurrence into the globs {@code executeAsGlobs} builds.
+     * <p>
+     * A glob has one type and one value per field, which bounds what it can carry out of a join:
+     * columns of a <em>joined</em> table do not fit in it, and neither do both sides of a self join.
+     * Read those with {@link #retrieveUnTyped(ColumnRef)} — or with the plain {@code retrieve} /
+     * {@code select(field, Ref)} accessors, which a join changes nothing about.
+     */
+    SelectBuilder select(ColumnRef column);
+
+    /**
+     * An accessor on a column of a named occurrence, outside the globs being built: how a joined
+     * table's columns, and both sides of a self join, are read.
+     */
+    Accessor retrieveUnTyped(ColumnRef column);
 
     SelectBuilder select(IntegerField field, Ref<IntegerAccessor> accessor);
 
@@ -43,9 +86,15 @@ public interface SelectBuilder {
 
     SelectBuilder groupBy(Field field);
 
+    SelectBuilder groupBy(ColumnRef column);
+
     SelectBuilder orderAsc(Field field);
 
     SelectBuilder orderDesc(Field field);
+
+    SelectBuilder orderAsc(ColumnRef column);
+
+    SelectBuilder orderDesc(ColumnRef column);
 
     SelectBuilder top(int n);
 

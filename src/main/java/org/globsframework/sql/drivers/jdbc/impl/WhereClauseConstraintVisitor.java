@@ -3,6 +3,8 @@ package org.globsframework.sql.drivers.jdbc.impl;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.TableRef;
+import org.globsframework.sql.drivers.jdbc.ColumnQualifier;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
 import org.globsframework.sql.constraints.OperandVisitor;
@@ -15,12 +17,35 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     protected StringPrettyWriter prettyWriter;
     private SqlService sqlService;
     private Set<GlobType> globTypes;
+    private ColumnQualifier columnQualifier;
+    /** the occurrence the column being written belongs to, while it is being written */
+    private TableRef currentTable;
 
     public WhereClauseConstraintVisitor(StringPrettyWriter prettyWriter, SqlService sqlService,
                                         Set<GlobType> GlobeTypeSetToUpdate) {
         this.prettyWriter = prettyWriter;
         this.sqlService = sqlService;
         this.globTypes = GlobeTypeSetToUpdate;
+        this.columnQualifier = ColumnQualifier.byTableName(sqlService, GlobeTypeSetToUpdate);
+    }
+
+    /**
+     * Set by a query that joins, so that columns are written with the alias of their occurrence
+     * rather than with a table name. Left alone by the delete and update requests, which have a
+     * single table and keep the joinless rendering.
+     */
+    public void setColumnQualifier(ColumnQualifier columnQualifier) {
+        this.columnQualifier = columnQualifier;
+    }
+
+    private void withTable(TableRef table, Runnable body) {
+        TableRef previous = currentTable;
+        currentTable = table;
+        try {
+            body.run();
+        } finally {
+            currentTable = previous;
+        }
     }
 
     public void visitEqual(EqualConstraint constraint) {
@@ -56,11 +81,12 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitIn(InConstraint inConstraint) {
-        appendInClause(inConstraint.getField(), inConstraint.getValues(), false);
+        withTable(inConstraint.getTable(),
+                () -> appendInClause(inConstraint.getField(), inConstraint.getValues(), false));
     }
 
     public void visitIsOrNotNull(NullOrNotConstraint constraint) {
-        visitFieldOperand(constraint.getField());
+        visitFieldOperand(constraint.getField(), constraint.getTable());
         if (constraint.checkNull()) {
             prettyWriter.append(" IS NULL ");
         } else {
@@ -69,7 +95,8 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitNotIn(NotInConstraint constraint) {
-        appendInClause(constraint.getField(), constraint.getValues(), true);
+        withTable(constraint.getTable(),
+                () -> appendInClause(constraint.getField(), constraint.getValues(), true));
     }
 
     private void appendInClause(Field field, Set<?> values, boolean not) {
@@ -133,10 +160,24 @@ public class WhereClauseConstraintVisitor implements ConstraintVisitor, OperandV
     }
 
     public void visitFieldOperand(Field field) {
-        globTypes.add(field.getGlobType());
-        prettyWriter.append(sqlService.getTableName(field.getGlobType(), true))
+        prettyWriter.append(columnQualifier.qualify(field, currentTable))
                 .append(".")
                 .append(sqlService.getColumnName(field, true));
+    }
+
+    public void visitFieldOperand(Field field, TableRef table) {
+        withTable(table, () -> visitFieldOperand(field));
+    }
+
+    public void visitContains(Field field, TableRef table, String value, ContainType containType,
+                              boolean contains, boolean ignoreCase) {
+        // routed through the single argument form, which a dialect may override
+        withTable(table, () -> visitContains(field, value, containType, contains, ignoreCase));
+    }
+
+    public void visitRegularExpression(Field field, TableRef table, String value, boolean caseInsensitive,
+                                       boolean not) {
+        withTable(table, () -> visitRegularExpression(field, value, caseInsensitive, not));
     }
 
     private void visitBinary(BinaryOperandConstraint constraint, String operator) {

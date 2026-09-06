@@ -9,7 +9,9 @@ import org.globsframework.core.streams.GlobStream;
 import org.globsframework.core.streams.accessors.Accessor;
 import org.globsframework.core.utils.NanoChrono;
 import org.globsframework.json.GSonUtils;
+import org.globsframework.sql.Join;
 import org.globsframework.sql.SelectQuery;
+import org.globsframework.sql.TableRef;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.accessors.SqlAccessor;
 import org.globsframework.sql.constraints.Constraint;
@@ -43,6 +45,10 @@ public class SqlSelectQuery implements SelectQuery {
     private final String sql;
     private boolean shouldInitAccessorWithMetadata;
     private final List<SqlAccessor> additionalAccessor;
+    private final TableRef rootTable;
+    private final List<Join> joins;
+    private final Map<Field, TableRef> columnTables;
+    private final ColumnQualifier columnQualifier;
 
     public SqlSelectQuery(SqlService sqlService, Connection connection, String sql,
                           Map<Field, SqlAccessor> fieldToAccessorHolder, GlobType fallBackType) {
@@ -59,6 +65,10 @@ public class SqlSelectQuery implements SelectQuery {
         distinct = Set.of();
         constraint = null;
         autoClose = true;
+        rootTable = null;
+        joins = List.of();
+        columnTables = Map.of();
+        columnQualifier = ColumnQualifier.byTableName(sqlService, globTypes);
         this.sql = sql;
         this.preparedStatement = prepare(connection, sql, fetchSize, queryTimeout);
         additionalAccessor = List.of();
@@ -87,6 +97,12 @@ public class SqlSelectQuery implements SelectQuery {
         this.distinct = spec.distinct();
         this.sqlOperations = spec.sqlOperations();
         this.fallBackType = spec.fallBackType();
+        this.rootTable = spec.rootTable();
+        this.joins = spec.joins();
+        this.columnTables = spec.columnTables();
+        this.columnQualifier = joins.isEmpty()
+                ? ColumnQualifier.byTableName(sqlService, globTypes)
+                : aliasQualifier();
         sql = prepareSqlRequest(spec.top(), spec.skip(), spec.orders(), spec.groupBy());
         this.preparedStatement = prepare(connection, sql, spec.fetchSize(), spec.queryTimeout());
         additionalAccessor = sqlOperations.stream().map(SqlOperation::getAccessor).collect(Collectors.toList());
@@ -115,6 +131,40 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw SqlExceptions.typed(message, e);
         }
+    }
+
+    /**
+     * Resolves a column to the alias of its occurrence. A bare field is allowed as long as its type
+     * is joined exactly once, which is what keeps every existing query working; a type joined twice
+     * has to be named, since nothing else can say which side is meant.
+     */
+    private ColumnQualifier aliasQualifier() {
+        Map<GlobType, TableRef> single = new HashMap<>();
+        Set<GlobType> ambiguous = new HashSet<>();
+        List<TableRef> occurrences = new ArrayList<>();
+        occurrences.add(rootTable);
+        joins.forEach(join -> occurrences.add(join.table()));
+        for (TableRef occurrence : occurrences) {
+            if (single.putIfAbsent(occurrence.getType(), occurrence) != null) {
+                ambiguous.add(occurrence.getType());
+            }
+        }
+        return (field, table) -> {
+            if (table != null) {
+                return table.getAlias();
+            }
+            GlobType type = field.getGlobType();
+            if (ambiguous.contains(type)) {
+                throw new SqlException(field.getFullName() + " is ambiguous: " + type.getName()
+                        + " appears more than once in the query, name the occurrence with TableRef.column(...)");
+            }
+            TableRef occurrence = single.get(type);
+            if (occurrence == null) {
+                throw new SqlException(field.getFullName() + " belongs to " + type.getName()
+                        + ", which this query does not join");
+            }
+            return occurrence.getAlias();
+        };
     }
 
     private void initIndexFromMetadata(ResultSetMetaData metaData, Map<Field, SqlAccessor> fieldToAccessorHolder, SqlService sqlService) {
@@ -158,10 +208,12 @@ public class SqlSelectQuery implements SelectQuery {
             sqlAccessor.setIndex(++index);
             prettyWriter.append(sqlOperation.toSqlOpe(new ToSqlName() {
                         public String toSqlName(Field field) {
-                            GlobType globType = field.getGlobType();
-                            globTypes.add(globType);
-                            String tableName = sqlService.getTableName(globType, true);
-                            return tableName + "." + sqlService.getColumnName(field, true);
+                            return toSqlName(field, null);
+                        }
+
+                        public String toSqlName(Field field, TableRef table) {
+                            return columnQualifier.qualify(field, table) + "."
+                                    + sqlService.getColumnName(field, true);
                         }
                     })
             );
@@ -171,9 +223,7 @@ public class SqlSelectQuery implements SelectQuery {
         for (Map.Entry<Field, SqlAccessor> fieldAndAccessor : fieldToAccessorHolder.entrySet()) {
             fieldAndAccessor.getValue().setIndex(++index);
             Field field = fieldAndAccessor.getKey();
-            GlobType globType = field.getGlobType();
-            globTypes.add(globType);
-            String tableName = sqlService.getTableName(globType, true);
+            String tableName = columnQualifier.qualify(field, columnTables.get(field));
             if (distinct.contains(field)) {
                 prettyWriter.append(" DISTINCT ");
             }
@@ -188,17 +238,28 @@ public class SqlSelectQuery implements SelectQuery {
         if (constraint != null) {
             where = new StringPrettyWriter();
             where.append(" WHERE ");
-            constraint.accept(getWhereConstraintVisitor(where));
+            constraint.accept(qualifiedWhereVisitor(where));
         }
 
         prettyWriter.append(" from ");
-        if (globTypes.isEmpty()) {
-            globTypes.add(fallBackType);
-        }
-        for (Iterator<GlobType> it = globTypes.iterator(); it.hasNext(); ) {
-            GlobType globType = it.next();
-            prettyWriter.append(sqlService.getTableName(globType, true))
-                    .appendIf(", ", it.hasNext());
+        if (joins.isEmpty()) {
+            if (globTypes.isEmpty()) {
+                globTypes.add(fallBackType);
+            }
+            for (Iterator<GlobType> it = globTypes.iterator(); it.hasNext(); ) {
+                GlobType globType = it.next();
+                prettyWriter.append(sqlService.getTableName(globType, true))
+                        .appendIf(", ", it.hasNext());
+            }
+        } else {
+            appendTable(prettyWriter, rootTable);
+            for (Join join : joins) {
+                prettyWriter.append(" ").append(join.kind().toSql()).append(" ");
+                appendTable(prettyWriter, join.table());
+                prettyWriter.append(" ON (");
+                join.on().accept(qualifiedWhereVisitor(prettyWriter));
+                prettyWriter.append(")");
+            }
         }
         if (where != null) {
             prettyWriter.append(where.toString());
@@ -207,7 +268,7 @@ public class SqlSelectQuery implements SelectQuery {
         if (!groupBy.isEmpty()) {
             prettyWriter.append(" GROUP BY ");
             for (Field field : groupBy) {
-                String tableName = sqlService.getTableName(field.getGlobType(), true);
+                String tableName = columnQualifier.qualify(field, columnTables.get(field));
                 prettyWriter.append(tableName)
                         .append(".")
                         .append(sqlService.getColumnName(field, true))
@@ -218,7 +279,14 @@ public class SqlSelectQuery implements SelectQuery {
 
         if (!orders.isEmpty()) {
             prettyWriter.append(" ORDER BY ");
+            // unqualified where a single table leaves no doubt, which is what it always did; with
+            // several it is ambiguous, and a database is entitled to refuse it
+            boolean qualify = !joins.isEmpty() || globTypes.size() > 1;
             for (SqlQueryBuilder.Order order : orders) {
+                if (qualify) {
+                    TableRef table = order.table != null ? order.table : columnTables.get(order.field);
+                    prettyWriter.append(columnQualifier.qualify(order.field, table)).append(".");
+                }
                 prettyWriter.append(sqlService.getColumnName(order.field, true));
                 if (order.asc) {
                     prettyWriter.append(" ASC");
@@ -231,6 +299,17 @@ public class SqlSelectQuery implements SelectQuery {
         }
         appendTopAndSkip(prettyWriter, top, skip);
         return prettyWriter.toString();
+    }
+
+    private void appendTable(StringPrettyWriter writer, TableRef table) {
+        // no AS before a table alias: Oracle accepts it only in front of a column alias
+        writer.append(sqlService.getTableName(table.getType(), true)).append(" ").append(table.getAlias());
+    }
+
+    private WhereClauseConstraintVisitor qualifiedWhereVisitor(StringPrettyWriter writer) {
+        WhereClauseConstraintVisitor visitor = getWhereConstraintVisitor(writer);
+        visitor.setColumnQualifier(columnQualifier);
+        return visitor;
     }
 
     /**
@@ -287,8 +366,15 @@ public class SqlSelectQuery implements SelectQuery {
             LOGGER.error(message);
             throw new SqlException(message);
         }
+        // the ON conditions come before the WHERE in the statement, so their values bind first
+        int index = 0;
+        for (Join join : joins) {
+            ValueConstraintVisitor visitor = new ValueConstraintVisitor(preparedStatement, index);
+            join.on().accept(visitor);
+            index = visitor.getIndex();
+        }
         if (constraint != null) {
-            constraint.accept(new ValueConstraintVisitor(preparedStatement));
+            constraint.accept(new ValueConstraintVisitor(preparedStatement, index));
         }
         long start = System.nanoTime();
         try {

@@ -1,6 +1,7 @@
 package org.globsframework.sql.constraints;
 
 import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.sql.TableRef;
 import org.globsframework.sql.constraints.impl.*;
 
 public interface ConstraintVisitor {
@@ -33,4 +34,17 @@ public interface ConstraintVisitor {
     void visitContains(Field field, String value, ContainType containType, boolean contains, boolean ignoreCase);
 
     void visitRegularExpression(Field field, String value, boolean caseInsensitive, boolean not);
+
+    /**
+     * @param table the occurrence the column belongs to, null when the constraint names a bare field
+     */
+    default void visitContains(Field field, TableRef table, String value, ContainType containType,
+                               boolean contains, boolean ignoreCase) {
+        visitContains(field, value, containType, contains, ignoreCase);
+    }
+
+    default void visitRegularExpression(Field field, TableRef table, String value, boolean caseInsensitive,
+                                        boolean not) {
+        visitRegularExpression(field, value, caseInsensitive, not);
+    }
 }

@@ -4,6 +4,7 @@ import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.FieldValues;
 import org.globsframework.core.streams.accessors.*;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
+import org.globsframework.sql.ColumnRef;
 import org.globsframework.sql.constraints.impl.*;
 
 import java.time.LocalDate;
@@ -299,6 +300,79 @@ public class Constraints {
 
     public static Constraint equal(BooleanField field, boolean value) {
         return new EqualConstraint(new FieldOperand(field), new ValueOperand(field, value));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Columns of a named table occurrence, for a query that joins — and the only way to say which
+    // side of a self join a column belongs to. A bare Field keeps working and resolves to the
+    // query's single occurrence of its type.
+    // ------------------------------------------------------------------------------------------
+
+    public static Constraint equal(ColumnRef left, ColumnRef right) {
+        return new EqualConstraint(new FieldOperand(left), new FieldOperand(right));
+    }
+
+    public static Constraint notEqual(ColumnRef left, ColumnRef right) {
+        return new NotEqualConstraint(new FieldOperand(left), new FieldOperand(right));
+    }
+
+    public static Constraint equalsObject(ColumnRef column, Object value) {
+        return new EqualConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint equalsObject(ColumnRef column, Accessor accessor) {
+        return new EqualConstraint(new FieldOperand(column), new AccessorOperand(column.field(), accessor));
+    }
+
+    public static Constraint notEqualUncheck(ColumnRef column, Object value) {
+        return new NotEqualConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint greaterUnchecked(ColumnRef column, Object value) {
+        return new BiggerThanConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint lessUncheck(ColumnRef column, Object value) {
+        return new LessThanConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint strictlyGreater(ColumnRef column, Object value) {
+        return new StrictlyBiggerThanConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint strictlyLessUnchecked(ColumnRef column, Object value) {
+        return new StrictlyLesserThanConstraint(new FieldOperand(column), new ValueOperand(column.field(), value));
+    }
+
+    public static Constraint isNull(ColumnRef column) {
+        return new NullOrNotConstraint(column.field(), column.table(), true);
+    }
+
+    public static Constraint isNotNull(ColumnRef column) {
+        return new NullOrNotConstraint(column.field(), column.table(), false);
+    }
+
+    public static Constraint in(ColumnRef column, Set<?> infos) {
+        return new InConstraint(column.field(), column.table(), infos);
+    }
+
+    public static Constraint notIn(ColumnRef column, Set<?> infos) {
+        return new NotInConstraint(column.field(), column.table(), infos);
+    }
+
+    public static Constraint contains(ColumnRef column, String value) {
+        return new ContainsConstraint(column.field(), column.table(), value,
+                ConstraintVisitor.ContainType.contains, true, false);
+    }
+
+    public static Constraint startWith(ColumnRef column, String value) {
+        return new ContainsConstraint(column.field(), column.table(), value,
+                ConstraintVisitor.ContainType.startWith, true, false);
+    }
+
+    public static Constraint endWith(ColumnRef column, String value) {
+        return new ContainsConstraint(column.field(), column.table(), value,
+                ConstraintVisitor.ContainType.endWith, true, false);
     }
 
     private static class ConstraintsFunctor implements FieldValues.Functor {

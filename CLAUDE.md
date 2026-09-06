@@ -122,6 +122,33 @@ back. `SqlListener` is fetched from `sqlService` at each execution — no constr
 in both the success and the failure path of `SqlSelectQuery.execute`, `SqlCreateRequest.apply`/`applyBatch`,
 `SqlUpdateRequest.apply` and `SqlDeleteBuilder.apply`. A new execution path should notify it too.
 
+### Joins
+
+`TableRef` is one *occurrence* of a table (a `GlobType` plus an alias), `ColumnRef` a column of one. That
+distinction is the whole feature: a bare `Field` cannot say which side of a self join it means. The builder
+hands them out (`rootTable()`, `table(type)`) and `innerJoin`/`leftJoin` add a `Join` to the spec.
+
+The rendering has two modes and `SqlSelectQuery` picks between them on `joins.isEmpty()`:
+`ColumnQualifier.byTableName` reproduces the old behaviour exactly — table names, FROM built from the
+`globTypes` the rendering collects — while the alias qualifier writes `t0`, `t1` and builds FROM from the
+root plus the joins. **A query without joins must keep generating byte-identical SQL**; `JoinTest` pins that.
+
+Things that bite:
+- a **glob has one type**, so a join's other side cannot be materialised into it (`AccessorGlobBuilder`
+  refuses two types in one stream). Joined columns are read through accessors, which is why
+  `retrieveUnTyped(ColumnRef)` goes through the `SqlOperation` list rather than `fieldToAccessorHolder`;
+- **ON values bind before WHERE values**, since ON comes first in the statement — `execute()` runs a
+  `ValueConstraintVisitor` per join and carries its `getIndex()` forward;
+- **no `AS` before a table alias**: Oracle accepts `AS` only in front of a column alias;
+- the alias resolution refuses a bare field whose type appears twice, and one whose type is not joined at
+  all — mixing explicit joins with the old implicit cross join would otherwise produce a broken FROM.
+
+Adding an alias-aware constraint means giving the constraint class an optional `TableRef` and a factory
+overload in `Constraints`; the visitor signatures took `default` overloads carrying the ref, so an
+implementor outside this repo still compiles. `JSonConstraintTypeAdapter` ignores aliases — a serialized
+constraint crosses the wire unqualified, which is right, since an alias only means something inside the
+query that created it.
+
 ### Constraints
 
 `Constraints` is a factory of immutable `Constraint` trees (`constraints/impl/`), overloaded per field type
