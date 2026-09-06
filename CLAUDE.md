@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 This repo is one clone inside the `globs` workspace — read `../CLAUDE.md` first for the ecosystem-wide
-conventions (Glob metamodel, annotation pairs, no-reflection-on-the-hot-path, per-repo release cycles).
+conventions (Glob metamodel, annotations as Globs, no-reflection-on-the-hot-path, per-repo release cycles).
 
 ## What this repo is
 
@@ -283,6 +283,10 @@ that database, the way `upsertRequest` already was.
 
 ### Annotations
 
-Same pair convention as the rest of the workspace (`DbFieldName.java` Glob type + `DbFieldName_.java`
-`@interface`), registered in `annotations/AllSqlAnnotations.MODEL`. Adding one means both files **and** the
-registry, otherwise JSON-serialized types lose it.
+One file per annotation, a Glob type (`DbFieldName.java`), registered in
+`annotations/AllSqlAnnotations.MODEL`. Adding one means the file **and** the registry, otherwise
+JSON-serialized types lose it.
+
+The `@interface` half the workspace used to pair with each annotation (`DbFieldName_.java`) is gone — don't
+write one. A handful of those files are still sitting in `annotations/` awaiting deletion; nothing reads
+them.
