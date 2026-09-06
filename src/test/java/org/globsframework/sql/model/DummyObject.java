@@ -9,7 +9,6 @@ import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.metamodel.index.NotUniqueIndex;
 import org.globsframework.core.metamodel.links.DirectLink;
 import org.globsframework.sql.annotations.DbIsNullable;
-import org.globsframework.sql.annotations.DbIsNullable_;
 
 public class DummyObject {
 

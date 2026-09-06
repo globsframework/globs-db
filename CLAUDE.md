@@ -287,6 +287,5 @@ One file per annotation, a Glob type (`DbFieldName.java`), registered in
 `annotations/AllSqlAnnotations.MODEL`. Adding one means the file **and** the registry, otherwise
 JSON-serialized types lose it.
 
-The `@interface` half the workspace used to pair with each annotation (`DbFieldName_.java`) is gone — don't
-write one. A handful of those files are still sitting in `annotations/` awaiting deletion; nothing reads
-them.
+The `@interface` half the workspace used to pair with each annotation (`DbFieldName_.java`) is gone from
+this repo — don't write one.
