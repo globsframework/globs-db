@@ -5,6 +5,7 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.core.streams.accessors.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.time.ZonedDateTime;
 
 public interface CreateBuilder {
@@ -80,6 +81,26 @@ public interface CreateBuilder {
         return (IntegerAccessor) getKeyGeneratedAccessor((Field) field);
 
     }
+
+    /**
+     * Turns the insert into an upsert: when a row with the same {@code conflictColumns} already
+     * exists, every other column being inserted is overwritten on it instead of the statement
+     * failing. Without arguments the conflict is on the type's key fields.
+     * <p>
+     * MySQL and MariaDB ignore the conflict columns — {@code ON DUPLICATE KEY UPDATE} fires on any
+     * unique key of the table, not on a named one.
+     */
+    CreateBuilder onConflictUpdate(Field... conflictColumns);
+
+    /**
+     * Same, naming what to overwrite rather than taking every other inserted column.
+     */
+    CreateBuilder onConflictUpdate(List<Field> conflictColumns, List<Field> columnsToUpdate);
+
+    /**
+     * Leaves the existing row untouched rather than failing.
+     */
+    CreateBuilder onConflictDoNothing(Field... conflictColumns);
 
     SqlRequest getRequest();
 

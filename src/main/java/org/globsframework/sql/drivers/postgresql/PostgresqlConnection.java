@@ -18,6 +18,10 @@ import org.globsframework.sql.utils.StringPrettyWriter;
 
 import java.sql.Connection;
 
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.sql.Upsert;
+import java.util.List;
+import java.util.function.Function;
 public class PostgresqlConnection extends JdbcConnection {
     public PostgresqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService);
@@ -101,4 +105,24 @@ public class PostgresqlConnection extends JdbcConnection {
         return new PostgreSqlQueryBuilder(getConnection(), globType, constraint, sqlService);
     }
 
+
+    /**
+     * PostgreSQL names the conflict it reacts to, so the conflict columns have to match a unique
+     * index — the primary key by default.
+     */
+    public String upsertRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                Function<Field, String> placeholder) {
+        StringPrettyWriter writer = insertPart(globType, columns, placeholder);
+        writer.append(" ON CONFLICT (");
+        appendColumns(writer, upsert.conflictColumns(), ", ", this::column);
+        writer.append(")");
+        if (upsert.doNothing()) {
+            writer.append(" DO NOTHING");
+        } else {
+            writer.append(" DO UPDATE SET ");
+            appendColumns(writer, upsert.columnsToUpdate(), ", ",
+                    field -> column(field) + " = EXCLUDED." + column(field));
+        }
+        return writer.toString();
+    }
 }

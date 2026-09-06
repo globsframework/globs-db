@@ -218,6 +218,24 @@ equivalent: they are stored as **JSON text** in a long-string column, encoded/de
 `SqlValueFieldVisitor` and the accessor-creation code in `SqlQueryBuilder` — miss one and values round-trip
 as raw numbers.
 
+### Upsert
+
+`CreateBuilder.onConflictUpdate` / `onConflictDoNothing` put an `Upsert` on the request; `Upsert.resolve`
+fills in the defaults once the inserted columns are known (key fields as conflict target, every other
+inserted column as the update list) and collapses an empty update list into a do-nothing.
+`SqlCreateRequest` then asks the driver for the **whole** statement rather than appending a clause: two
+dialects write a `MERGE`, which is not an `INSERT` at all. `JdbcConnection.upsertRequest` is the seam and
+throws by default, so a new backend fails loudly instead of silently emitting the wrong dialect;
+`mergeRequest` and `insertPart` are the shared halves, and `mergeSource` is what HSQLDB (a `VALUES` row)
+and Oracle (a `SELECT ... FROM dual`, having no row constructor) differ on.
+
+The invariant that keeps the value binding untouched: **every form has one placeholder per inserted column,
+in the order given**. Break it and `updateStatement` binds the wrong values with no error.
+
+Only the PostgreSQL and HSQLDB paths are executed by the suite. MySQL and Oracle are checked on the
+generated SQL, by building their `JdbcConnection` over the test database's connection and reading the
+string back — the trick `MysqlSelectQueryTest` and `OracleSelectQueryTest` already use.
+
 ### Indexes and foreign keys
 
 `createTable` ends with `createIndexes(globType)`, which reads `globType.getIndices()` (core's index model)

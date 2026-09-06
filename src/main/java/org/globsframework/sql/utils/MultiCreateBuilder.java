@@ -27,6 +27,33 @@ public class MultiCreateBuilder implements CreateBuilder {
         }
     }
 
+    public CreateBuilder onConflictUpdate(Field... conflictColumns) {
+        return forwardUpsert(conflictColumns, builder -> builder.onConflictUpdate(conflictColumns));
+    }
+
+    public CreateBuilder onConflictUpdate(java.util.List<Field> conflictColumns, java.util.List<Field> columnsToUpdate) {
+        return forwardUpsert(conflictColumns.toArray(Field[]::new),
+                builder -> builder.onConflictUpdate(conflictColumns, columnsToUpdate));
+    }
+
+    public CreateBuilder onConflictDoNothing(Field... conflictColumns) {
+        return forwardUpsert(conflictColumns, builder -> builder.onConflictDoNothing(conflictColumns));
+    }
+
+    /**
+     * The upsert applies to the one type the conflict columns belong to. Without them there is no
+     * way to tell which of the builders is meant.
+     */
+    private CreateBuilder forwardUpsert(Field[] conflictColumns, java.util.function.Consumer<CreateBuilder> apply) {
+        if (conflictColumns.length == 0) {
+            throw new IllegalArgumentException("Name the conflict columns: a MultiCreateBuilder writes to "
+                                               + createBuilders.keySet().size() + " types at once");
+        }
+        GlobType globType = conflictColumns[0].getGlobType();
+        apply.accept(createBuilders.get(globType));
+        return this;
+    }
+
     public CreateBuilder set(IntegerField field, Integer value) {
         createBuilders.get(field.getGlobType()).set(field, value);
         return this;

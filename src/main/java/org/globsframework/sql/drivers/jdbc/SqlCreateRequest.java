@@ -9,6 +9,7 @@ import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.SqlRequest;
+import org.globsframework.sql.Upsert;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.impl.SqlValueFieldVisitor;
 import org.globsframework.sql.drivers.jdbc.request.GeneratedKeyAccessor;
@@ -23,6 +24,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,10 +41,20 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
     private SqlService sqlService;
     private JdbcConnection jdbcConnection;
     private final String sqlRequest;
+    private final Upsert upsert;
 
     public SqlCreateRequest(List<Pair<Field, Accessor>> fields, GeneratedKeyAccessor generatedKeyAccessor,
                             Connection connection,
                             GlobType globType, SqlService sqlService, JdbcConnection jdbcConnection) {
+        this(fields, generatedKeyAccessor, connection, globType, sqlService, jdbcConnection, null);
+    }
+
+    public SqlCreateRequest(List<Pair<Field, Accessor>> fields, GeneratedKeyAccessor generatedKeyAccessor,
+                            Connection connection,
+                            GlobType globType, SqlService sqlService, JdbcConnection jdbcConnection,
+                            Upsert upsert) {
+        this.upsert = upsert == null ? null
+                : upsert.resolve(globType, fields.stream().map(Pair::getFirst).toList());
         this.generatedKeyAccessor = generatedKeyAccessor;
         this.fields = fields;
         this.globType = globType;
@@ -66,6 +80,16 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
     }
 
     private String prepareRequest(List<Pair<Field, Accessor>> fields, GlobType globType, Value value) {
+        if (upsert != null) {
+            // every dialect writes it differently, and two of them are not an INSERT at all, so the
+            // whole statement comes from the driver -- with the same placeholders, in the same order
+            Map<Field, String> placeholders = new LinkedHashMap<>();
+            for (Pair<Field, Accessor> pair : fields) {
+                placeholders.put(pair.getFirst(), value.get(pair));
+            }
+            return jdbcConnection.upsertRequest(globType, List.copyOf(placeholders.keySet()), upsert,
+                    placeholders::get);
+        }
         PrettyWriter writer = new StringPrettyWriter();
         writer.append("INSERT INTO ")
                 .append(sqlService.getTableName(globType, true))

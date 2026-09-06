@@ -217,6 +217,30 @@ try (SqlRequest insert = createBuilder.getRequest()) {
 `CreateBuilder` and `UpdateBuilder` take either a **value** or an **accessor** per field — an accessor turns
 the request into a prepared statement fed from a stream, which is what `BatchSqlRequest` is for.
 
+### Inserting a row that may already be there
+
+```java
+sqlConnection.getCreateBuilder(StudentType.TYPE)
+        .set(StudentType.id, 42)
+        .set(StudentType.name, "Ada")
+        .onConflictUpdate()            // on the key fields; name the columns to use others
+        .getRequest()
+        .apply();
+```
+
+`onConflictUpdate(...)` overwrites every other inserted column on the existing row,
+`onConflictUpdate(conflictColumns, columnsToUpdate)` only the ones named, and `onConflictDoNothing(...)`
+leaves it alone. It works on a `getBulkRequest()` batch as well as on a single insert.
+
+Every dialect expresses it differently and two of them are not an `INSERT` at all — PostgreSQL uses
+`ON CONFLICT`, MySQL `ON DUPLICATE KEY UPDATE`, HSQLDB and Oracle a `MERGE` — but all four end up with one
+placeholder per column, in the same order, so the values bind exactly as for a plain insert.
+
+Two dialect facts worth knowing: **MySQL and MariaDB ignore the conflict columns**, since
+`ON DUPLICATE KEY` fires on any unique key of the table rather than on a named one, and they have no way to
+say "do nothing", so that is written as a no-op assignment on the key. **PostgreSQL requires the conflict
+columns to match a unique index**, the primary key by default.
+
 `populate(Collection<Glob>)` does that for you: it groups the globs by shape — the type together with the
 columns actually written, which an unset auto-increment key makes vary inside one type — and batches each
 group, flushing every 1000 rows. One prepared statement per shape, not per row.

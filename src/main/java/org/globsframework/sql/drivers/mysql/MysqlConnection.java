@@ -12,6 +12,10 @@ import org.globsframework.sql.utils.StringPrettyWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.sql.Upsert;
+import java.util.List;
+import java.util.function.Function;
 public class MysqlConnection extends JdbcConnection {
     public MysqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService);
@@ -42,5 +46,23 @@ public class MysqlConnection extends JdbcConnection {
     public SelectBuilder getQueryBuilder(GlobType globType, Constraint constraint) {
         checkConnectionIsNotClosed();
         return new MysqlQueryBuilder(getConnection(), globType, constraint, sqlService);
+    }
+
+    /**
+     * MySQL and MariaDB react to any unique key of the table, so the conflict columns cannot be
+     * named — they are used only to write the no-op assignment that expresses "do nothing".
+     */
+    public String upsertRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                Function<Field, String> placeholder) {
+        StringPrettyWriter writer = insertPart(globType, columns, placeholder);
+        writer.append(" ON DUPLICATE KEY UPDATE ");
+        if (upsert.doNothing()) {
+            String first = column(upsert.conflictColumns().get(0));
+            writer.append(first).append(" = ").append(first);
+        } else {
+            appendColumns(writer, upsert.columnsToUpdate(), ", ",
+                    field -> column(field) + " = VALUES(" + column(field) + ")");
+        }
+        return writer.toString();
     }
 }

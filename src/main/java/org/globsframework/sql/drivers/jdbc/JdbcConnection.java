@@ -12,6 +12,7 @@ import org.globsframework.core.streams.accessors.utils.ValueAccessor;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
 import org.globsframework.sql.*;
 import org.globsframework.sql.annotations.DbIndex;
+import org.globsframework.sql.Upsert;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.drivers.jdbc.impl.SqlFieldCreationVisitor;
 import org.globsframework.sql.drivers.jdbc.request.SqlCreateBuilder;
@@ -36,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public abstract class JdbcConnection implements SqlConnection {
     private static Logger LOGGER = LoggerFactory.getLogger(JdbcConnection.class);
@@ -278,6 +280,88 @@ public abstract class JdbcConnection implements SqlConnection {
 
     public void endOfRequest(StringPrettyWriter writer) {
         writer.append(";");
+    }
+
+    /**
+     * The whole statement for an insert that must not fail on an existing row. PostgreSQL and MySQL
+     * bolt a clause onto the INSERT, HSQLDB and Oracle write a MERGE instead, but all four end up
+     * with one placeholder per column, in the order given, so the values bind exactly as for a plain
+     * insert.
+     *
+     * @param placeholder what to write for a column's value: a "?" for the real statement, the
+     *                    rendered value when a request is being described for a log
+     */
+    public String upsertRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                Function<Field, String> placeholder) {
+        throw new UnsupportedOperationException("Upsert is not implemented for " + getClass().getSimpleName());
+    }
+
+    /**
+     * The MERGE form, shared by the dialects that have no INSERT-level upsert. The source row is
+     * built by {@link #mergeSource}, which is where they differ.
+     */
+    protected String mergeRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                  Function<Field, String> placeholder, String sourceAlias) {
+        String table = sqlService.getTableName(globType, true);
+        StringPrettyWriter writer = new StringPrettyWriter();
+        writer.append("MERGE INTO ").append(table)
+                .append(" USING ").append(mergeSource(columns, placeholder, sourceAlias))
+                .append(" ON (");
+        appendColumns(writer, upsert.conflictColumns(), " AND ",
+                field -> table + "." + column(field) + " = " + sourceAlias + "." + column(field));
+        writer.append(")");
+        if (!upsert.doNothing()) {
+            writer.append(" WHEN MATCHED THEN UPDATE SET ");
+            appendColumns(writer, upsert.columnsToUpdate(), ", ",
+                    field -> table + "." + column(field) + " = " + sourceAlias + "." + column(field));
+        }
+        writer.append(" WHEN NOT MATCHED THEN INSERT (");
+        appendColumns(writer, columns, ", ", this::column);
+        writer.append(") VALUES (");
+        appendColumns(writer, columns, ", ", field -> sourceAlias + "." + column(field));
+        writer.append(")");
+        return writer.toString();
+    }
+
+    /**
+     * The row the MERGE matches against, with one placeholder per column.
+     */
+    protected String mergeSource(List<Field> columns, Function<Field, String> placeholder, String alias) {
+        StringPrettyWriter writer = new StringPrettyWriter();
+        writer.append("(VALUES(");
+        appendColumns(writer, columns, ", ", placeholder);
+        writer.append(")) AS ").append(alias).append(" (");
+        appendColumns(writer, columns, ", ", this::column);
+        writer.append(")");
+        return writer.toString();
+    }
+
+    protected final String column(Field field) {
+        return sqlService.getColumnName(field, true);
+    }
+
+    protected final void appendColumns(StringPrettyWriter writer, List<Field> columns, String separator,
+                                       Function<Field, String> render) {
+        for (int i = 0; i < columns.size(); i++) {
+            writer.append(render.apply(columns.get(i)));
+            if (i + 1 < columns.size()) {
+                writer.append(separator);
+            }
+        }
+    }
+
+    /**
+     * The INSERT the dialects that bolt a clause onto it start from.
+     */
+    protected final StringPrettyWriter insertPart(GlobType globType, List<Field> columns,
+                                                  Function<Field, String> placeholder) {
+        StringPrettyWriter writer = new StringPrettyWriter();
+        writer.append("INSERT INTO ").append(sqlService.getTableName(globType, true)).append(" (");
+        appendColumns(writer, columns, ", ", this::column);
+        writer.append(") VALUES (");
+        appendColumns(writer, columns, ", ", placeholder);
+        writer.append(")");
+        return writer;
     }
 
     public void addColumn(Field... column) {

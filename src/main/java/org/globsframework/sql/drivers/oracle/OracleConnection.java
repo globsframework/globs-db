@@ -20,6 +20,10 @@ import org.globsframework.sql.utils.StringPrettyWriter;
 import java.sql.Connection;
 
 
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.sql.Upsert;
+import java.util.List;
+import java.util.function.Function;
 public class OracleConnection extends JdbcConnection {
     public OracleConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService);
@@ -86,5 +90,21 @@ public class OracleConnection extends JdbcConnection {
                 ;
             }
         };
+    }
+
+    public String upsertRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                Function<Field, String> placeholder) {
+        return mergeRequest(globType, columns, upsert, placeholder, "src");
+    }
+
+    /**
+     * Oracle has no standalone VALUES row constructor: the source is a one row query on dual.
+     */
+    protected String mergeSource(List<Field> columns, Function<Field, String> placeholder, String alias) {
+        StringPrettyWriter writer = new StringPrettyWriter();
+        writer.append("(SELECT ");
+        appendColumns(writer, columns, ", ", field -> placeholder.apply(field) + " " + column(field));
+        writer.append(" FROM dual) ").append(alias);
+        return writer.toString();
     }
 }

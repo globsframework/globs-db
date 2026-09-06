@@ -9,6 +9,7 @@ import org.globsframework.core.utils.collections.Pair;
 import org.globsframework.sql.BatchSqlRequest;
 import org.globsframework.sql.CreateBuilder;
 import org.globsframework.sql.SqlRequest;
+import org.globsframework.sql.Upsert;
 import org.globsframework.sql.SqlService;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.SqlCreateRequest;
@@ -30,6 +31,7 @@ public class SqlCreateBuilder implements CreateBuilder {
     private final List<Pair<Field, Accessor>> fields = new ArrayList<Pair<Field, Accessor>>();
     private final Set<Field> fieldSet = new HashSet<>();
     protected DelegateGeneratedKeyAccessor generatedKeyAccessor;
+    private Upsert upsert;
 
     public SqlCreateBuilder(Connection connection, GlobType globType, SqlService sqlService,
                             JdbcConnection jdbcConnection) {
@@ -225,12 +227,29 @@ public class SqlCreateBuilder implements CreateBuilder {
         return field.safeAccept(new AllocateKeyGeneratedAccessor(generatedKeyAccessor)).generatedKeyAccessor;
     }
 
+    public CreateBuilder onConflictUpdate(Field... conflictColumns) {
+        upsert = Upsert.update(List.of(conflictColumns), null);
+        return this;
+    }
+
+    public CreateBuilder onConflictUpdate(List<Field> conflictColumns, List<Field> columnsToUpdate) {
+        upsert = Upsert.update(conflictColumns, columnsToUpdate);
+        return this;
+    }
+
+    public CreateBuilder onConflictDoNothing(Field... conflictColumns) {
+        upsert = Upsert.doNothing(List.of(conflictColumns));
+        return this;
+    }
+
     public SqlRequest getRequest() {
-        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, jdbcConnection);
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService,
+                jdbcConnection, upsert);
     }
 
     public BatchSqlRequest getBulkRequest() {
-        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService, jdbcConnection);
+        return new SqlCreateRequest(fields, generatedKeyAccessor, connection, globType, sqlService,
+                jdbcConnection, upsert);
     }
 
     private static class DelegateGeneratedKeyAccessor implements GeneratedKeyAccessor {

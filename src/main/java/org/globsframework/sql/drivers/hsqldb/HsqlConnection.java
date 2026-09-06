@@ -13,6 +13,9 @@ import org.globsframework.sql.utils.StringPrettyWriter;
 
 import java.sql.Connection;
 
+import org.globsframework.sql.Upsert;
+import java.util.List;
+import java.util.function.Function;
 public class HsqlConnection extends JdbcConnection {
     public HsqlConnection(boolean autoCommit, Connection connection, SqlService sqlService) {
         super(autoCommit, connection, sqlService);
@@ -49,5 +52,10 @@ public class HsqlConnection extends JdbcConnection {
         for (Field field : column) {
             super.addColumn(field);
         }
+    }
+
+    public String upsertRequest(GlobType globType, List<Field> columns, Upsert upsert,
+                                Function<Field, String> placeholder) {
+        return mergeRequest(globType, columns, upsert, placeholder, "src");
     }
 }
