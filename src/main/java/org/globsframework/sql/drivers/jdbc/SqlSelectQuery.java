@@ -371,12 +371,14 @@ public class SqlSelectQuery implements SelectQuery {
         // the ON conditions come before the WHERE in the statement, so their values bind first
         int index = 0;
         for (Join join : joins) {
-            ValueConstraintVisitor visitor = new ValueConstraintVisitor(preparedStatement, index);
+            ValueConstraintVisitor visitor = new ValueConstraintVisitor(preparedStatement, index,
+                    sqlService.getNativeValueBinder());
             join.on().accept(visitor);
             index = visitor.getIndex();
         }
         if (constraint != null) {
-            constraint.accept(new ValueConstraintVisitor(preparedStatement, index));
+            constraint.accept(new ValueConstraintVisitor(preparedStatement, index,
+                    sqlService.getNativeValueBinder()));
         }
         long start = System.nanoTime();
         try {

@@ -61,7 +61,7 @@ public class SqlDeleteBuilder implements SqlRequest {
 
     public int apply() {
         if (constraint != null) {
-            constraint.accept(new ValueConstraintVisitor(preparedStatement));
+            constraint.accept(new ValueConstraintVisitor(preparedStatement, sqlService.getNativeValueBinder()));
         }
         long start = System.nanoTime();
         try {

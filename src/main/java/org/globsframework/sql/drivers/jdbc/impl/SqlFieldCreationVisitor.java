@@ -6,7 +6,10 @@ import org.globsframework.core.metamodel.annotations.IsDateTime;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.sql.SqlService;
+import org.globsframework.sql.annotations.DbColumnType;
 import org.globsframework.sql.annotations.DbIsNullable;
+import org.globsframework.sql.annotations.DbJson;
+import org.globsframework.sql.annotations.IsUuid;
 import org.globsframework.sql.annotations.DbMaxCharSize;
 import org.globsframework.sql.annotations.IsTimestamp;
 import org.globsframework.sql.utils.StringPrettyWriter;
@@ -48,6 +51,39 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
 
     public void visitDouble(DoubleField field) throws Exception {
         add("DOUBLE", field);
+    }
+
+    /**
+     * The column type a native-type annotation asks for, null when the field carries none. Checked
+     * before every default: DbColumnType goes in verbatim, and the dialects override the rest with
+     * the type they actually have.
+     */
+    protected String nativeColumnType(Field field) {
+        Glob columnType = field.findAnnotation(DbColumnType.KEY);
+        if (columnType != null) {
+            return columnType.get(DbColumnType.NAME);
+        }
+        if (field.hasAnnotation(IsUuid.KEY)) {
+            return getUuidType();
+        }
+        if (field.hasAnnotation(DbJson.KEY)) {
+            return getJsonType();
+        }
+        return null;
+    }
+
+    /**
+     * No dedicated type here: a UUID is written in its canonical 36 character form.
+     */
+    public String getUuidType() {
+        return "CHAR(36)";
+    }
+
+    /**
+     * No dedicated type here either: JSON stays text.
+     */
+    public String getJsonType() {
+        return getLongStringType();
     }
 
     public void visitString(StringField field) throws Exception {
@@ -111,7 +147,16 @@ public abstract class SqlFieldCreationVisitor extends FieldVisitor.AbstractWithE
         add("DATETIME", field);
     }
 
+    /**
+     * Writes one column. A native-type annotation wins over the type the visit method worked out,
+     * and it is applied here rather than in each visit method because a dialect that overrides one
+     * of them — PostgreSQL and Oracle both override visitString — would otherwise bypass the check.
+     */
     protected void add(String param, Field field) {
+        String nativeType = nativeColumnType(field);
+        if (nativeType != null) {
+            param = nativeType;
+        }
         boolean isAutoIncrementField = field.hasAnnotation(AutoIncrement.KEY);
         String columnName = sqlService.getColumnName(field, true);
         if (columnName != null) {

@@ -40,6 +40,16 @@ public class PostgresqlConnection extends JdbcConnection {
             }
 
             @Override
+            public String getUuidType() {
+                return "uuid";
+            }
+
+            @Override
+            public String getJsonType() {
+                return "jsonb";
+            }
+
+            @Override
             public void visitLong(LongField field) throws Exception {
                 if (field.hasAnnotation(AutoIncrement.KEY)) {
                     add("BIGSERIAL", field);

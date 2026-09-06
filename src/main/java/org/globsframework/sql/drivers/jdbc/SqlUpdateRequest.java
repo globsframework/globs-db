@@ -53,7 +53,7 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
             LOGGER.error(message, e);
             throw new UnexpectedApplicationState(message, e);
         }
-        sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement);
+        sqlValueFieldVisitor = new SqlValueFieldVisitor(preparedStatement, sqlService.getNativeValueBinder());
     }
 
     public int apply() {
@@ -79,7 +79,8 @@ public class SqlUpdateRequest implements SqlRequest, BatchSqlRequest {
             sqlValueFieldVisitor.setValue(values[i].accessor().getObjectValue(), i + 1);
             values[i].field().safeAccept(sqlValueFieldVisitor);
         }
-        constraint.accept(new ValueConstraintVisitor(preparedStatement, values.length));
+        constraint.accept(new ValueConstraintVisitor(preparedStatement, values.length,
+                sqlService.getNativeValueBinder()));
     }
 
     public void close() {

@@ -149,6 +149,25 @@ public abstract class JdbcConnection implements SqlConnection {
             return;
         }
         LOGGER.info("Create table for " + globType.getName());
+        String request = createTableRequest(globType);
+        try {
+            PreparedStatement statement = connection.prepareStatement(request);
+            statement.executeUpdate();
+            statement.close();
+            LOGGER.info("sql create request : " + request);
+        } catch (SQLException e) {
+            String message = "Invalid creation request: " + request;
+            LOGGER.error(message);
+            throw new UnexpectedApplicationState(message, e);
+        }
+        createIndexes(globType);
+    }
+
+    /**
+     * The CREATE TABLE this dialect would run for the type. Public so that the column types a
+     * dialect picks can be checked without an instance of that database.
+     */
+    public String createTableRequest(GlobType globType) {
         StringPrettyWriter writer = new StringPrettyWriter();
         writer.append("CREATE TABLE ")
                 .append(sqlService.getTableName(globType, true))
@@ -171,17 +190,7 @@ public abstract class JdbcConnection implements SqlConnection {
         }
         writer.append(")");
         endOfRequest(writer);
-        try {
-            PreparedStatement statement = connection.prepareStatement(writer.toString());
-            statement.executeUpdate();
-            statement.close();
-            LOGGER.info("sql create request : " + writer.toString());
-        } catch (SQLException e) {
-            String message = "Invalid creation request: " + writer.toString();
-            LOGGER.error(message);
-            throw new UnexpectedApplicationState(message, e);
-        }
-        createIndexes(globType);
+        return writer.toString();
     }
 
     public void createIndexes(GlobType globType) {

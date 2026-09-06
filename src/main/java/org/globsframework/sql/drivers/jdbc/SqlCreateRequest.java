@@ -76,7 +76,7 @@ public class SqlCreateRequest implements SqlRequest, BatchSqlRequest {
         } catch (SQLException e) {
             throw new UnexpectedApplicationState("In prepareStatement for request : " + sql, e);
         }
-        this.sqlValueVisitor = new SqlValueFieldVisitor(preparedStatement);
+        this.sqlValueVisitor = new SqlValueFieldVisitor(preparedStatement, sqlService.getNativeValueBinder());
     }
 
     private String prepareRequest(List<Pair<Field, Accessor>> fields, GlobType globType, Value value) {

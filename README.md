@@ -190,6 +190,37 @@ Date and time are annotation-driven, not type-driven: an `IntegerField` or `Long
 text** in a long-string column, which is why `globs-gson` is a compile dependency. Reading one back needs a
 `GlobTypeResolver`.
 
+### Native column types
+
+A column can be the database's own type rather than a string, opt-in per field:
+
+```java
+reference = builder.declareStringField("reference", IsUuid.UNIQUE);            // uuid on PostgreSQL
+payload   = builder.declareStringField("payload", DbJson.UNIQUE);              // jsonb, or JSON on MySQL
+nested    = builder.declareGlobField("nested", () -> Other.TYPE, DbJson.UNIQUE);
+location  = builder.declareStringField("location", DbColumnType.create("inet"));
+```
+
+| | PostgreSQL | MySQL | HSQLDB, Oracle |
+| --- | --- | --- | --- |
+| `IsUuid` | `uuid` | `CHAR(36)` | `CHAR(36)` |
+| `DbJson` | `jsonb` | `JSON` | the long text type |
+| `DbColumnType` | verbatim | verbatim | verbatim |
+
+`DbJson` applies to a `StringField` already holding JSON and to the composite fields this library encodes as
+JSON itself. `DbColumnType` is the escape hatch: what it says goes straight into the `CREATE TABLE`, with
+nothing checking that the dialect in use has that type.
+
+Nothing above this layer moves — the field stays a `String`, or a `Glob` the library encodes, and reading
+back is unchanged. What changes is the column type and the binding: PostgreSQL refuses `setString` into any
+non-text column, so a value going to one of these is sent untyped for the server to read as whatever the
+column is. Every other dialect keeps `setString`. Without the annotation nothing changes at all, so an
+existing schema is untouched.
+
+**Arrays are not covered.** `StringArrayField` and friends stay JSON text rather than `text[]`: reading a
+native array back needs `ResultSet.getArray` and so a different accessor, and the builder that creates
+accessors has no handle on the dialect to choose one.
+
 ## Inserting
 
 ```java

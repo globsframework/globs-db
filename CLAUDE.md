@@ -261,6 +261,26 @@ schema, not the table.
 separate `GlobLinkModel` that a `GlobType` does not expose. Generating foreign keys needs that gap closed
 first, plus an answer for creation order and for existing dangling rows. Don't wire it up casually.
 
+### Native column types
+
+`IsUuid`, `DbJson` and `DbColumnType` make a column the database's own type instead of a string. Two halves:
+
+- the DDL, decided by `SqlFieldCreationVisitor.nativeColumnType` and applied **inside `add(...)`**, not in
+  each visit method — PostgreSQL and Oracle both override `visitString`, so a check placed there is bypassed
+  by exactly the dialects that matter. Dialects override `getUuidType` / `getJsonType`;
+- the binding, `NativeValueBinder`, reached through `sqlService.getNativeValueBinder()` so every value
+  visitor can get it without new constructor plumbing. PostgreSQL refuses `setString` into a non-text column
+  and needs the parameter sent untyped (`setObject(i, v, Types.OTHER)`), which the server then reads as
+  whatever the column is; the other dialects keep `setString`. `MappingHelper.nativeValueBinder(DbType)` is
+  the single place that decides.
+
+Reading back needs nothing: `getString` on a `uuid` or `jsonb` column returns the text. Arrays are
+deliberately left out — `ResultSet.getArray` would need a different accessor, and `SqlQueryBuilder`, which
+creates them, has no handle on the dialect.
+
+`createTableRequest(GlobType)` is public so a dialect's column types can be asserted without an instance of
+that database, the way `upsertRequest` already was.
+
 ### Annotations
 
 Same pair convention as the rest of the workspace (`DbFieldName.java` Glob type + `DbFieldName_.java`

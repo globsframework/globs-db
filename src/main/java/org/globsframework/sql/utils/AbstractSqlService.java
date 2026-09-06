@@ -3,6 +3,7 @@ package org.globsframework.sql.utils;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.utils.Strings;
+import org.globsframework.sql.NativeValueBinder;
 import org.globsframework.sql.RetryPolicy;
 import org.globsframework.sql.SqlListener;
 import org.globsframework.sql.SqlService;
@@ -16,6 +17,7 @@ public abstract class AbstractSqlService implements SqlService {
     private SqlListener listener = SqlListener.NONE;
     private int defaultFetchSize = 0;
     private Duration defaultQueryTimeout = null;
+    private NativeValueBinder nativeValueBinder = NativeValueBinder.AS_STRING;
 
     private static final String[] RESERVED_KEYWORDS = {
             "COUNT", "WHERE", "FROM", "SELECT", "ORDER"
@@ -72,6 +74,18 @@ public abstract class AbstractSqlService implements SqlService {
      */
     public void setDefaultFetchSize(int defaultFetchSize) {
         this.defaultFetchSize = defaultFetchSize;
+    }
+
+    public NativeValueBinder getNativeValueBinder() {
+        return nativeValueBinder;
+    }
+
+    /**
+     * Set by the service once it knows its dialect: PostgreSQL needs untyped parameters for its own
+     * column types, the others take a plain string.
+     */
+    public void setNativeValueBinder(NativeValueBinder nativeValueBinder) {
+        this.nativeValueBinder = nativeValueBinder == null ? NativeValueBinder.AS_STRING : nativeValueBinder;
     }
 
     public Duration getDefaultQueryTimeout() {

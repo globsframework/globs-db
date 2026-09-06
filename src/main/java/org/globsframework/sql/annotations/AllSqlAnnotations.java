@@ -9,5 +9,6 @@ public class AllSqlAnnotations {
     public final static GlobModel MODEL =
             new DefaultGlobModel(DbFieldName.TYPE, DbRef.TYPE, IsBigDecimal.TYPE, DbIndex.TYPE, IsDbKey.TYPE, DbTableName.TYPE,
                     DbSqlType.TYPE, DbFieldIndex.TYPE, DbIsNullable.TYPE, DbMaxCharSize.TYPE, DbNumericPrecision.TYPE,
-                    DbNumericDigit.TYPE, DbMinCharSize.TYPE, IsTimestamp.TYPE, IsDate.TYPE, IsDateTime.TYPE);
+                    DbNumericDigit.TYPE, DbMinCharSize.TYPE, IsTimestamp.TYPE, IsDate.TYPE, IsDateTime.TYPE,
+                    IsUuid.TYPE, DbJson.TYPE, DbColumnType.TYPE);
 }

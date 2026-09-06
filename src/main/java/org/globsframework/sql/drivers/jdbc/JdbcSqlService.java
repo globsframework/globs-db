@@ -68,6 +68,7 @@ public class JdbcSqlService extends AbstractSqlService {
         if (dbType == DbType.mysql || dbType == DbType.mariadb) {
             dbInfo.put("zeroDateTimeBehavior", "convertToNull");
         }
+        setNativeValueBinder(MappingHelper.nativeValueBinder(dbType));
         init(poolConfig);
     }
 

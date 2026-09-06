@@ -2,6 +2,7 @@ package org.globsframework.sql.drivers.jdbc.impl;
 
 import org.globsframework.core.metamodel.fields.Field;
 import org.globsframework.core.utils.exceptions.UnexpectedApplicationState;
+import org.globsframework.sql.NativeValueBinder;
 import org.globsframework.sql.SubQuery;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.ConstraintVisitor;
@@ -18,11 +19,20 @@ public class ValueConstraintVisitor extends SqlValueFieldVisitor implements Cons
     private int index = 0;
 
     public ValueConstraintVisitor(PreparedStatement preparedStatement) {
-        super(preparedStatement);
+        this(preparedStatement, 0, NativeValueBinder.AS_STRING);
     }
 
     public ValueConstraintVisitor(PreparedStatement preparedStatement, int index) {
-        super(preparedStatement);
+        this(preparedStatement, index, NativeValueBinder.AS_STRING);
+    }
+
+    public ValueConstraintVisitor(PreparedStatement preparedStatement, NativeValueBinder nativeValueBinder) {
+        this(preparedStatement, 0, nativeValueBinder);
+    }
+
+    public ValueConstraintVisitor(PreparedStatement preparedStatement, int index,
+                                  NativeValueBinder nativeValueBinder) {
+        super(preparedStatement, nativeValueBinder);
         this.index = index;
     }
 

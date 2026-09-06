@@ -24,6 +24,11 @@ public class MysqlConnection extends JdbcConnection {
     protected SqlFieldCreationVisitor getFieldVisitorCreator(StringPrettyWriter prettyWriter) {
         return new SqlFieldCreationVisitor(sqlService, prettyWriter) {
 
+            @Override
+            public String getJsonType() {
+                return "JSON";
+            }
+
             public String getAutoIncrementKeyWord() {
                 return "AUTO_INCREMENT";
             }

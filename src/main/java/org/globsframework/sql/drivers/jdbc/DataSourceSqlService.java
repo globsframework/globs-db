@@ -18,6 +18,7 @@ public class DataSourceSqlService extends AbstractSqlService {
 
     public DataSourceSqlService(NamingMapping namingMapping, DataSource dataSource, DbType dbType) {
         super(namingMapping);
+        setNativeValueBinder(MappingHelper.nativeValueBinder(dbType));
         this.dataSource = dataSource;
 
         dbFactory = switch (dbType) {

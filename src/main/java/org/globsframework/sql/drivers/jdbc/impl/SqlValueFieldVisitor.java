@@ -8,10 +8,15 @@ import org.globsframework.core.metamodel.annotations.IsDateTime;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.json.GSonUtils;
+import org.globsframework.sql.NativeValueBinder;
+import org.globsframework.sql.annotations.DbColumnType;
+import org.globsframework.sql.annotations.DbJson;
 import org.globsframework.sql.annotations.IsTimestamp;
+import org.globsframework.sql.annotations.IsUuid;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
@@ -23,11 +28,33 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
     private static Gson gson = new Gson();
     private static final TypeAdapter adapter = gson.getAdapter(TypeToken.getArray(String.class));
     private PreparedStatement preparedStatement;
+    private final NativeValueBinder nativeValueBinder;
     private Object value;
     private int index;
 
     public SqlValueFieldVisitor(PreparedStatement preparedStatement) {
+        this(preparedStatement, NativeValueBinder.AS_STRING);
+    }
+
+    public SqlValueFieldVisitor(PreparedStatement preparedStatement, NativeValueBinder nativeValueBinder) {
         this.preparedStatement = preparedStatement;
+        this.nativeValueBinder = nativeValueBinder == null ? NativeValueBinder.AS_STRING : nativeValueBinder;
+    }
+
+    /**
+     * True when the column is not a string column, whatever the value looks like on the Java side.
+     */
+    private static boolean isNativeType(Field field) {
+        return field.hasAnnotation(IsUuid.KEY) || field.hasAnnotation(DbJson.KEY)
+               || field.hasAnnotation(DbColumnType.KEY);
+    }
+
+    private void setText(Field field, String text) throws SQLException {
+        if (isNativeType(field)) {
+            nativeValueBinder.bind(preparedStatement, index, text);
+        } else {
+            preparedStatement.setString(index, text);
+        }
     }
 
     public void setValue(Object value, int index) {
@@ -105,9 +132,9 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
 
     public void visitString(StringField field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.VARCHAR);
+            preparedStatement.setNull(index, isNativeType(field) ? Types.OTHER : Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, (String) value);
+            setText(field, (String) value);
         }
     }
 
@@ -137,33 +164,33 @@ public class SqlValueFieldVisitor extends FieldVisitor.AbstractWithErrorVisitor 
 
     public void visitGlob(GlobField<?> field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.VARCHAR);
+            preparedStatement.setNull(index, isNativeType(field) ? Types.OTHER : Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
+            setText(field, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
         }
     }
 
     public void visitGlobArray(GlobArrayField<?> field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.VARCHAR);
+            preparedStatement.setNull(index, isNativeType(field) ? Types.OTHER : Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
+            setText(field, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
         }
     }
 
     public void visitUnionGlob(GlobUnionField field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.VARCHAR);
+            preparedStatement.setNull(index, isNativeType(field) ? Types.OTHER : Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
+            setText(field, this.value instanceof Glob ? GSonUtils.encode((Glob) this.value, true) : ((String) this.value));
         }
     }
 
     public void visitUnionGlobArray(GlobArrayUnionField field) throws Exception {
         if (value == null) {
-            preparedStatement.setNull(index, Types.VARCHAR);
+            preparedStatement.setNull(index, isNativeType(field) ? Types.OTHER : Types.VARCHAR);
         } else {
-            preparedStatement.setString(index, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
+            setText(field, this.value instanceof Glob[] ? GSonUtils.encode((Glob[]) this.value, true) : ((String) this.value));
         }
     }
 

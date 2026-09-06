@@ -56,6 +56,13 @@ public interface SqlService extends AutoCloseable {
     }
 
     /**
+     * How a value reaches a column whose type is not a string one — see {@link NativeValueBinder}.
+     */
+    default NativeValueBinder getNativeValueBinder() {
+        return NativeValueBinder.AS_STRING;
+    }
+
+    /**
      * Runs the work in a transaction: commit on normal return, rollback on any exception, and the
      * connection is released either way. This is the recommended entry point — it makes it
      * impossible to leak a connection on an error path.
